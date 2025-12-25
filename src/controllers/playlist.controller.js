@@ -179,13 +179,37 @@ const updatePlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
   //TODO: update playlist
 
-if(!isValidObjectId(playlistId)){
-  throw new ApiError(400,"Invalid Id")
-}
+  if (!isValidObjectId(playlistId)) {
+    throw new ApiError(400, "Invalid Id");
+  }
 
+  if (!name && !description) {
+    throw new ApiError(400, "Nothing to update");
+  }
 
+  const updateFields = {};
 
+  if (name?.trim()) updateFields.name = name;
+  if (description?.trim()) updateFields.description = description;
 
+  const playlist = await Playlist.findOneAndUpdate(
+    {
+      _id: playlistId,
+      owner: req.user._id,
+    },
+    { $set: updateFields },
+    { new: true, runValidators: true }
+  );
+
+  if (!playlist) {
+    return res
+      .status(404)
+      .json({ message: "Playlist not found or user not authorized" });
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, playlist, "playlist update successfully"));
 });
 
 export {
