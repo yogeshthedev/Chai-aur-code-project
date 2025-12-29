@@ -105,29 +105,143 @@ const publishAVideo = asyncHandler(async (req, res) => {
     isPublished: false, // draft by default
   });
 
-  return res.status(201).json(
-    new ApiResponse(201, video, "Video uploaded successfully")
-  );
+  return res
+    .status(201)
+    .json(new ApiResponse(201, video, "Video uploaded successfully"));
 });
-
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: get video by id
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const userId = req.user._id;
+
+  const video = await Video.findById(videoId).populate(
+    "owner ",
+    "username avatar"
+  );
+
+  if (!video) {
+    throw new ApiError(404, "Video does not exist");
+  }
+
+  if (video.isPublished === true) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, video, "Video fetched successfully"));
+  }
+
+  if (video.owner._id.toString() !== userId.toString()) {
+    throw new ApiError(403, "You are not allowed to view this video");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video fetched successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: update video details like title, description, thumbnail
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid id");
+  }
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new ApiError(404, "Video does not exist");
+  }
+
+  if (video.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to update video");
+  }
+  const { title, description } = req.body;
+
+  if (!title && !description && !req.files?.thumbnail) {
+    throw new ApiError(400, "Nothing to update");
+  }
+  if (title && title.trim()) {
+    video.title = title.trim();
+  }
+
+  if (description && description.trim()) {
+    video.description = description.trim();
+  }
+
+  if (req.files?.thumbnail) {
+    const thumbnailPath = req.files.thumbnail[0].path;
+    const uploadedThumbnail = await uploadOnCloudinary(thumbnailPath);
+
+    if (!uploadedThumbnail?.secure_url) {
+      throw new ApiError(500, "Failed to upload thumbnail");
+    }
+
+    video.thumbnail = uploadedThumbnail.secure_url;
+  }
+  await video.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video update succesffulyy"));
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: delete video
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+  const video = await Video.findById({ _id: videoId });
+
+  if (!video) {
+    throw new ApiError(404, "Video does not exist");
+  }
+
+  if (video.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to delete video");
+  }
+
+  await Video.deleteOne(videoId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Video delete successfully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new ApiError(404, "Video does not exist");
+  }
+
+  if (video.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to change publish status");
+  }
+
+  video.isPublished = !video.isPublished;
+  await video.save();
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { isPublished: video.isPublished },
+        `Video is now ${video.isPublished ? "published" : "unpublished"}`
+      )
+    );
 });
 
 export {
