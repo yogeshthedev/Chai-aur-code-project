@@ -1,11 +1,10 @@
-import mongoose, {isValidObjectId} from "mongoose"
-import {Video} from "../models/video.model.js"
-import {User} from "../models/user.model.js"
-import {ApiError} from "../utils/ApiError.js"
-import {ApiResponse} from "../utils/ApiResponse.js"
-import {asyncHandler} from "../utils/asyncHandler.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
-
+import mongoose, { isValidObjectId } from "mongoose";
+import { Video } from "../models/video.model.js";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -72,41 +71,70 @@ const getAllVideos = asyncHandler(async (req, res) => {
   );
 });
 
-
 const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description} = req.body
-    // TODO: get video, upload to cloudinary, create video
-})
+  const { title, description } = req.body;
+
+  // 1️⃣ Validate text fields
+  if (!title || !description) {
+    throw new ApiError(400, "Title and description are required");
+  }
+
+  // 2️⃣ Validate files
+  if (!req.files || !req.files.video || !req.files.thumbnail) {
+    throw new ApiError(400, "Video file and thumbnail are required");
+  }
+
+  const videoFilePath = req.files.video[0].path;
+  const thumbnailFilePath = req.files.thumbnail[0].path;
+
+  // 3️⃣ Upload files to Cloudinary
+  const uploadedVideo = await uploadOnCloudinary(videoFilePath);
+  const uploadedThumbnail = await uploadOnCloudinary(thumbnailFilePath);
+
+  if (!uploadedVideo?.secure_url || !uploadedThumbnail?.secure_url) {
+    throw new ApiError(500, "Failed to upload files to Cloudinary");
+  }
+
+  // 4️⃣ Create video document
+  const video = await Video.create({
+    title: title.trim(),
+    description: description.trim(),
+    videoUrl: uploadedVideo.secure_url,
+    thumbnail: uploadedThumbnail.secure_url,
+    owner: req.user._id,
+    isPublished: false, // draft by default
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, video, "Video uploaded successfully")
+  );
+});
+
 
 const getVideoById = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: get video by id
-
-    
-
-
-})
+  const { videoId } = req.params;
+  //TODO: get video by id
+});
 
 const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: update video details like title, description, thumbnail
-
-})
+  const { videoId } = req.params;
+  //TODO: update video details like title, description, thumbnail
+});
 
 const deleteVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-    //TODO: delete video
-})
+  const { videoId } = req.params;
+  //TODO: delete video
+});
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
-})
+  const { videoId } = req.params;
+});
 
 export {
-    getAllVideos,
-    publishAVideo,
-    getVideoById,
-    updateVideo,
-    deleteVideo,
-    togglePublishStatus
-}
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+};
