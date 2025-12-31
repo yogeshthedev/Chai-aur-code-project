@@ -138,11 +138,11 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   const alreadyExists = await playlist.videos.some(
     (vid) => vid.toString() === videoId
   );
-  if (alreadyExists) {
-    throw new ApiError(400, "Video already exists in playlist");
+  if (!alreadyExists) {
+  throw new ApiError(404, "Video does not exist in playlist");
   }
 
-  playlist.vidoes.pull(videoId);
+  playlist.videos.pull(videoId);
   await playlist.save();
 
   return res
