@@ -99,8 +99,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const video = await Video.create({
     title: title.trim(),
     description: description.trim(),
-    videoUrl: uploadedVideo.secure_url,
+    videoFile: uploadedVideo.secure_url,
     thumbnail: uploadedThumbnail.secure_url,
+    duration: uploadedVideo.duration || 0,
     owner: req.user._id,
     isPublished: false, // draft by default
   });
@@ -121,7 +122,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   const video = await Video.findById(videoId).populate(
-    "owner ",
+    "owner",
     "username avatar"
   );
 

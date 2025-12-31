@@ -3,7 +3,7 @@ import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Video } from "./../models/video.model";
+import { Video } from "./../models/video.model.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
@@ -79,6 +79,7 @@ const updateComment = asyncHandler(async (req, res) => {
   // TODO: update a comment
   const { commentId } = req.params;
   const { content } = req.body;
+  console.log(content)
 
   if (!isValidObjectId(commentId)) {
     throw new ApiError(400, "Invalid video id");

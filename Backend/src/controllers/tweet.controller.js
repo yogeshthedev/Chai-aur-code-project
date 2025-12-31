@@ -43,7 +43,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
 
 const updateTweet = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
-  const { content } = req.body;
+  const { content } = req.body || {};
 
   // 1. Validate tweetId
   if (!isValidObjectId(tweetId)) {
@@ -86,7 +86,7 @@ const deleteTweet = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid tweet id");
   }
 
-  const tweet = await Tweet.findById({ tweetId });
+  const tweet = await Tweet.findById( tweetId );
   if (tweet.owner.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not allowed to update this tweet");
   }
