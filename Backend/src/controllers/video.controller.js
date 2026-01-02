@@ -103,7 +103,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: uploadedThumbnail.secure_url,
     duration: uploadedVideo.duration || 0,
     owner: req.user._id,
-    isPublished: false, // draft by default
+    isPublished: true, // draft by default
   });
 
   return res
@@ -113,31 +113,34 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  //TODO: get video by id
 
-  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+  if (!mongoose.isValidObjectId(videoId)) {
     throw new ApiError(400, "Invalid video ID");
   }
 
-  const userId = req.user._id;
+  const userId = req.user?._id;
 
-  const video = await Video.findById(videoId).populate(
+  let video = await Video.findById(videoId).populate(
     "owner",
-    "username avatar"
+    "fullname avatar"
   );
 
   if (!video) {
-    throw new ApiError(404, "Video does not exist");
+    throw new ApiError(404, "Video not found");
   }
 
-  if (video.isPublished === true) {
-    return res
-      .status(200)
-      .json(new ApiResponse(200, video, "Video fetched successfully"));
+  const isOwner = userId && video.owner._id.toString() === userId.toString();
+
+  if (!video.isPublished && !isOwner) {
+    throw new ApiError(403, "This video is not published yet");
   }
 
-  if (video.owner._id.toString() !== userId.toString()) {
-    throw new ApiError(403, "You are not allowed to view this video");
+  if (!isOwner) {
+    video = await Video.findOneAndUpdate(
+      { _id: videoId },
+      { $inc: { views: 1 } },
+      { new: true }
+    ).populate("owner", "fullname avatar");
   }
 
   return res

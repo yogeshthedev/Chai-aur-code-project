@@ -1,12 +1,16 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import VideoDetail from "./pages/VideoDetail";
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<h1>home</h1>} />
-      <Route path="/about" element={<h1>about</h1>} />
-      <Route path="/contact" element={<h1>contact</h1>} />
+      <Route path="/" element={<Login/>} />
+      <Route path="/home" element={<Home/>} />
+      <Route path="/watch/:id" element={<VideoDetail/>} />
     </Routes>
   );
 };
