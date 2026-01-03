@@ -15,3 +15,18 @@ export const fetchVideoComments = createAsyncThunk(
     }
   }
 );
+
+export const addComment = createAsyncThunk(
+  "comment/addComment",
+  async (videoId, thunkAPI) => {
+    try {
+      const response = await api.post(`/comments/${videoId}`);
+      console.log(response.data.data);
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Error while adding comment"
+      );
+    }
+  }
+);

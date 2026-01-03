@@ -15,7 +15,7 @@ const commentSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchVideoComments.pending, (state, action) => {
+      .addCase(fetchVideoComments.pending, (state) => {
         (state.loading = true), (state.error = null);
       })
       .addCase(fetchVideoComments.fulfilled, (state, action) => {
@@ -28,6 +28,21 @@ const commentSlice = createSlice({
       })
 
       .addCase(fetchVideoComments.rejected, (state, action) => {
+        (state.error = action.payload || action.payload.error),
+          (state.loading = false);
+      });
+
+    builder
+
+      .addCase(addComment.pending, (state) => {
+        (state.loading = true), (state.error = null);
+      })
+      .addCase(addComment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.comments = action.payload.comments;
+      })
+
+      .addCase(addComment.rejected, (state, action) => {
         (state.error = action.payload || action.payload.error),
           (state.loading = false);
       });
