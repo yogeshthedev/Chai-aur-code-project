@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllVideos, getVideoById } from "./videoThunks";
+import { getAllVideos, getVideoById, toggleVideoLike } from "./videoThunks";
 
 const initialState = {
   videos: [],
@@ -46,6 +46,34 @@ const videoSlice = createSlice({
 
       .addCase(getVideoById.rejected, (state, action) => {
         (state.loading = false), (state.error = action.payload);
+      });
+
+    builder
+
+      .addCase(toggleVideoLike.pending, (state) => {
+        if (!state.currentVideo) return;
+
+        if (state.currentVideo.isLiked) {
+          state.currentVideo.isLiked = false;
+          state.currentVideo.likeCount -= 1;
+        } else {
+          state.currentVideo.isLiked = true;
+          state.currentVideo.likeCount += 1;
+        }
+      })
+
+      .addCase(toggleVideoLike.rejected, (state, action) => {
+        if (!state.currentVideo) return;
+
+        if (state.currentVideo.isLiked) {
+          state.currentVideo.isLiked = false;
+          state.currentVideo.likeCount -= 1;
+        } else {
+          state.currentVideo.isLiked = true;
+          state.currentVideo.likeCount += 1;
+        }
+
+        state.error = action.payload;
       });
   },
 });

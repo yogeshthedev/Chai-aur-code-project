@@ -34,3 +34,20 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
+
+export const currentUser = createAsyncThunk(
+  "auth/currentUser",
+  async (_, thunkAPI) => {
+    try {
+
+      const response = await api.get("/users/current-user", {}, {
+        withCredentials: true, 
+      });
+      return response.data.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Error getting current user"
+      );
+    }
+  }
+);

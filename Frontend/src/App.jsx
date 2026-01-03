@@ -1,18 +1,22 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import VideoDetail from "./pages/VideoDetail";
+
+
+import React,{ useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import MainRoutes from "./routes/MainRoutes";
+import { currentUser } from "./features/auth/authThunks";
 
 const App = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<Login/>} />
-      <Route path="/home" element={<Home/>} />
-      <Route path="/watch/:id" element={<VideoDetail/>} />
-    </Routes>
-  );
+  const dispatch = useDispatch();
+
+
+  useEffect(() => {
+    dispatch(currentUser());
+  }, [dispatch]);
+
+
+
+  return <MainRoutes />;
 };
 
 export default App;

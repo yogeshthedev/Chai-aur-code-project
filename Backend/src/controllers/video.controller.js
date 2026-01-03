@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { Like } from "./../models/like.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -143,9 +144,30 @@ const getVideoById = asyncHandler(async (req, res) => {
     ).populate("owner", "fullname avatar");
   }
 
+  const likeCount = await Like.countDocuments({
+    video: videoId,
+  });
+
+  let isLiked = false;
+
+  if (req.user && userId) {
+    const liked = await Like.findOne({
+      video: videoId,
+      likedBy: userId,
+    });
+
+    isLiked = Boolean(liked);
+  }
+
+  const videoResponse = {
+    ...video.toObject(),
+    likeCount,
+    isLiked,
+  };
+
   return res
     .status(200)
-    .json(new ApiResponse(200, video, "Video fetched successfully"));
+    .json(new ApiResponse(200, videoResponse, "Video fetched successfully"));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {

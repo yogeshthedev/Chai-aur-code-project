@@ -1,9 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { loginUser, registerUser } from "./authThunks.js";
+import { currentUser, loginUser, registerUser } from "./authThunks.js";
 
 const initialState = {
   user: null,
   isAuthenticated: false,
+  authChecked: false,
   loading: false,
   error: null,
   success: null,
@@ -12,7 +13,7 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: { 
+  reducers: {
     logoutUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -40,8 +41,8 @@ const authSlice = createSlice({
         state.success = null;
       });
 
-      builder
-     .addCase(loginUser.pending, (state) => {
+    builder
+      .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.success = null;
@@ -58,7 +59,26 @@ const authSlice = createSlice({
         state.success = null;
       });
 
+    builder
+      .addCase(currentUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(currentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload.user ?? action.payload;
+        state.authChecked = true; // ✅ done checking
+      })
+
+      .addCase(currentUser.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.authChecked = true; // ✅ done checking (failed)
+      });
   },
 });
 
-export default authSlice.reducer
+export default authSlice.reducer;

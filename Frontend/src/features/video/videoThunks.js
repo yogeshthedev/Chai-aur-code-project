@@ -30,3 +30,18 @@ export const getVideoById = createAsyncThunk(
     }
   }
 );
+
+export const toggleVideoLike = createAsyncThunk(
+  "video/toggleVideoLike",
+  async (videoId, thunkAPI) => {
+    try {
+      const response = await api.post(`/likes/toggle/v/${videoId}`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Something went wrong"
+      );
+    }
+  }
+);
