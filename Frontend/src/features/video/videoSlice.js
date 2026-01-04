@@ -54,7 +54,7 @@ const videoSlice = createSlice({
       });
 
     builder
-    // optimistic and rollback feature
+      // optimistic and rollback feature
 
       .addCase(toggleVideoLike.pending, (state) => {
         if (!state.currentVideo) return;
@@ -83,7 +83,7 @@ const videoSlice = createSlice({
       });
 
     builder
-    // only optimistic
+      // only optimistic
       .addCase(toggleSubscription.pending, (state) => {
         if (state.currentVideo?.owner) {
           const owner = state.currentVideo.owner;
