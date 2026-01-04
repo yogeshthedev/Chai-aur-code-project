@@ -45,3 +45,19 @@ export const toggleVideoLike = createAsyncThunk(
     }
   }
 );
+
+
+export const toggleSubscription = createAsyncThunk(
+  "video/toggleSubscription",
+  async (channelId, thunkAPI) => {
+    try {
+      const response = await api.post(`/subscriptions/c/${channelId}`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message 
+      );
+    }
+  }
+);

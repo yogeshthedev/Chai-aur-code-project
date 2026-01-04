@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Like } from "./../models/like.model.js";
+import { Subscription } from "./../models/subscription.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   let { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -137,32 +138,46 @@ const getVideoById = asyncHandler(async (req, res) => {
   }
 
   if (!isOwner) {
-    video = await Video.findOneAndUpdate(
-      { _id: videoId },
+    video = await Video.findByIdAndUpdate(
+      videoId,
       { $inc: { views: 1 } },
       { new: true }
     ).populate("owner", "fullname avatar");
   }
 
-  const likeCount = await Like.countDocuments({
-    video: videoId,
-  });
+  const likeCount = await Like.countDocuments({ video: videoId });
 
   let isLiked = false;
-
-  if (req.user && userId) {
+  if (userId) {
     const liked = await Like.findOne({
       video: videoId,
       likedBy: userId,
     });
-
     isLiked = Boolean(liked);
+  }
+
+  const subscriberCount = await Subscription.countDocuments({
+    channel: video.owner._id,
+  });
+
+  let isSubscribed = false;
+  if (userId) {
+    const subscribed = await Subscription.findOne({
+      channel: video.owner._id,
+      subscriber: userId,
+    });
+    isSubscribed = Boolean(subscribed);
   }
 
   const videoResponse = {
     ...video.toObject(),
     likeCount,
     isLiked,
+    owner: {
+      ...video.owner.toObject(),
+      subscriberCount,
+      isSubscribed,
+    },
   };
 
   return res

@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchVideoComments } from "./commentThunks";
+import {
+  addComment,
+  deleteComment,
+  fetchVideoComments,
+  updateComment,
+} from "./commentThunks";
 
 const initialState = {
   comments: [],
@@ -38,13 +43,47 @@ const commentSlice = createSlice({
         (state.loading = true), (state.error = null);
       })
       .addCase(addComment.fulfilled, (state, action) => {
-        state.loading = false;
-        state.comments = action.payload.comments;
+        state.comments.unshift(action.payload);
+        state.totalComments += 1;
       })
 
       .addCase(addComment.rejected, (state, action) => {
         (state.error = action.payload || action.payload.error),
           (state.loading = false);
+      });
+
+    builder
+
+      .addCase(updateComment.pending, (state) => {
+        (state.loading = true), (state.error = null);
+      })
+      .addCase(updateComment.fulfilled, (state, action) => {
+        const index = state.comments.findIndex(
+          (c) => c._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.comments[index] = action.payload;
+        }
+      })
+
+      .addCase(updateComment.rejected, (state, action) => {
+        (state.error = action.payload || action.payload.error),
+          (state.loading = false);
+      });
+
+    builder
+      .addCase(deleteComment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.comments = state.comments.filter((c) => c._id !== action.payload);
+        state.totalComments -= 1;
+      })
+      .addCase(deleteComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

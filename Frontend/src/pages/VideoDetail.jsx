@@ -1,7 +1,11 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getVideoById, toggleVideoLike } from "../features/video/videoThunks";
+import {
+  getVideoById,
+  toggleSubscription,
+  toggleVideoLike,
+} from "../features/video/videoThunks.js";
 import CommentSection from "./../components/comment-section/CommentSection";
 
 const VideoDetail = () => {
@@ -36,6 +40,17 @@ const VideoDetail = () => {
       </div>
 
       <p>{currentVideo.description}</p>
+
+      <button
+        onClick={() => dispatch(toggleSubscription(currentVideo.owner._id))}
+        style={{
+          background: currentVideo.owner.isSubscribed ? "gray" : "red",
+          color: "black",
+          marginLeft: "10px",
+        }}
+      >
+        {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
+      </button>
       <p>Views: {currentVideo.views}</p>
 
       <CommentSection videoId={currentVideo._id} />

@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getAllVideos, getVideoById, toggleVideoLike } from "./videoThunks";
+import {
+  getAllVideos,
+  getVideoById,
+  toggleSubscription,
+  toggleVideoLike,
+} from "./videoThunks";
 
 const initialState = {
   videos: [],
@@ -49,6 +54,7 @@ const videoSlice = createSlice({
       });
 
     builder
+    // optimistic and rollback feature
 
       .addCase(toggleVideoLike.pending, (state) => {
         if (!state.currentVideo) return;
@@ -73,6 +79,25 @@ const videoSlice = createSlice({
           state.currentVideo.likeCount += 1;
         }
 
+        state.error = action.payload;
+      });
+
+    builder
+    // only optimistic
+      .addCase(toggleSubscription.pending, (state) => {
+        if (state.currentVideo?.owner) {
+          const owner = state.currentVideo.owner;
+
+          if (owner.isSubscribed) {
+            owner.subscriberCount -= 1;
+          } else {
+            owner.subscriberCount += 1;
+          }
+
+          owner.isSubscribed = !owner.isSubscribed;
+        }
+      })
+      .addCase(toggleSubscription.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
