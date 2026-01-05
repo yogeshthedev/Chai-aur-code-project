@@ -1,12 +1,13 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import CommentSection from './../components/CommentSection';
 import {
   getVideoById,
   toggleSubscription,
   toggleVideoLike,
 } from "../features/video/videoThunks.js";
-import CommentSection from "./../components/comment-section/CommentSection";
+
 
 const VideoDetail = () => {
   const { id: videoId } = useParams();

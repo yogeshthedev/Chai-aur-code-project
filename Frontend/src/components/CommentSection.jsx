@@ -5,7 +5,7 @@ import {
   deleteComment,
   fetchVideoComments,
   updateComment,
-} from "../../features/comment/commentThunks";
+} from "./../features/comment/commentThunks";
 
 const CommentSection = ({ videoId }) => {
   const dispatch = useDispatch();
