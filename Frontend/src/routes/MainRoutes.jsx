@@ -6,6 +6,7 @@ import VideoDetail from "../pages/VideoDetail";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import Home from "./../pages/Home";
+import Profile from "../pages/Profile";
 
 const MainRoutes = () => {
   return (
@@ -33,6 +34,14 @@ const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <VideoDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />
