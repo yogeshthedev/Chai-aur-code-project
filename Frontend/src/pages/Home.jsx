@@ -16,12 +16,16 @@ const Home = () => {
   if (!videos) return <p>Videos not found</p>;
 
   return (
-    <div>
-      <h1>Home</h1>
-      {videos.map((video) => {
-        return <VideoCard key={video._id} video={video} />;
-      })}
-    </div>
+   <div className="home-page">
+  <h1 className="page-title">Home</h1>
+
+  <div className="video-grid">
+    {videos.map((video) => (
+      <VideoCard key={video._id} video={video} />
+    ))}
+  </div>
+</div>
+
   );
 };
 

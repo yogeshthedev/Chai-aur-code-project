@@ -28,39 +28,38 @@ const Login = () => {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div>
-      <h1>Login</h1>
+   <div className="auth-page">
+  <h1 className="auth-title">Login</h1>
 
-      <form onSubmit={handleSubmit}>
-        {/* Email or Username */}
-        <div>
-          <label>Email or Username</label>
-          <input
-            type="text"
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="Enter email or username"
-          />
-        </div>
-
-        {/* Password */}
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        {/* Submit */}
-        <button type="submit" disabled={loading}>
-          {loading ? "logging in..." : "login"}
-        </button>
-      </form>
+  <form className="auth-form" onSubmit={handleSubmit}>
+    <div className="form-group">
+      <label>Email or Username</label>
+      <input
+        type="text"
+        value={identifier}
+        onChange={(e) => setIdentifier(e.target.value)}
+        placeholder="Enter email or username"
+      />
     </div>
+
+    <div className="form-group">
+      <label>Password</label>
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Enter password"
+      />
+    </div>
+
+    {error && <p className="form-error">{error}</p>}
+
+    <button type="submit" disabled={loading} className="auth-btn">
+      {loading ? "Logging in..." : "Login"}
+    </button>
+  </form>
+</div>
+
   );
 };
 

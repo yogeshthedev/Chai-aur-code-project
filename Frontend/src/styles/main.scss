@@ -10,7 +10,10 @@
 
 /* pages */
 @use "./pages/video-detail";
+@use "./pages/home";
+@use "./pages/auth";
 
 /* components */
 @use "./components/comment";
 @use "./components/button";
+@use "./components/video-card"

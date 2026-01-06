@@ -1,0 +1,54 @@
+.video-detail {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.video-title {
+  margin-bottom: 10px;
+}
+
+.video-player {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.video-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.like-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #222;
+  color: white;
+
+  &.active {
+    color: red;
+  }
+}
+
+.subscribe-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: red;
+  color: white;
+
+  &.subscribed {
+    background: gray;
+  }
+}
+
+.video-description {
+  margin-top: 10px;
+  color: #ccc;
+}
+
+.video-views {
+  color: #aaa;
+  font-size: 14px;
+}

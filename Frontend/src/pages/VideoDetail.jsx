@@ -26,36 +26,41 @@ const VideoDetail = () => {
   if (!currentVideo) return <p>Video not found</p>;
 
   return (
-    <div>
-      <h1>{currentVideo.title}</h1>
+  <div className="video-detail">
+  <h1 className="video-title">{currentVideo.title}</h1>
 
-      <video src={currentVideo.videoFile} controls width="600" />
+  <video
+    className="video-player"
+    src={currentVideo.videoFile}
+    controls
+  />
 
-      <p>{currentVideo.likeCount}</p>
+  <div className="video-actions">
+    <button
+      className={`like-btn ${currentVideo.isLiked ? "active" : ""}`}
+      onClick={() => dispatch(toggleVideoLike(currentVideo._id))}
+    >
+      {currentVideo.isLiked ? "👍" : "❤"} {currentVideo.likeCount}
+    </button>
 
-      <div
-        className="like"
-        onClick={() => dispatch(toggleVideoLike(currentVideo._id))}
-      >
-        {currentVideo.isLiked ? "👍" : "❤"}
-      </div>
+    <button
+      className={`subscribe-btn ${
+        currentVideo.owner.isSubscribed ? "subscribed" : ""
+      }`}
+      onClick={() =>
+        dispatch(toggleSubscription(currentVideo.owner._id))
+      }
+    >
+      {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
+    </button>
+  </div>
 
-      <p>{currentVideo.description}</p>
+  <p className="video-description">{currentVideo.description}</p>
+  <p className="video-views">Views: {currentVideo.views}</p>
 
-      <button
-        onClick={() => dispatch(toggleSubscription(currentVideo.owner._id))}
-        style={{
-          background: currentVideo.owner.isSubscribed ? "gray" : "red",
-          color: "black",
-          marginLeft: "10px",
-        }}
-      >
-        {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
-      </button>
-      <p>Views: {currentVideo.views}</p>
+  <CommentSection videoId={currentVideo._id} />
+</div>
 
-      <CommentSection videoId={currentVideo._id} />
-    </div>
   );
 };
 
