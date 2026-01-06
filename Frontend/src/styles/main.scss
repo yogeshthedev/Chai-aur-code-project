@@ -1,0 +1,16 @@
+/* base */
+@use "./base/reset";
+@use "./base/variables";
+@use "./base/mixins";
+@use "./base/globals";
+
+/* layout */
+@use "./layout/header";
+@use "./layout/layout";
+
+/* pages */
+@use "./pages/video-detail";
+
+/* components */
+@use "./components/comment";
+@use "./components/button";
