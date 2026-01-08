@@ -7,6 +7,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import Home from "./../pages/Home";
 import Profile from "../pages/Profile";
+import Channel from "../pages/Channel";
 
 const MainRoutes = () => {
   return (
@@ -42,6 +43,14 @@ const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/c/:username"
+        element={
+          <ProtectedRoute>
+            <Channel />
           </ProtectedRoute>
         }
       />

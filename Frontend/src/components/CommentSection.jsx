@@ -4,6 +4,7 @@ import {
   addComment,
   deleteComment,
   fetchVideoComments,
+  toggleCommentLike,
   updateComment,
 } from "./../features/comment/commentThunks";
 
@@ -89,7 +90,7 @@ const CommentSection = ({ videoId }) => {
 
         <div className="comment-actions">
           <button onClick={() => dispatch(toggleCommentLike(comment._id))}>
-            {comment.isLiked ? "👍" : "🤍"} {comment.likeCount}
+            {comment.isLiked ? "👍" : "🤍"} {comment.commentLikeCount}
           </button>
 
           {isOwner && (

@@ -3,6 +3,7 @@ import {
   addComment,
   deleteComment,
   fetchVideoComments,
+  toggleCommentLike,
   updateComment,
 } from "./commentThunks";
 
@@ -83,6 +84,42 @@ const commentSlice = createSlice({
       })
       .addCase(deleteComment.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      });
+
+    builder
+      .addCase(toggleCommentLike.pending, (state, action) => {
+        const commentId = action.meta.arg;
+
+        const comment = state.comments.find((c) => c._id === commentId);
+
+        if (!comment) return;
+
+        if (comment.isLiked) {
+          comment.isLiked = false;
+          comment.likeCount -= 1;
+        } else {
+          comment.isLiked = true;
+          comment.likeCount += 1;
+        }
+      })
+
+      .addCase(toggleCommentLike.rejected, (state, action) => {
+        const commentId = action.meta.arg;
+
+        const comment = state.comments.find((c) => c._id === commentId);
+
+        if (!comment) return;
+
+        // rollback
+        if (comment.isLiked) {
+          comment.isLiked = false;
+          comment.likeCount -= 1;
+        } else {
+          comment.isLiked = true;
+          comment.likeCount += 1;
+        }
+
         state.error = action.payload;
       });
   },

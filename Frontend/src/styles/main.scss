@@ -1,5 +1,5 @@
 /* base */
-@use "./base/reset";
+// @use "./base/reset";
 @use "./base/variables";
 @use "./base/mixins";
 @use "./base/globals";
@@ -12,6 +12,7 @@
 @use "./pages/video-detail";
 @use "./pages/home";
 @use "./pages/auth";
+@use "./pages/channel";
 
 /* components */
 @use "./components/comment";

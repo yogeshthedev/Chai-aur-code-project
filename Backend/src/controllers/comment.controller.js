@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Video } from "./../models/video.model.js";
+import { Like } from "./../models/like.model.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
@@ -30,6 +31,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     .limit(limit);
 
   const totalComments = await Comment.countDocuments({ video: videoId });
+
 
   return res.status(200).json(
     new ApiResponse(
@@ -68,18 +70,29 @@ const addComment = asyncHandler(async (req, res) => {
     owner: req.user._id,
   });
 
-  const populatedComment = await comment.populate("owner", "username avatar");
+  const populatedComment = await comment.populate(
+    "owner",
+    "username avatar"
+  );
+
+
+  const commentResponse = {
+    ...populatedComment.toObject(),
+    likeCount: 0,
+    isLiked: false,
+  };
 
   return res
     .status(201)
-    .json(new ApiResponse(201, populatedComment, "Comment added successfully"));
+    .json(new ApiResponse(201, commentResponse, "Comment added successfully"));
 });
+
 
 const updateComment = asyncHandler(async (req, res) => {
   // TODO: update a comment
   const { commentId } = req.params;
   const { content } = req.body;
-  console.log(content)
+  console.log(content);
 
   if (!isValidObjectId(commentId)) {
     throw new ApiError(400, "Invalid video id");

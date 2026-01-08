@@ -124,7 +124,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   let video = await Video.findById(videoId).populate(
     "owner",
-    "fullname avatar"
+    "username avatar fullname"
   );
 
   if (!video) {

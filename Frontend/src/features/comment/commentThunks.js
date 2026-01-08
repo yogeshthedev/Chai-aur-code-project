@@ -7,6 +7,7 @@ export const fetchVideoComments = createAsyncThunk(
   async (videoId, thunkAPI) => {
     try {
       const res = await api.get(`/comments/${videoId}`);
+      console.log(res.data.data);
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -22,6 +23,7 @@ export const addComment = createAsyncThunk(
   async ({ videoId, content }, thunkAPI) => {
     try {
       const res = await api.post(`/comments/${videoId}`, { content });
+      console.log(res.data.data);
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -60,4 +62,17 @@ export const deleteComment = createAsyncThunk(
     }
   }
 );
-
+export const toggleCommentLike = createAsyncThunk(
+  "comment/toggleCommentLike",
+  async (commentId, thunkAPI) => {
+    try {
+      const response = await api.post(`/likes/toggle/c/${commentId}`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Error while toggling like on comment"
+      );
+    }
+  }
+);
