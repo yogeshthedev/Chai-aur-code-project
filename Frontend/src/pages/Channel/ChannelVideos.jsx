@@ -1,10 +1,8 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+
 import VideoCard from "../../components/VideoCard";
 
 const ChannelVideos = ({ videos }) => {
-  const navigate = useNavigate();
-
   if (!videos || videos.length === 0) {
     return (
       <div className="no-content">
@@ -23,7 +21,7 @@ const ChannelVideos = ({ videos }) => {
     <div className="videos-section">
       <div className="video-grid">
         {videos.map((video) => (
-<VideoCard video={video}/>
+          <VideoCard key={video._id} video={video} />
         ))}
       </div>
     </div>

@@ -14,13 +14,16 @@ const VideoDetail = () => {
   const navigate = useNavigate();
 
   const { currentVideo, loading, error } = useSelector((state) => state.video);
+  const { user } = useSelector((state) => state.auth);
 
+  
   useEffect(() => {
     if (videoId) {
       dispatch(getVideoById(videoId));
     }
   }, [dispatch, videoId]);
-
+  
+  
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   if (!currentVideo) return <p>Video not found</p>;
@@ -44,14 +47,16 @@ const VideoDetail = () => {
           {currentVideo.isLiked ? "👍" : "❤"} {currentVideo.likeCount}
         </button>
 
-        <button
-          className={`subscribe-btn ${
-            currentVideo.owner.isSubscribed ? "subscribed" : ""
-          }`}
-          onClick={() => dispatch(toggleSubscription(currentVideo.owner._id))}
-        >
-          {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
-        </button>
+        {!user._id === currentVideo.owner._id && (
+          <button
+            className={`subscribe-btn ${
+              currentVideo.owner.isSubscribed ? "subscribed" : ""
+            }`}
+            onClick={() => dispatch(toggleSubscription(currentVideo.owner._id))}
+          >
+            {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
+          </button>
+        )}
       </div>
 
       <p className="video-description">{currentVideo.description}</p>
