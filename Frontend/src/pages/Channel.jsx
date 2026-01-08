@@ -1,16 +1,16 @@
 import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getChannelProfile,
   getChannelVideos,
   toggleSubscription,
 } from "../features/channel/channelThunks";
+import VideoCard from "../components/VideoCard";
 
 const Channel = () => {
   const { channelId } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const { profile, videos, loading, error } = useSelector(
     (state) => state.profile
@@ -64,19 +64,7 @@ const Channel = () => {
         ) : (
           <div className="video-grid">
             {videos?.map((video) => (
-              <div
-                key={video._id}
-                className="video-card"
-                onClick={() => navigate(`/watch/${video._id}`)}
-              >
-                <img
-                  src={video.thumbnail}
-                  alt={video.title}
-                  className="video-thumb"
-                />
-                <h4>{video.title}</h4>
-                <p>{video.views} views</p>
-              </div>
+              <VideoCard video={video} />
             ))}
           </div>
         )}
