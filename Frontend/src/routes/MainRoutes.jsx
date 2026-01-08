@@ -7,7 +7,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import Home from "./../pages/Home";
 import Profile from "../pages/Profile";
-import Channel from "../pages/Channel";
+
+import Channel from "./../pages/Channel/Channel";
 
 const MainRoutes = () => {
   return (
