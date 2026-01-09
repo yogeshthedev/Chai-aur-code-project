@@ -9,6 +9,8 @@ import Home from "./../pages/Home";
 import Profile from "../pages/Profile";
 
 import Channel from "./../pages/Channel/Channel";
+import Playlist from "../pages/Playlist/Playlist";
+import PlaylistDetail from "../pages/Playlist/PlaylistDetail";
 
 const MainRoutes = () => {
   return (
@@ -52,6 +54,22 @@ const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <Channel />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/playlists"
+        element={
+          <ProtectedRoute>
+            <Playlist />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/playlists/:playlistId"
+        element={
+          <ProtectedRoute>
+            <PlaylistDetail />
           </ProtectedRoute>
         }
       />

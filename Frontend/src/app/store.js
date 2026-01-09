@@ -3,6 +3,7 @@ import authReducer from "../features/auth/authSlice.js";
 import videoReducer from "../features/video/videoSlice.js";
 import commentReducer from "../features/comment/commentSlice.js";
 import channelReducer from "../features/channel/channelSlice.js";
+import playlistReducer from "../features/playlist/playlistSlice.js";
 
 export default configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export default configureStore({
     video: videoReducer,
     comment: commentReducer,
     profile: channelReducer,
+    playlist:playlistReducer,
   },
 });
