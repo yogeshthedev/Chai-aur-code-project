@@ -9,7 +9,7 @@ const PlaylistCard = ({ playlist }) => {
   // Use first video's thumbnail if exists
   const thumbnail =
     playlist.videos?.[0]?.thumbnail ||
-    "https://via.placeholder.com/300x180?text=Playlist";
+    "https://placehold.co/600x400?text=Playlist";
 
   return (
     <div

@@ -6,7 +6,7 @@ export const createPlaylist = createAsyncThunk(
   "playlist/create",
   async ({ name, description }, thunkAPI) => {
     try {
-      const res = await api.post("/playlists", { name, description });
+      const res = await api.post("/playlist", { name, description });
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -21,7 +21,7 @@ export const getPlaylistById = createAsyncThunk(
   "playlist/getById",
   async (playlistId, thunkAPI) => {
     try {
-      const res = await api.get(`/playlists/${playlistId}`);
+      const res = await api.get(`/playlist/${playlistId}`);
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -36,8 +36,8 @@ export const getUserPlaylists = createAsyncThunk(
   "playlist/getUserPlaylists",
   async (userId, thunkAPI) => {
     try {
-      const res = await api.get(`/playlists/user/${userId}`);
-      return res.data.data;
+      const res = await api.get(`/playlist/user/${userId}`);
+      return res.data.data      ;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to fetch playlists"
@@ -51,7 +51,7 @@ export const updatePlaylist = createAsyncThunk(
   "playlist/update",
   async ({ playlistId, name, description }, thunkAPI) => {
     try {
-      const res = await api.patch(`/playlists/${playlistId}`, {
+      const res = await api.patch(`/playlist/${playlistId}`, {
         name,
         description,
       });
@@ -69,7 +69,7 @@ export const deletePlaylist = createAsyncThunk(
   "playlist/delete",
   async (playlistId, thunkAPI) => {
     try {
-      await api.delete(`/playlists/${playlistId}`);
+      await api.delete(`/playlist/${playlistId}`);
       return playlistId;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -85,7 +85,7 @@ export const addVideoToPlaylist = createAsyncThunk(
   async ({ videoId, playlistId }, thunkAPI) => {
     try {
       const res = await api.patch(
-        `/playlists/add/${videoId}/${playlistId}`
+        `/playlist/add/${videoId}/${playlistId}`
       );
       return res.data.data;
     } catch (error) {
@@ -105,7 +105,7 @@ export const removeVideoFromPlaylist = createAsyncThunk(
   async ({ videoId, playlistId }, thunkAPI) => {
     try {
       const res = await api.patch(
-        `/playlists/remove/${videoId}/${playlistId}`
+        `/playlist/remove/${videoId}/${playlistId}`
       );
       return res.data.data;
     } catch (error) {

@@ -61,8 +61,7 @@ const getPlaylistById = asyncHandler(async (req, res) => {
   const playlist = await Playlist.findOne({
     _id: playlistId,
     owner: userId,
-  });
-
+  }).populate("videos", "title thumbnail duration views createdAt owner");
   if (!playlist) {
     throw new ApiError(404, "Playlist not found");
   }
@@ -139,7 +138,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     (vid) => vid.toString() === videoId
   );
   if (!alreadyExists) {
-  throw new ApiError(404, "Video does not exist in playlist");
+    throw new ApiError(404, "Video does not exist in playlist");
   }
 
   playlist.videos.pull(videoId);

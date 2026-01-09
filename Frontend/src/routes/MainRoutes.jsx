@@ -66,7 +66,7 @@ const MainRoutes = () => {
         }
       />
       <Route
-        path="/playlists/:playlistId"
+        path="/playlist/:playlistId"
         element={
           <ProtectedRoute>
             <PlaylistDetail />
