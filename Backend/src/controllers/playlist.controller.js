@@ -9,13 +9,14 @@ const createPlaylist = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
   //TODO: create playlist
 
-  if (name.trim() === "" || description.trim() === "") {
-    throw new ApiError(400, "Name or description is not available");
-  }
+ if (!name?.trim()) {
+  throw new ApiError(400, "Playlist name is required");
+}
+
 
   const newPlaylist = await Playlist.create({
     name,
-    description,
+    description: description || "",
     owner: req.user._id,
     videos: [],
   });

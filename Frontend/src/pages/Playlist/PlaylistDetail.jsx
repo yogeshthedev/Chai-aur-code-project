@@ -1,10 +1,7 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getPlaylistById,
-
-} from "../../features/playlist/playlistThunks";
+import { getPlaylistById } from "../../features/playlist/playlistThunks";
 import VideoCard from "../../components/VideoCard";
 
 const PlaylistDetail = () => {
@@ -14,8 +11,6 @@ const PlaylistDetail = () => {
   const { currentPlaylist, loading, error } = useSelector(
     (state) => state.playlist
   );
-
-
 
   useEffect(() => {
     if (playlistId) {
@@ -27,8 +22,6 @@ const PlaylistDetail = () => {
   if (loading) return <p>Loading playlist...</p>;
   if (error) return <p>{error}</p>;
   if (!currentPlaylist) return <p>Playlist not found</p>;
-
-
 
   return (
     <div className="playlist-detail">

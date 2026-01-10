@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import CommentSection from "./../components/CommentSection";
@@ -7,12 +7,13 @@ import {
   toggleSubscription,
   toggleVideoLike,
 } from "../features/video/videoThunks.js";
+import SaveToPlaylistModal from "../components/SaveToPlaylistModal.jsx";
 
 const VideoDetail = () => {
   const { id: videoId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+const [showSaveModal, setShowSaveModal] = useState(false);
   const { currentVideo, loading, error } = useSelector((state) => state.video);
   const { user } = useSelector((state) => state.auth);
 
@@ -57,6 +58,19 @@ const VideoDetail = () => {
             {currentVideo.owner.isSubscribed ? "Subscribed" : "Subscribe"}
           </button>
         )}
+
+
+<button onClick={() => setShowSaveModal(true)}>
+  Save
+</button>
+
+{showSaveModal && (
+  <SaveToPlaylistModal
+    videoId={currentVideo._id}
+    onClose={() => setShowSaveModal(false)}
+  />
+)}
+
       </div>
 
       <p className="video-description">{currentVideo.description}</p>
