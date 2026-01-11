@@ -169,12 +169,11 @@ const getVideoById = asyncHandler(async (req, res) => {
     isSubscribed = Boolean(subscribed);
   }
 
-  if (userId && !isOwner) {
-    await User.findByIdAndUpdate(userId, {
+if (userId && !isOwner) {
+  await User.findByIdAndUpdate(
+    userId,
+    {
       $pull: { watchHistory: videoId },
-    });
-
-    await User.findByIdAndUpdate(userId, {
       $push: {
         watchHistory: {
           $each: [videoId],
@@ -182,8 +181,11 @@ const getVideoById = asyncHandler(async (req, res) => {
           $slice: 50,
         },
       },
-    });
-  }
+    },
+    { new: true }
+  );
+}
+
 
   const videoResponse = {
     ...video.toObject(),

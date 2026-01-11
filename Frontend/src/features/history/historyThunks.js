@@ -9,6 +9,7 @@ export const getWatchHistory = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const res = await api.get("/users/history");
+    
       return res.data.data; // array of videos
     } catch (error) {
       return thunkAPI.rejectWithValue(

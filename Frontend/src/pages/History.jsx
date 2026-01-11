@@ -7,14 +7,13 @@ const History = () => {
   const dispatch = useDispatch();
 
   const { videos, loading, error } = useSelector((state) => state.history);
-  const { user } = useSelector((state) => state.auth);
+
 
   useEffect(() => {
     dispatch(getWatchHistory());
   }, [dispatch]);
 
-  console.log("Watch History Videos:", videos);
-  console.log("User:", user);
+
 
   if (loading) {
     return <p>Loading watch history...</p>;

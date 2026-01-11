@@ -13,18 +13,16 @@ const VideoDetail = () => {
   const { id: videoId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const { currentVideo, loading, error } = useSelector((state) => state.video);
   const { user } = useSelector((state) => state.auth);
 
-  
   useEffect(() => {
     if (videoId) {
       dispatch(getVideoById(videoId));
     }
   }, [dispatch, videoId]);
-  
-  
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
   if (!currentVideo) return <p>Video not found</p>;
@@ -59,18 +57,14 @@ const [showSaveModal, setShowSaveModal] = useState(false);
           </button>
         )}
 
+        <button onClick={() => setShowSaveModal(true)}>Save</button>
 
-<button onClick={() => setShowSaveModal(true)}>
-  Save
-</button>
-
-{showSaveModal && (
-  <SaveToPlaylistModal
-    videoId={currentVideo._id}
-    onClose={() => setShowSaveModal(false)}
-  />
-)}
-
+        {showSaveModal && (
+          <SaveToPlaylistModal
+            videoId={currentVideo._id}
+            onClose={() => setShowSaveModal(false)}
+          />
+        )}
       </div>
 
       <p className="video-description">{currentVideo.description}</p>
