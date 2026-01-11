@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/axios";
 
-
 export const createPlaylist = createAsyncThunk(
   "playlist/create",
   async ({ name, description }, thunkAPI) => {
@@ -15,7 +14,6 @@ export const createPlaylist = createAsyncThunk(
     }
   }
 );
-
 
 export const getPlaylistById = createAsyncThunk(
   "playlist/getById",
@@ -31,13 +29,12 @@ export const getPlaylistById = createAsyncThunk(
   }
 );
 
-
 export const getUserPlaylists = createAsyncThunk(
   "playlist/getUserPlaylists",
   async (userId, thunkAPI) => {
     try {
       const res = await api.get(`/playlist/user/${userId}`);
-      return res.data.data      ;
+      return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Failed to fetch playlists"
@@ -45,7 +42,6 @@ export const getUserPlaylists = createAsyncThunk(
     }
   }
 );
-
 
 export const updatePlaylist = createAsyncThunk(
   "playlist/update",
@@ -64,7 +60,6 @@ export const updatePlaylist = createAsyncThunk(
   }
 );
 
-
 export const deletePlaylist = createAsyncThunk(
   "playlist/delete",
   async (playlistId, thunkAPI) => {
@@ -79,14 +74,11 @@ export const deletePlaylist = createAsyncThunk(
   }
 );
 
-
 export const addVideoToPlaylist = createAsyncThunk(
   "playlist/addVideo",
   async ({ videoId, playlistId }, thunkAPI) => {
     try {
-      const res = await api.patch(
-        `/playlist/add/${videoId}/${playlistId}`
-      );
+      const res = await api.patch(`/playlist/add/${videoId}/${playlistId}`);
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(
@@ -104,9 +96,7 @@ export const removeVideoFromPlaylist = createAsyncThunk(
   "playlist/removeVideo",
   async ({ videoId, playlistId }, thunkAPI) => {
     try {
-      const res = await api.patch(
-        `/playlist/remove/${videoId}/${playlistId}`
-      );
+      const res = await api.patch(`/playlist/remove/${videoId}/${playlistId}`);
       return res.data.data;
     } catch (error) {
       return thunkAPI.rejectWithValue(

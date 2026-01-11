@@ -38,3 +38,27 @@
 
 
 
+// create playlist scss
+
+.create-playlist {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  input {
+    padding: 6px;
+  }
+}
+
+.playlist-item {
+  position: relative;
+}
+
+.delete-btn {
+  margin-top: 6px;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+}

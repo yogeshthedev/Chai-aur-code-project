@@ -11,6 +11,7 @@ import Profile from "../pages/Profile";
 import Channel from "./../pages/Channel/Channel";
 import Playlist from "../pages/Playlist/Playlist";
 import PlaylistDetail from "../pages/Playlist/PlaylistDetail";
+import History from "../pages/History";
 
 const MainRoutes = () => {
   return (
@@ -70,6 +71,14 @@ const MainRoutes = () => {
         element={
           <ProtectedRoute>
             <PlaylistDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <History />
           </ProtectedRoute>
         }
       />
