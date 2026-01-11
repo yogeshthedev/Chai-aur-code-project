@@ -5,37 +5,40 @@ import VideoCard from "../components/VideoCard";
 
 const History = () => {
   const dispatch = useDispatch();
-
   const { videos, loading, error } = useSelector((state) => state.history);
-
 
   useEffect(() => {
     dispatch(getWatchHistory());
   }, [dispatch]);
 
-
-
-  if (loading) {
-    return <p>Loading watch history...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
   return (
-    <div className="history-page">
-      <h2>Watch History</h2>
-
-      {videos.length === 0 ? (
-        <p>You haven’t watched any videos yet</p>
-      ) : (
-        <div className="video-grid">
-          {videos.map((video) => (
-            <VideoCard key={video._id} video={video} />
-          ))}
+    <div>
+      <div>
+        <div>
+          <h1>Watch History</h1>
+          <p>{videos?.length || 0} videos</p>
         </div>
-      )}
+
+        <div>
+          <button>Clear All</button>
+        </div>
+      </div>
+
+      <div>
+        {loading ? (
+          <div>Loading...</div>
+        ) : error ? (
+          <div>{error}</div>
+        ) : (
+          <div>
+            {videos?.map((video) => (
+              <div key={video._id}>
+                <VideoCard video={video} showRemoveBtn />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
