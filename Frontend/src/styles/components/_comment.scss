@@ -1,71 +1,244 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .comment-section {
-  margin-top: 20px;
-}
+  margin-top: $spacing-2xl;
+  padding-top: $spacing-xl;
+  border-top: 1px solid $border-color;
 
-.comment-title {
-  margin-bottom: 10px;
-}
-
-.comment-input {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-
-  input {
-    flex: 1;
-    padding: 8px;
-    border-radius: 6px;
-    background: #1f1f1f;
-    color: white;
-    border: 1px solid #333;
+  .comment-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xl;
+    color: $text-primary;
   }
 
-  button {
-    padding: 8px 14px;
-    border-radius: 6px;
-    background: #ff0000;
-    color: white;
+  // Add Comment Input
+  .comment-input-wrapper {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-2xl;
+
+    .comment-user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: $radius-full;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .comment-input-container {
+      flex: 1;
+      @include flex-column;
+      gap: $spacing-md;
+
+      .comment-input {
+        @include input-field;
+        padding: $spacing-md;
+        font-size: $font-size-sm;
+        border: none;
+        border-bottom: 1px solid $border-color;
+        border-radius: 0;
+        background: transparent;
+        transition: border-color $transition-base;
+
+        &:focus {
+          border-bottom-color: $accent-primary;
+        }
+      }
+
+      .comment-input-actions {
+        @include flex-center;
+        justify-content: flex-end;
+        gap: $spacing-sm;
+
+        .btn-cancel,
+        .btn-comment {
+          @include button-base;
+          padding: $spacing-sm $spacing-lg;
+        }
+
+        .btn-cancel {
+          color: $text-secondary;
+
+          &:hover:not(:disabled) {
+            background: $bg-secondary;
+          }
+
+          &:disabled {
+            opacity: 0.3;
+          }
+        }
+
+        .btn-comment {
+          @include button-primary;
+
+          &:disabled {
+            opacity: 0.5;
+          }
+        }
+      }
+    }
   }
-}
 
-.comment-item {
-  border-bottom: 1px solid #333;
-  padding: 10px 0;
-}
+  // Comment List
+  .comment-list {
+    @include flex-column;
+    gap: $spacing-xl;
 
-.comment-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 5px;
-}
+    .no-comments {
+      @include flex-center;
+      @include flex-column;
+      gap: $spacing-md;
+      padding: $spacing-3xl;
+      text-align: center;
 
-.comment-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-}
+      svg {
+        width: 60px;
+        height: 60px;
+        color: $text-muted;
+      }
 
-.comment-content {
-  margin: 5px 0;
-}
+      p {
+        color: $text-secondary;
+        font-size: $font-size-sm;
+      }
+    }
 
-.comment-actions {
-  display: flex;
-  gap: 10px;
+    .comment-item {
+      display: flex;
+      gap: $spacing-md;
+      padding: $spacing-md 0;
 
-  button {
-    font-size: 13px;
-    color: #aaa;
+      .comment-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: $radius-full;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .comment-content-wrapper {
+        flex: 1;
+        min-width: 0;
+
+        .comment-header {
+          @include flex-center;
+          gap: $spacing-md;
+          margin-bottom: $spacing-xs;
+
+          .comment-author {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+          }
+
+          .comment-date {
+            font-size: $font-size-xs;
+            color: $text-muted;
+          }
+        }
+
+        .comment-text {
+          font-size: $font-size-sm;
+          color: $text-primary;
+          line-height: 1.6;
+          margin-bottom: $spacing-md;
+          word-wrap: break-word;
+        }
+
+        // Edit Mode
+        .comment-edit {
+          @include flex-column;
+          gap: $spacing-md;
+          margin-bottom: $spacing-md;
+
+          .edit-input {
+            @include input-field;
+            padding: $spacing-sm $spacing-md;
+            font-size: $font-size-sm;
+          }
+
+          .edit-actions {
+            @include flex-center;
+            gap: $spacing-sm;
+
+            .btn-cancel,
+            .btn-save {
+              @include button-base;
+              padding: $spacing-xs $spacing-md;
+              font-size: $font-size-xs;
+            }
+
+            .btn-cancel {
+              color: $text-secondary;
+
+              &:hover {
+                background: $bg-secondary;
+              }
+            }
+
+            .btn-save {
+              @include button-primary;
+            }
+          }
+        }
+
+        // Comment Actions
+        .comment-actions {
+          @include flex-center;
+          gap: $spacing-lg;
+
+          .action-btn {
+            @include flex-center;
+            gap: $spacing-xs;
+            padding: $spacing-xs $spacing-sm;
+            background: transparent;
+            color: $text-secondary;
+            font-size: $font-size-xs;
+            border-radius: $radius-md;
+            transition: all $transition-base;
+
+            svg {
+              width: 16px;
+              height: 16px;
+            }
+
+            &:hover {
+              background: $bg-secondary;
+              color: $text-primary;
+            }
+
+            &.like-btn {
+              &.liked {
+                color: $accent-primary;
+
+                svg {
+                  fill: $accent-primary;
+                }
+              }
+            }
+
+            &.delete-btn:hover {
+              color: $error;
+              background: rgba($error, 0.1);
+            }
+          }
+        }
+      }
+    }
   }
-}
 
-.comment-edit {
-  display: flex;
-  gap: 8px;
+  @include respond(mobile) {
+    .comment-input-wrapper,
+    .comment-list .comment-item {
+      gap: $spacing-sm;
 
-  input {
-    flex: 1;
-    padding: 6px;
+      .comment-user-avatar,
+      .comment-avatar {
+        width: 32px;
+        height: 32px;
+      }
+    }
   }
 }

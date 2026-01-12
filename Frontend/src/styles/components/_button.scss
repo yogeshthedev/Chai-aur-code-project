@@ -1,0 +1,84 @@
+@use "sass:color";
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+// Base button classes
+.btn {
+  @include button-base;
+
+  &-primary {
+    @include button-primary;
+  }
+
+  &-secondary {
+    @include button-secondary;
+  }
+
+  &-outline {
+    @include button-outline;
+  }
+
+  &-danger {
+    @include button-base;
+    background: $error;
+    color: $text-primary;
+
+    &:hover:not(:disabled) {
+      background: color.adjust($error, $lightness: -10%);
+    }
+  }
+
+  &-success {
+    @include button-base;
+    background: $success;
+    color: $text-primary;
+
+    &:hover:not(:disabled) {
+      background: color.adjust($success, $lightness: -10%);
+    }
+  }
+
+  // Sizes
+  &-sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
+  }
+
+  &-lg {
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-base;
+  }
+
+  // Icon button
+  &-icon {
+    @include flex-center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: $radius-full;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  // Loading state
+  &-loading {
+    position: relative;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      @include spinner(16px, 2px);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    span {
+      visibility: hidden;
+    }
+  }
+}

@@ -51,3 +51,19 @@ export const currentUser = createAsyncThunk(
     }
   }
 );
+
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, thunkAPI) => {
+    try {
+      const response = await api.post("/users/logout", {}, {
+        withCredentials: true,
+      });
+      return response.data.message;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Logout failed"
+      );
+    }
+  }
+);

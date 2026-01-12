@@ -1,0 +1,215 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: $header-height;
+  background: $bg-primary;
+  border-bottom: 1px solid $border-color;
+  z-index: $z-fixed;
+  box-shadow: $shadow-sm;
+
+  .navbar-container {
+    @include flex-between;
+    max-width: $max-content-width;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 $spacing-md;
+    gap: $spacing-lg;
+  }
+
+  // Logo
+  .navbar-logo {
+    @include flex-center;
+    gap: $spacing-sm;
+    color: $text-primary;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+    
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      color: $accent-primary;
+    }
+    
+    .logo-text {
+      @include respond(mobile) {
+        display: none;
+      }
+    }
+
+    &:hover {
+      color: $accent-light;
+    }
+  }
+
+  // Search
+  .navbar-search {
+    @include flex-center;
+    flex: 1;
+    max-width: 600px;
+    
+    @include respond(mobile) {
+      max-width: none;
+    }
+
+    .search-input {
+      @include input-field;
+      border-radius: $radius-full 0 0 $radius-full;
+      border-right: none;
+      padding-right: $spacing-xs;
+    }
+
+    .search-button {
+      @include flex-center;
+      padding: $spacing-sm $spacing-lg;
+      background: $bg-secondary;
+      border: 1px solid $border-color;
+      border-radius: 0 $radius-full $radius-full 0;
+      color: $text-secondary;
+      transition: all $transition-base;
+      
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        background: $bg-hover;
+        color: $text-primary;
+      }
+    }
+  }
+
+  // Actions
+  .navbar-actions {
+    @include flex-center;
+    gap: $spacing-sm;
+    flex-shrink: 0;
+
+    .nav-icon-btn {
+      @include flex-center;
+      width: 40px;
+      height: 40px;
+      border-radius: $radius-full;
+      color: $text-primary;
+      transition: all $transition-base;
+
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      &:hover {
+        background: $bg-secondary;
+      }
+
+      @include respond(mobile) {
+        display: none;
+      }
+    }
+
+    .user-menu-wrapper {
+      position: relative;
+
+      .user-avatar {
+        @include flex-center;
+        width: 32px;
+        height: 32px;
+        border-radius: $radius-full;
+        overflow: hidden;
+        background: $bg-secondary;
+        cursor: pointer;
+        transition: all $transition-base;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+
+      .user-dropdown {
+        position: absolute;
+        top: calc(100% + $spacing-sm);
+        right: 0;
+        min-width: 200px;
+        background: $bg-secondary;
+        border: 1px solid $border-color;
+        border-radius: $radius-lg;
+        box-shadow: $shadow-lg;
+        overflow: hidden;
+        animation: fadeIn $transition-fast;
+
+        .dropdown-item {
+          @include flex-center;
+          justify-content: flex-start;
+          gap: $spacing-md;
+          width: 100%;
+          padding: $spacing-md;
+          color: $text-primary;
+          font-size: $font-size-sm;
+          transition: background $transition-base;
+          text-align: left;
+
+          svg {
+            width: 20px;
+            height: 20px;
+            color: $text-secondary;
+          }
+
+          &:hover {
+            background: $bg-hover;
+          }
+        }
+
+        .dropdown-divider {
+          height: 1px;
+          background: $border-color;
+          margin: $spacing-xs 0;
+        }
+      }
+    }
+
+    .auth-buttons {
+      @include flex-center;
+      gap: $spacing-sm;
+
+      .btn-login {
+        @include button-primary;
+        @include flex-center;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-lg;
+
+        svg {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Adjust body for fixed navbar
+body {
+  padding-top: $header-height;
+}

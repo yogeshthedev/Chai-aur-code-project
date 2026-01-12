@@ -1,7 +1,7 @@
 @use '../base/variables' as *;
 @use '../base/mixins' as *;
 
-.home-page {
+.history-page {
   padding: $spacing-xl $spacing-lg;
   max-width: $max-content-width;
   margin: 0 auto;
@@ -11,35 +11,41 @@
   }
 
   .page-header {
+    @include flex-between;
     margin-bottom: $spacing-xl;
+    gap: $spacing-lg;
+    flex-wrap: wrap;
 
-    .page-title {
-      font-size: $font-size-2xl;
-      font-weight: $font-weight-bold;
-      margin-bottom: $spacing-lg;
-      color: $text-primary;
-    }
-
-    .page-filters {
-      display: flex;
-      gap: $spacing-sm;
-      overflow-x: auto;
-      padding-bottom: $spacing-sm;
-      
-      &::-webkit-scrollbar {
-        height: 4px;
+    .header-content {
+      .page-title {
+        font-size: $font-size-2xl;
+        font-weight: $font-weight-bold;
+        margin-bottom: $spacing-xs;
+        color: $text-primary;
       }
 
-      .filter-btn {
-        @include button-secondary;
-        white-space: nowrap;
-        padding: $spacing-sm $spacing-lg;
+      .page-subtitle {
         font-size: $font-size-sm;
+        color: $text-secondary;
+      }
+    }
 
-        &.active {
-          background: $text-primary;
-          color: $bg-primary;
-        }
+    .clear-btn {
+      @include button-secondary;
+      @include flex-center;
+      gap: $spacing-sm;
+      padding: $spacing-sm $spacing-lg;
+      border: 1px solid $border-color;
+
+      svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      &:hover {
+        background: rgba($error, 0.1);
+        color: $error;
+        border-color: $error;
       }
     }
   }
@@ -48,7 +54,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: $spacing-lg;
-    
+
     @include respond(mobile) {
       grid-template-columns: 1fr;
       gap: $spacing-md;
@@ -79,7 +85,6 @@
     gap: $spacing-lg;
     min-height: 60vh;
     text-align: center;
-    padding: $spacing-xl;
 
     svg {
       width: 80px;
@@ -94,12 +99,6 @@
 
     p {
       color: $text-secondary;
-      max-width: 400px;
-    }
-
-    .btn-retry {
-      @include button-primary;
-      margin-top: $spacing-md;
     }
   }
 

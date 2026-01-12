@@ -1,0 +1,148 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+/* Page */
+.channel-page {
+  width: 100%;
+  background: $bg-primary;
+}
+
+/* Banner */
+.channel-banner {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(135deg, $bg-secondary, $bg-hover);
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @include respond(mobile) {
+    height: 140px;
+  }
+}
+
+/* Main container */
+.channel-container {
+  max-width: $max-content-width;
+  margin: 0 auto;
+  padding: 0 $spacing-xl;
+
+  @include respond(mobile) {
+    padding: 0 $spacing-md;
+  }
+}
+
+/* Header */
+.channel-header {
+  display: flex;
+  gap: $spacing-lg;
+  margin-top: -64px;
+  padding-bottom: $spacing-lg;
+  border-bottom: 1px solid $border-color;
+
+  @include respond(mobile) {
+    flex-direction: column;
+    margin-top: -40px;
+  }
+}
+
+/* Avatar */
+.channel-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: $radius-full;
+  border: 4px solid $bg-primary;
+  object-fit: cover;
+
+  @include respond(mobile) {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+/* Meta */
+.channel-meta {
+  flex: 1;
+}
+
+.channel-name {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.channel-details {
+  display: flex;
+  gap: $spacing-sm;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.channel-description {
+  margin-top: $spacing-sm;
+  color: $text-secondary;
+  max-width: 700px;
+}
+
+/* Actions */
+.channel-actions {
+  margin-top: $spacing-md;
+  display: flex;
+  gap: $spacing-sm;
+
+  .subscribe-btn {
+    @include button-primary;
+    border-radius: $radius-full;
+
+    &.subscribed {
+      @include button-secondary;
+    }
+  }
+
+  .join-btn {
+    @include button-outline;
+    border-radius: $radius-full;
+  }
+}
+
+/* Tabs */
+.channel-tabs {
+  display: flex;
+  gap: $spacing-xl;
+  border-bottom: 1px solid $border-color;
+  margin-top: $spacing-md;
+  overflow-x: auto;
+
+  .tab-btn {
+    padding: $spacing-md 0;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    background: none;
+    border-bottom: 2px solid transparent;
+
+    &:hover {
+      color: $text-primary;
+    }
+
+    &.active {
+      color: $text-primary;
+      border-bottom-color: $accent-primary;
+    }
+  }
+}
+
+/* Content */
+.channel-content {
+  padding-top: $spacing-xl;
+}
+
+/* Videos grid */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: $spacing-lg;
+}

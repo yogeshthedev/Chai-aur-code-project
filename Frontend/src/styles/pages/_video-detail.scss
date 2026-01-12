@@ -1,54 +1,229 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .video-detail {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: $spacing-xl $spacing-lg;
 
-.video-title {
-  margin-bottom: 10px;
-}
-
-.video-player {
-  width: 100%;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-.video-actions {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.like-btn {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: #222;
-  color: white;
-
-  &.active {
-    color: red;
+  @include respond(mobile) {
+    padding: $spacing-md;
   }
-}
 
-.subscribe-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
-  background: red;
-  color: white;
+  // Loading & Error States
+  .loading-container,
+  .error-container {
+    @include flex-center;
+    @include flex-column;
+    gap: $spacing-lg;
+    min-height: 60vh;
+    text-align: center;
 
-  &.subscribed {
-    background: gray;
+    .spinner-large {
+      @include spinner(60px, 6px);
+    }
+
+    svg {
+      width: 80px;
+      height: 80px;
+      color: $error;
+    }
+
+    h3 {
+      font-size: $font-size-xl;
+      color: $text-primary;
+    }
+
+    p {
+      color: $text-secondary;
+    }
   }
-}
 
-.video-description {
-  margin-top: 10px;
-  color: #ccc;
-}
+  // Video Player
+  .video-player-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: $bg-secondary;
+    border-radius: $radius-lg;
+    overflow: hidden;
+    margin-bottom: $spacing-lg;
 
-.video-views {
-  color: #aaa;
-  font-size: 14px;
+    .video-player {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Video Info
+  .video-info-container {
+    .video-title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $spacing-md;
+      color: $text-primary;
+      line-height: 1.3;
+
+      @include respond(mobile) {
+        font-size: $font-size-lg;
+      }
+    }
+
+    // Metadata and Actions
+    .video-metadata {
+      @include flex-between;
+      padding-bottom: $spacing-lg;
+      border-bottom: 1px solid $border-color;
+      margin-bottom: $spacing-lg;
+      gap: $spacing-md;
+      flex-wrap: wrap;
+
+      .video-stats {
+        @include flex-center;
+        gap: $spacing-sm;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+
+        .separator {
+          color: $text-muted;
+        }
+      }
+
+      .video-action-buttons {
+        @include flex-center;
+        gap: $spacing-sm;
+        flex-wrap: wrap;
+
+        .action-btn {
+          @include button-secondary;
+          @include flex-center;
+          gap: $spacing-sm;
+          padding: $spacing-sm $spacing-lg;
+          border-radius: $radius-full;
+
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+
+          &.like-btn.liked {
+            color: $accent-primary;
+            background: rgba($accent-primary, 0.1);
+
+            svg {
+              fill: $accent-primary;
+            }
+          }
+
+          &:hover {
+            background: $bg-hover;
+          }
+        }
+      }
+    }
+
+    // Channel Info
+    .channel-info {
+      @include flex-between;
+      padding: $spacing-lg;
+      background: $bg-card;
+      border-radius: $radius-lg;
+      margin-bottom: $spacing-lg;
+
+      @include respond(mobile) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $spacing-md;
+      }
+
+      .channel-details {
+        @include flex-center;
+        gap: $spacing-md;
+        cursor: pointer;
+        flex: 1;
+
+        .channel-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: $radius-full;
+          object-fit: cover;
+          flex-shrink: 0;
+        }
+
+        .channel-text {
+          @include flex-column;
+          gap: 2px;
+
+          .channel-name {
+            font-size: $font-size-base;
+            font-weight: $font-weight-semibold;
+            color: $text-primary;
+            transition: color $transition-base;
+          }
+
+          .subscriber-count {
+            font-size: $font-size-xs;
+            color: $text-secondary;
+          }
+        }
+
+        &:hover .channel-name {
+          color: $accent-primary;
+        }
+      }
+
+      .subscribe-btn {
+        @include button-primary;
+        padding: $spacing-sm $spacing-xl;
+        border-radius: $radius-full;
+        font-weight: $font-weight-semibold;
+
+        &.subscribed {
+          background: $bg-secondary;
+          color: $text-primary;
+
+          &:hover {
+            background: $bg-hover;
+          }
+        }
+
+        @include respond(mobile) {
+          width: 100%;
+        }
+      }
+    }
+
+    // Description
+    .video-description {
+      padding: $spacing-lg;
+      background: $bg-card;
+      border-radius: $radius-lg;
+      margin-bottom: $spacing-xl;
+
+      p {
+        color: $text-primary;
+        font-size: $font-size-sm;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        margin: 0;
+      }
+
+      &:not(.expanded) p {
+        @include truncate-lines(3);
+      }
+
+      .show-more-btn {
+        @include button-base;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+        margin-top: $spacing-md;
+        padding: $spacing-xs 0;
+
+        &:hover {
+          color: $text-primary;
+        }
+      }
+    }
+  }
 }

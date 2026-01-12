@@ -15,8 +15,12 @@
 @use "./pages/auth";
 @use "./pages/channel";
 @use "./pages/playlist";
+@use "./pages/history";
+@use "./pages/profile";
 
 /* components */
+@use "./components/navbar";
 @use "./components/comment";
 @use "./components/button";
-@use "./components/video-card"
+@use "./components/video-card";
+@use "./components/modal";

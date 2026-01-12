@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Login from "../pages/Login";
+import Register from "../pages/Register";
 import VideoDetail from "../pages/VideoDetail";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -12,6 +13,7 @@ import Channel from "./../pages/Channel/Channel";
 import Playlist from "../pages/Playlist/Playlist";
 import PlaylistDetail from "../pages/Playlist/PlaylistDetail";
 import History from "../pages/History";
+import MainLayout from "../layouts/MainLayout";
 
 const MainRoutes = () => {
   return (
@@ -26,62 +28,73 @@ const MainRoutes = () => {
       />
 
       <Route
-        path="/"
+        path="/register"
         element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
         }
       />
 
-      <Route
-        path="/watch/:id"
-        element={
-          <ProtectedRoute>
-            <VideoDetail />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/c/:username"
-        element={
-          <ProtectedRoute>
-            <Channel />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/playlists"
-        element={
-          <ProtectedRoute>
-            <Playlist />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/playlist/:playlistId"
-        element={
-          <ProtectedRoute>
-            <PlaylistDetail />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/history"
-        element={
-          <ProtectedRoute>
-            <History />
-          </ProtectedRoute>
-        }
-      />
+      <Route element={<MainLayout />}>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/watch/:id"
+          element={
+            <ProtectedRoute>
+              <VideoDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/c/:username"
+          element={
+            <ProtectedRoute>
+              <Channel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/playlists"
+          element={
+            <ProtectedRoute>
+              <Playlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/playlist/:playlistId"
+          element={
+            <ProtectedRoute>
+              <PlaylistDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
     </Routes>
   );
 };

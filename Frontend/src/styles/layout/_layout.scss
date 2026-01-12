@@ -1,0 +1,46 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background: $bg-primary;
+  }
+}
+
+// Container utilities
+.container {
+  width: 100%;
+  max-width: $max-content-width;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+
+  @include respond(mobile) {
+    padding: 0 $spacing-md;
+  }
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 $spacing-lg;
+
+  @include respond(mobile) {
+    padding: 0 $spacing-md;
+  }
+}
+
+// Section spacing
+.section {
+  padding: $spacing-2xl 0;
+
+  @include respond(mobile) {
+    padding: $spacing-xl 0;
+  }
+}

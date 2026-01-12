@@ -1,0 +1,185 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  @include flex-center;
+  z-index: $z-modal-backdrop;
+  animation: fadeIn $transition-fast;
+  padding: $spacing-md;
+
+  .modal-container {
+    background: $bg-secondary;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-xl;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp $transition-base;
+
+    .modal-header {
+      @include flex-between;
+      padding: $spacing-lg $spacing-xl;
+      border-bottom: 1px solid $border-color;
+
+      h2 {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-semibold;
+        color: $text-primary;
+      }
+
+      .close-btn {
+        @include flex-center;
+        width: 32px;
+        height: 32px;
+        border-radius: $radius-full;
+        color: $text-secondary;
+        transition: all $transition-base;
+
+        svg {
+          width: 24px;
+          height: 24px;
+        }
+
+        &:hover {
+          background: $bg-hover;
+          color: $text-primary;
+        }
+      }
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: $spacing-xl;
+
+      @include respond(mobile) {
+        padding: $spacing-lg;
+      }
+    }
+
+    .modal-footer {
+      @include flex-between;
+      padding: $spacing-lg $spacing-xl;
+      border-top: 1px solid $border-color;
+      gap: $spacing-md;
+
+      @include respond(mobile) {
+        flex-direction: column;
+      }
+
+      button {
+        @include button-base;
+        padding: $spacing-sm $spacing-xl;
+      }
+
+      .btn-cancel {
+        @include button-secondary;
+      }
+
+      .btn-primary {
+        @include button-primary;
+
+        @include respond(mobile) {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Save to Playlist Modal Specific Styles
+.save-to-playlist-modal {
+  .playlist-list {
+    @include flex-column;
+    gap: $spacing-sm;
+    max-height: 400px;
+    overflow-y: auto;
+
+    .playlist-item {
+      @include flex-between;
+      padding: $spacing-md;
+      background: $bg-hover;
+      border-radius: $radius-md;
+      cursor: pointer;
+      transition: all $transition-base;
+
+      &:hover {
+        background: $bg-secondary;
+      }
+
+      .playlist-info {
+        @include flex-center;
+        gap: $spacing-md;
+
+        input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+        }
+
+        .playlist-details {
+          @include flex-column;
+          gap: 2px;
+
+          .playlist-name {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            color: $text-primary;
+          }
+
+          .playlist-count {
+            font-size: $font-size-xs;
+            color: $text-secondary;
+          }
+        }
+      }
+    }
+  }
+
+  .create-playlist-section {
+    padding-top: $spacing-lg;
+    margin-top: $spacing-lg;
+    border-top: 1px solid $border-color;
+
+    .form-group {
+      @include flex-column;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-md;
+
+      label {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+      }
+
+      input {
+        @include input-field;
+        padding: $spacing-sm $spacing-md;
+      }
+    }
+
+    .create-btn {
+      @include button-primary;
+      width: 100%;
+    }
+  }
+}

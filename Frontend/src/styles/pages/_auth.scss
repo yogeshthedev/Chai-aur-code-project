@@ -1,47 +1,179 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .auth-page {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 20px;
-}
+  min-height: calc(100vh - $header-height);
+  @include flex-center;
+  padding: $spacing-xl $spacing-md;
+  background: linear-gradient(135deg, $bg-primary 0%, $bg-tertiary 100%);
 
-.auth-title {
-  text-align: center;
-  margin-bottom: 20px;
-}
+  .auth-container {
+    width: 100%;
+    max-width: 500px;
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  label {
-    font-size: 14px;
-    color: #aaa;
+    @include respond(mobile) {
+      max-width: 100%;
+    }
   }
 
-  input {
-    padding: 10px;
-    border-radius: 6px;
-    background: #1f1f1f;
-    color: white;
-    border: 1px solid #333;
+  .auth-card {
+    @include card;
+    padding: $spacing-xl;
+    
+    @include respond(mobile) {
+      padding: $spacing-lg;
+    }
   }
-}
 
-.auth-btn {
-  padding: 10px;
-  background: #ff0000;
-  color: white;
-  border-radius: 6px;
-}
+  .auth-title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    text-align: center;
+    margin-bottom: $spacing-sm;
+    color: $text-primary;
+    
+    @include respond(mobile) {
+      font-size: $font-size-2xl;
+    }
+  }
 
-.form-error {
-  color: red;
-  font-size: 14px;
+  .auth-subtitle {
+    text-align: center;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-xl;
+  }
+
+  .auth-form {
+    @include flex-column;
+    gap: $spacing-lg;
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: $spacing-md;
+      
+      @include respond(mobile) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      @include flex-column;
+      gap: $spacing-sm;
+
+      label {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+      }
+
+      input:not(.file-input) {
+        @include input-field;
+        padding: $spacing-md;
+        font-size: $font-size-sm;
+
+        &.error {
+          border-color: $error;
+        }
+
+        &:focus {
+          border-color: $accent-primary;
+        }
+      }
+
+      .file-input-wrapper {
+        position: relative;
+
+        .file-input {
+          position: absolute;
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .file-input-label {
+          @include flex-center;
+          gap: $spacing-sm;
+          padding: $spacing-md;
+          background: $bg-secondary;
+          border: 2px dashed $border-color;
+          border-radius: $radius-md;
+          color: $text-secondary;
+          cursor: pointer;
+          transition: all $transition-base;
+          font-size: $font-size-sm;
+
+          svg {
+            width: 20px;
+            height: 20px;
+          }
+
+          &:hover {
+            border-color: $accent-primary;
+            background: $bg-hover;
+            color: $text-primary;
+          }
+        }
+      }
+    }
+
+    .form-error {
+      color: $error;
+      font-size: $font-size-xs;
+      margin-top: -$spacing-sm;
+
+      &.global-error {
+        text-align: center;
+        padding: $spacing-md;
+        background: rgba($error, 0.1);
+        border-radius: $radius-md;
+        border: 1px solid rgba($error, 0.3);
+        margin-top: 0;
+      }
+    }
+
+    .auth-btn {
+      @include button-primary;
+      @include flex-center;
+      gap: $spacing-sm;
+      width: 100%;
+      padding: $spacing-md;
+      font-size: $font-size-base;
+      font-weight: $font-weight-semibold;
+      margin-top: $spacing-md;
+
+      .spinner {
+        @include spinner(16px, 2px);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .auth-footer {
+    margin-top: $spacing-xl;
+    text-align: center;
+    padding-top: $spacing-lg;
+    border-top: 1px solid $border-color;
+
+    p {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+    }
+
+    .auth-link {
+      color: $accent-primary;
+      font-weight: $font-weight-medium;
+      transition: color $transition-base;
+
+      &:hover {
+        color: $accent-light;
+        text-decoration: underline;
+      }
+    }
+  }
 }
