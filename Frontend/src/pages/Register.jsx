@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '../features/auth/authThunks';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading, error } = useSelector((state) => state.auth);
+  const {  loading, error } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -92,14 +92,17 @@ const Register = () => {
       data.append('coverImage', coverImage);
     }
 
-    dispatch(registerUser(data));
+dispatch(registerUser(data))
+    .unwrap()
+    .then(() => {
+      navigate('/login'); // ✅ redirect here
+    })
+    .catch(() => {
+      // error already handled by redux
+    });
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
+ 
 
   return (
     <div className="auth-page">

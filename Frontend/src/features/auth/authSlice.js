@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { currentUser, loginUser, registerUser } from "./authThunks.js";
+import {
+  currentUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+} from "./authThunks.js";
 
 const initialState = {
   user: null,
@@ -13,15 +18,7 @@ const initialState = {
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {
-    logoutUser: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.loading = false;
-      state.error = null;
-      state.success = "Logout successful";
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
@@ -29,12 +26,18 @@ const authSlice = createSlice({
         state.error = null;
         state.success = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user ?? action.payload;
+
+        // ❌ DO NOT authenticate user on register
+        state.isAuthenticated = false;
+
+        // optional: you may or may not store user
+        state.user = null;
+
         state.success = "Registration successful!";
       })
+
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? action.error?.message;
@@ -77,6 +80,25 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.authChecked = true; // ✅ done checking (failed)
+      });
+
+    builder
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+        state.authChecked = true; // ✅ VERY IMPORTANT
+        state.success = "Logout successful";
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+        state.authChecked = true;
+        state.error = action.payload ?? action.error?.message;
       });
   },
 });

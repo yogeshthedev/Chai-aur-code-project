@@ -145,6 +145,31 @@ const getVideoById = asyncHandler(async (req, res) => {
     ).populate("owner", "fullname avatar");
   }
 
+
+   await User.findByIdAndUpdate(req.user._id, [
+    {
+      $set: {
+        watchHistory: {
+          $slice: [
+            {
+              $concatArrays: [
+                [video._id],
+                {
+                  $filter: {
+                    input: "$watchHistory",
+                    as: "vid",
+                    cond: { $ne: ["$$vid", video._id] },
+                  },
+                },
+              ],
+            },
+            50,
+          ],
+        },
+      },
+    },
+  ]);
+
   const likeCount = await Like.countDocuments({ video: videoId });
 
   let isLiked = false;
@@ -169,22 +194,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     isSubscribed = Boolean(subscribed);
   }
 
-if (userId && !isOwner) {
-  await User.findByIdAndUpdate(
-    userId,
-    {
-      $pull: { watchHistory: videoId },
-      $push: {
-        watchHistory: {
-          $each: [videoId],
-          $position: 0,
-          $slice: 50,
-        },
-      },
-    },
-    { new: true }
-  );
-}
+
 
 
   const videoResponse = {
