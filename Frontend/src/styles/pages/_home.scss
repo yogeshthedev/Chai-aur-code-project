@@ -10,39 +10,6 @@
     padding: $spacing-md;
   }
 
-  .page-header {
-    margin-bottom: $spacing-xl;
-
-    .page-title {
-      font-size: $font-size-2xl;
-      font-weight: $font-weight-bold;
-      margin-bottom: $spacing-lg;
-      color: $text-primary;
-    }
-
-    .page-filters {
-      display: flex;
-      gap: $spacing-sm;
-      overflow-x: auto;
-      padding-bottom: $spacing-sm;
-      
-      &::-webkit-scrollbar {
-        height: 4px;
-      }
-
-      .filter-btn {
-        @include button-secondary;
-        white-space: nowrap;
-        padding: $spacing-sm $spacing-lg;
-        font-size: $font-size-sm;
-
-        &.active {
-          background: $text-primary;
-          color: $bg-primary;
-        }
-      }
-    }
-  }
 
   .video-grid {
     display: grid;

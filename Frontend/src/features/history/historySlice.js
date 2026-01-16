@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getWatchHistory } from "./historyThunks";
+import { deleteAllHistory, getWatchHistory } from "./historyThunks";
 
 const initialState = {
   videos: [],
@@ -30,7 +30,20 @@ const historySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-      
+
+    builder
+      .addCase(deleteAllHistory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAllHistory.fulfilled, (state) => {
+        state.loading = false;
+        state.videos = [];
+      })
+      .addCase(deleteAllHistory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
   },
 });
 

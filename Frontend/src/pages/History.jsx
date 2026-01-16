@@ -1,6 +1,9 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getWatchHistory } from "../features/history/historyThunks";
+import {
+  deleteAllHistory,
+  getWatchHistory,
+} from "../features/history/historyThunks";
 import VideoCard from "../components/VideoCard";
 
 const History = () => {
@@ -13,7 +16,7 @@ const History = () => {
 
   const handleClearHistory = () => {
     if (window.confirm("Are you sure you want to clear your watch history?")) {
-      // Dispatch clear history action
+      dispatch(deleteAllHistory());
     }
   };
 

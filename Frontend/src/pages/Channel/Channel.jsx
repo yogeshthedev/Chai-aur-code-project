@@ -10,6 +10,8 @@ import ChannelBanner from "./ChannelBanner";
 import ChannelHeader from "./ChannelHeader";
 import ChannelTabs from "./ChannelTabs";
 import ChannelVideos from "./ChannelVideos";
+import CommunityTab from "./CommunityTab";
+import PlaylistTab from "./PlaylistTab";
 
 const Channel = () => {
   const { channelId } = useParams();
@@ -69,12 +71,19 @@ const Channel = () => {
 
         <div className="channel-content">
           {activeTab === "videos" && <ChannelVideos videos={videos} />}
+          {activeTab === "community" && (
+            <CommunityTab channelUserId={profile._id} />
+          )}
+          {activeTab === "playlists" && (
+            <PlaylistTab channelUserId={profile._id} />
+          )}
+
           {activeTab === "home" && (
             <div className="coming-soon">
               <p>Home content coming soon</p>
             </div>
           )}
-          {activeTab !== "videos" && activeTab !== "home" && (
+          {activeTab !== "videos" && activeTab !== "home" && activeTab !== "community" && activeTab !== "playlists" && (
             <div className="coming-soon">
               <p>This section is coming soon</p>
             </div>

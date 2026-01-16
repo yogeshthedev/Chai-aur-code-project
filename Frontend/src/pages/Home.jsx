@@ -55,16 +55,6 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      <div className="page-header">
-        <h1 className="page-title">Recommended Videos</h1>
-        <div className="page-filters">
-          <button className="filter-btn active">All</button>
-          <button className="filter-btn">Gaming</button>
-          <button className="filter-btn">Music</button>
-          <button className="filter-btn">Education</button>
-          <button className="filter-btn">Entertainment</button>
-        </div>
-      </div>
 
       <div className="video-grid">
         {videos.map((video) => (
