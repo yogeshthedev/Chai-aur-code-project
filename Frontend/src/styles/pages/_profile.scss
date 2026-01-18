@@ -1,240 +1,179 @@
-@use '../base/variables' as *;
-@use '../base/mixins' as *;
+@use "../base/_variables.scss" as *;
+@use "../base/mixins.scss" as *;
+
 
 .profile-page {
-  max-width: 1200px;
+  padding: $spacing-lg;
+  max-width: $max-content-width;
   margin: 0 auto;
+}
 
-  .profile-header {
-    background: $bg-card;
-    border-radius: 0 0 $radius-xl $radius-xl;
-    overflow: hidden;
-    margin-bottom: $spacing-xl;
+/* ================= HEADER ================= */
+.profile-header {
+  background: $bg-tertiary;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  margin-bottom: $spacing-lg;
+}
 
-    .cover-image {
-      width: 100%;
-      height: 200px;
-      background: linear-gradient(135deg, $bg-secondary 0%, $bg-hover 100%);
-      overflow: hidden;
+.cover-image {
+  height: 220px;
+  background: $bg-secondary;
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
 
-      @include respond(mobile) {
-        height: 120px;
-      }
-    }
+.profile-info {
+  @include flex-between;
+  gap: $spacing-lg;
+  padding: $spacing-lg;
 
-    .profile-info {
-      padding: 0 $spacing-xl $spacing-xl;
-      position: relative;
+  @include respond(mobile) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 
-      @include respond(mobile) {
-        padding: 0 $spacing-md $spacing-md;
-      }
+/* ================= AVATAR ================= */
+.avatar-section {
+  flex-shrink: 0;
 
-      .avatar-section {
-        margin-top: -60px;
-        margin-bottom: $spacing-lg;
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: $radius-full;
+    object-fit: cover;
+    border: 3px solid $bg-tertiary;
+  }
+}
 
-        .profile-avatar {
-          width: 120px;
-          height: 120px;
-          border-radius: $radius-full;
-          border: 4px solid $bg-primary;
-          object-fit: cover;
-          box-shadow: $shadow-lg;
+/* ================= USER DETAILS ================= */
+.user-details {
+  flex: 1;
 
-          @include respond(mobile) {
-            width: 80px;
-            height: 80px;
-            margin-top: -40px;
-          }
-        }
-      }
-
-      .user-details {
-        margin-bottom: $spacing-lg;
-
-        .username {
-          font-size: $font-size-2xl;
-          font-weight: $font-weight-bold;
-          margin-bottom: $spacing-xs;
-          color: $text-primary;
-
-          @include respond(mobile) {
-            font-size: $font-size-xl;
-          }
-        }
-
-        .user-handle {
-          font-size: $font-size-sm;
-          color: $text-secondary;
-          margin-bottom: $spacing-lg;
-        }
-
-        .user-stats {
-          display: flex;
-          gap: $spacing-xl;
-
-          .stat-item {
-            @include flex-column;
-            gap: $spacing-xs;
-
-            .stat-value {
-              font-size: $font-size-xl;
-              font-weight: $font-weight-bold;
-              color: $text-primary;
-            }
-
-            .stat-label {
-              font-size: $font-size-xs;
-              color: $text-secondary;
-              text-transform: uppercase;
-            }
-          }
-        }
-      }
-
-      .profile-actions {
-        @include flex-center;
-        gap: $spacing-md;
-
-        @include respond(mobile) {
-          flex-direction: column;
-          width: 100%;
-        }
-
-        .btn-channel,
-        .btn-edit {
-          @include button-base;
-          @include flex-center;
-          gap: $spacing-sm;
-          padding: $spacing-sm $spacing-xl;
-
-          svg {
-            width: 18px;
-            height: 18px;
-          }
-
-          @include respond(mobile) {
-            width: 100%;
-          }
-        }
-
-        .btn-channel {
-          @include button-primary;
-        }
-
-        .btn-edit {
-          @include button-outline;
-        }
-      }
-    }
+  .username {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
   }
 
-  .profile-tabs {
-    @include flex-center;
-    gap: $spacing-sm;
-    padding: 0 $spacing-lg;
-    margin-bottom: $spacing-xl;
-    border-bottom: 1px solid $border-color;
+  .user-handle {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-top: $spacing-xs;
+  }
 
-    @include respond(mobile) {
-      padding: 0 $spacing-md;
-    }
+  .user-stats {
+    display: flex;
+    gap: $spacing-lg;
+    margin-top: $spacing-md;
 
-    .tab-btn {
-      padding: $spacing-md $spacing-xl;
-      background: transparent;
-      color: $text-secondary;
-      font-size: $font-size-sm;
-      font-weight: $font-weight-medium;
-      border-bottom: 2px solid transparent;
-      transition: all $transition-base;
+    .stat-item {
+      @include flex-column;
 
-      &:hover {
-        color: $text-primary;
+      .stat-value {
+        font-weight: $font-weight-semibold;
+        font-size: $font-size-lg;
       }
 
-      &.active {
-        color: $accent-primary;
-        border-bottom-color: $accent-primary;
-      }
-
-      @include respond(mobile) {
-        padding: $spacing-sm $spacing-lg;
+      .stat-label {
         font-size: $font-size-xs;
+        color: $text-muted;
       }
     }
   }
+}
 
-  .profile-content {
-    padding: 0 $spacing-lg $spacing-xl;
+/* ================= ACTIONS ================= */
+.profile-actions {
+  display: flex;
+  gap: $spacing-sm;
 
-    @include respond(mobile) {
-      padding: 0 $spacing-md $spacing-md;
-    }
+  .btn-channel {
+    @include button-secondary;
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    text-decoration: none;
+  }
 
-    .overview-section,
-    .settings-section {
-      .info-card {
-        background: $bg-card;
-        border-radius: $radius-lg;
-        padding: $spacing-xl;
-        margin-bottom: $spacing-lg;
+  .btn-edit {
+    @include button-outline;
+  }
+}
 
-        h3 {
-          font-size: $font-size-lg;
-          font-weight: $font-weight-semibold;
-          margin-bottom: $spacing-lg;
-          color: $text-primary;
-        }
+/* ================= TABS ================= */
+.profile-tabs {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+  border-bottom: 1px solid $divider;
 
-        .info-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: $spacing-lg;
+  .tab-btn {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
 
-          .info-item {
-            @include flex-column;
-            gap: $spacing-xs;
+    &.active {
+      color: $text-primary;
+      font-weight: $font-weight-medium;
 
-            .info-label {
-              font-size: $font-size-xs;
-              color: $text-secondary;
-              text-transform: uppercase;
-              font-weight: $font-weight-medium;
-            }
-
-            .info-value {
-              font-size: $font-size-sm;
-              color: $text-primary;
-            }
-          }
-        }
-      }
-
-      .coming-soon {
-        color: $text-secondary;
-        text-align: center;
-        padding: $spacing-xl;
+      &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 100%;
+        height: 2px;
+        background: $accent-primary;
       }
     }
   }
+}
 
-  .empty-state {
-    @include flex-center;
-    @include flex-column;
-    min-height: 60vh;
-    text-align: center;
+/* ================= CONTENT ================= */
+.profile-content {
+  .info-card {
+    @include card;
 
     h3 {
-      font-size: $font-size-xl;
-      color: $text-primary;
+      margin-bottom: $spacing-md;
     }
   }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+
+    @include respond(mobile) {
+      grid-template-columns: 1fr;
+    }
+
+    .info-item {
+      @include flex-column;
+
+      .info-label {
+        font-size: $font-size-xs;
+        color: $text-muted;
+      }
+
+      .info-value {
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}
+
+.coming-soon {
+  color: $text-muted;
+  font-size: $font-size-sm;
 }

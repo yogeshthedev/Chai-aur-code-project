@@ -67,3 +67,27 @@ export const logoutUser = createAsyncThunk(
     }
   }
 );
+
+export const updateAccountDetails = createAsyncThunk(
+  "auth/updateAccount",
+  async (data, thunkAPI) => {
+    const res = await api.patch("/users/update-account", data);
+    return res.data.data;
+  }
+);
+
+export const updateUserAvatar = createAsyncThunk(
+  "auth/updateAvatar",
+  async (formData, thunkAPI) => {
+    const res = await api.patch("/users/avatar", formData);
+    return res.data.data;
+  }
+);
+
+export const updateUserCoverImage = createAsyncThunk(
+  "auth/updateCover",
+  async (formData, thunkAPI) => {
+    const res = await api.patch("/users/cover-image", formData);
+    return res.data.data;
+  }
+);

@@ -4,6 +4,9 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
 } from "./authThunks.js";
 
 const initialState = {
@@ -100,6 +103,21 @@ const authSlice = createSlice({
         state.authChecked = true;
         state.error = action.payload ?? action.error?.message;
       });
+
+builder
+.addCase(updateAccountDetails.fulfilled, (state, action) => {
+  state.user = { ...state.user, ...action.payload };
+})
+builder
+.addCase(updateUserAvatar.fulfilled, (state, action) => {
+  state.user.avatar = action.payload.avatar;
+})
+builder
+.addCase(updateUserCoverImage.fulfilled, (state, action) => {
+  state.user.coverImage = action.payload.coverImage;
+});
+
+
   },
 });
 
