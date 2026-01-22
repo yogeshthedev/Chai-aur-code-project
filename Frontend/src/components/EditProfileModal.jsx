@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { updateAccountDetails, updateUserAvatar, updateUserCoverImage } from "../features/auth/authThunks";
-
+import {
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage,
+} from "../features/auth/authThunks";
 
 const EditProfileModal = ({ user, onClose }) => {
   const dispatch = useDispatch();
@@ -16,19 +19,14 @@ const EditProfileModal = ({ user, onClose }) => {
     setLoading(true);
 
     try {
-      // 1️⃣ Update text fields
-      await dispatch(
-        updateAccountDetails({ fullName, email })
-      ).unwrap();
+      await dispatch(updateAccountDetails({ fullName, email })).unwrap();
 
-      // 2️⃣ Update avatar (if selected)
       if (avatar) {
         const avatarData = new FormData();
         avatarData.append("avatar", avatar);
         await dispatch(updateUserAvatar(avatarData)).unwrap();
       }
 
-      // 3️⃣ Update cover image (if selected)
       if (coverImage) {
         const coverData = new FormData();
         coverData.append("coverImage", coverImage);
@@ -58,10 +56,7 @@ const EditProfileModal = ({ user, onClose }) => {
 
         <div className="form-group">
           <label>Email</label>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <input value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
 
         <div className="form-group">
@@ -71,7 +66,10 @@ const EditProfileModal = ({ user, onClose }) => {
 
         <div className="form-group">
           <label>Cover Image</label>
-          <input type="file" onChange={(e) => setCoverImage(e.target.files[0])} />
+          <input
+            type="file"
+            onChange={(e) => setCoverImage(e.target.files[0])}
+          />
         </div>
 
         <div className="modal-actions">

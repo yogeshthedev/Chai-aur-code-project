@@ -5,7 +5,6 @@ import EditProfileModal from "../components/EditProfileModal";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
-  const [activeTab, setActiveTab] = useState("overview");
   const [showEditModal, setShowEditModal] = useState(false);
 
   if (!user) {
@@ -69,60 +68,34 @@ const Profile = () => {
         <EditProfileModal user={user} onClose={() => setShowEditModal(false)} />
       )}
 
-      <div className="profile-tabs">
-        <button
-          className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
-          onClick={() => setActiveTab("overview")}
-        >
-          Overview
-        </button>
-        <button
-          className={`tab-btn ${activeTab === "settings" ? "active" : ""}`}
-          onClick={() => setActiveTab("settings")}
-        >
-          Settings
-        </button>
-      </div>
-
       <div className="profile-content">
-        {activeTab === "overview" && (
-          <div className="overview-section">
-            <div className="info-card">
-              <h3>Account Information</h3>
-              <div className="info-grid">
-                <div className="info-item">
-                  <span className="info-label">Email</span>
-                  <span className="info-value">{user.email}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Username</span>
-                  <span className="info-value">@{user.username}</span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Full Name</span>
-                  <span className="info-value">
-                    {user.fullName || "Not set"}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <span className="info-label">Joined</span>
-                  <span className="info-value">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toLocaleDateString()
-                      : "Unknown"}
-                  </span>
-                </div>
+        <div className="overview-section">
+          <div className="info-card">
+            <h3>Account Information</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <span className="info-label">Email</span>
+                <span className="info-value">{user.email}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Username</span>
+                <span className="info-value">@{user.username}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Full Name</span>
+                <span className="info-value">{user.fullName || "Not set"}</span>
+              </div>
+              <div className="info-item">
+                <span className="info-label">Joined</span>
+                <span className="info-value">
+                  {user.createdAt
+                    ? new Date(user.createdAt).toLocaleDateString()
+                    : "Unknown"}
+                </span>
               </div>
             </div>
           </div>
-        )}
-
-        {activeTab === "settings" && (
-          <div className="settings-section">
-            <h3>Settings</h3>
-            <p className="coming-soon">Settings panel coming soon...</p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
