@@ -42,6 +42,6 @@ const videoSchema = new Schema(
     }
 )
 
-videoSchema.plugin(mongooseAggregatePaginate)
+videoSchema.plugin(mongooseAggregatePaginate) // why we use this because we want to use aggregate pagination for videos, so we can get videos in a paginated way
 
 export const Video = mongoose.model("Video", videoSchema)

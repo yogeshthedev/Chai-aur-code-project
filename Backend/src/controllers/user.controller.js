@@ -144,10 +144,12 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
+
   const options = {
     httpOnly: true,
     secure: true,
   };
+
 
   return res
     .status(200)
@@ -170,14 +172,17 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $unset: {
-        refreshToken: 1, // this removes the field from document
+     
+      $unset: {   
+        refreshToken: 1, 
       },
     },
     {
+     
       new: true,
     }
   );
+
 
   const options = {
     httpOnly: true,
@@ -220,7 +225,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefereshTokens(user._id);
 
     return res
@@ -230,7 +235,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken: newRefreshToken },
+          { accessToken, refreshToken },
           "Access token refreshed"
         )
       );
@@ -295,6 +300,13 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   //TODO: delete old image - assignment
 
+  fs.unlink(avatarLocalPath, (err) => {
+    if (err) {
+      console.error("Error deleting local avatar file:", err);
+    }
+  });
+
+
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   if (!avatar.url) {
@@ -324,12 +336,20 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   }
 
   //TODO: delete old image - assignment
+  fs.unlink(coverImageLocalPath, (err) => {
+    if (err) {
+      console.error("Error deleting local cover image file:", err);
+    }
+  });
+
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!coverImage.url) {
     throw new ApiError(400, "Error while uploading on avatar");
   }
+
+
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -355,12 +375,12 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
 
   const channel = await User.aggregate([
     {
-      $match: {
+      $match: {   // Match the user by username (case-insensitive)
         username: username?.toLowerCase(),
       },
     },
     {
-      $lookup: {
+      $lookup: {   // Lookup the subscribers
         from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
@@ -368,7 +388,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
     {
-      $lookup: {
+      $lookup: { // Lookup the channels the user has subscribed to
         from: "subscriptions",
         localField: "_id",
         foreignField: "subscriber",
@@ -380,12 +400,14 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         subscribersCount: {
           $size: "$subscribers",
         },
+
         channelsSubscribedToCount: {
           $size: "$subscribedTo",
         },
+
         isSubscribed: {
           $cond: {
-            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] }, // $ in indicate feild and $in is used to check if the user is subscribed to the channel
             then: true,
             else: false,
           },
@@ -393,7 +415,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
     {
-      $project: {
+      $project: {  // project means which fields to include in the final output .
         fullName: 1,
         username: 1,
         subscribersCount: 1,
@@ -405,10 +427,13 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  console.log(channel)
 
   if (!channel?.length) {
     throw new ApiError(404, "channel does not exists");
   }
+
+  // channel[0] is used to access the first element of the channel array, which contains the user channel profile information. The response is then sent back to the client with a status code of 200 and a success message.
 
   return res
     .status(200)
@@ -430,6 +455,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         localField: "watchHistory",
         foreignField: "_id",
         as: "watchHistory",
+
         pipeline: [
           {
             $lookup: {
@@ -451,7 +477,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
           {
             $addFields: {
               owner: {
-                $first: "$owner",
+                $first: "$owner", // Get the first element of the owner array 
               },
             },
           },

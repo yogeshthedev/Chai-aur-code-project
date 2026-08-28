@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose";
+import { isValidObjectId } from "mongoose";
 import { Like } from "../models/like.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -9,10 +9,9 @@ import { Tweet } from "./../models/tweet.model.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  //TODO: toggle like on video
 
   if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "Invalid Video ID");
+    throw new ApiError(400, "Invalid video id");
   }
 
   const video = await Video.findById(videoId);
@@ -21,14 +20,12 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
 
-  const existingLike = await Like.findOne({
+  const existingLike = await Like.findOneAndDelete({
     likedBy: req.user._id,
     video: videoId,
   });
 
   if (existingLike) {
-    await Like.findByIdAndDelete(existingLike._id);
-
     return res.status(200).json(new ApiResponse(200, null, "Video unliked"));
   }
 
@@ -44,7 +41,7 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
 
   if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "Invalid Comment ID");
+    throw new ApiError(400, "Invalid comment id");
   }
 
   const comment = await Comment.findById(commentId);
@@ -52,21 +49,17 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Comment not found");
   }
 
-  // 🔹 Check if user already liked this comment
-  const existingLike = await Like.findOne({
+  const existingLike = await Like.findOneAndDelete({
     comment: commentId,
     likedBy: req.user._id,
   });
 
-  // 🔹 Unlike
   if (existingLike) {
-    await Like.findByIdAndDelete(existingLike._id);
     return res
       .status(200)
       .json(new ApiResponse(200, null, "Comment unliked"));
   }
 
-  // 🔹 Like
   await Like.create({
     comment: commentId,
     likedBy: req.user._id,
@@ -80,10 +73,9 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
   const { tweetId } = req.params;
-  //TODO: toggle like on tweet
 
   if (!isValidObjectId(tweetId)) {
-    throw new ApiError(400, "Invalid TweetID");
+    throw new ApiError(400, "Invalid tweet id");
   }
 
   const tweet = await Tweet.findById(tweetId);
@@ -92,13 +84,12 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Tweet not exist");
   }
 
-  const isTweetLiked = await Like.findOne({
+  const isTweetLiked = await Like.findOneAndDelete({
     likedBy: req.user._id,
     tweet: tweetId,
   });
 
   if (isTweetLiked) {
-    await Like.findByIdAndDelete(isTweetLiked._id);
     return res.status(200).json(new ApiResponse(200, null, "Tweet unliked"));
   }
   await Like.create({
@@ -109,12 +100,11 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  //TODO: get all liked videos
   const userId = req.user._id;
 
   const likes = await Like.find({
     likedBy: userId,
-    video: { $exists: true },
+    video: { $exists: true, $ne: null }, // $ne is used to exclude null values, $exists is used to check if the field exists
   })
     .populate({
       path: "video",
@@ -125,14 +115,14 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     })
     .sort({ createdAt: -1 });
 
-  const validLikes = likes.filter((like) => like.video !== null);
-
-  const likedVideo = validLikes.map((like) => like.video);
+  const likedVideos = likes
+    .filter((like) => like.video)
+    .map((like) => like.video);
 
   return res
     .status(200)
     .json(
-      new ApiResponse(200, likedVideo, "Liked videos fetched successfully")
+      new ApiResponse(200, likedVideos, "Liked videos fetched successfully")
     );
 });
 

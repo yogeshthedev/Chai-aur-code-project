@@ -22,15 +22,117 @@ const getVideoComments = asyncHandler(async (req, res) => {
   page = Number(page);
   limit = Number(limit);
 
+  if (!Number.isInteger(page) || page < 1) {
+    throw new ApiError(400, "Page must be a positive integer");
+  }
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new ApiError(400, "Limit must be between 1 and 100");
+  }
+
   const skip = (page - 1) * limit;
 
-  const comments = await Comment.find({ video: videoId })
-    .populate("owner", "username avatar")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+  const videoObjectId = new mongoose.Types.ObjectId(videoId);
+  const currentUserId = new mongoose.Types.ObjectId(req.user._id);
 
-  const totalComments = await Comment.countDocuments({ video: videoId });
+  const comments = await Comment.aggregate([
+    {
+      $match: { // find this video's comments
+        video: videoObjectId,
+      },
+    },
+    {
+      $sort: { // newest first
+        createdAt: -1,
+      },
+    },
+    { // pagination
+      $skip: skip,
+    },
+    {
+      $limit: limit,
+    },
+    { // populate owner
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    {
+      $unwind: "$owner", // convert the owner array to an object
+    },
+    { // find likes for each comment
+      $lookup: {
+        from: "likes",
+        let: {
+          commentId: "$_id",
+        },
+        pipeline: [ // find likes for this comment
+          {
+            $match: {
+              $expr: {
+                $eq: ["$comment", "$$commentId"],
+              },
+            },
+          },
+          {
+            $group: { // count likes and check current user
+              _id: null,
+              likeCount: {
+                $sum: 1,
+              },
+              likedByCurrentUser: {
+                $max: {
+                  $cond: [
+                    { $eq: ["$likedBy", currentUserId] },
+                    1,
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ],
+        as: "likeStats",
+      },
+    },
+    {
+      $project: { // return clean data
+        content: 1,
+        video: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        owner: {
+          _id: 1,
+          username: 1,
+          avatar: 1,
+        },
+        likeCount: { // if likeStats is empty, return 0
+          $ifNull: [
+            { $arrayElemAt: ["$likeStats.likeCount", 0] },
+            0,
+          ],
+        },
+        isLiked: { // if likeStats is empty, return false
+          $eq: [
+            {
+              $ifNull: [
+                { $arrayElemAt: ["$likeStats.likedByCurrentUser", 0] },
+                0,
+              ],
+            },
+            1,
+          ],
+        },
+      },
+    },
+  ]);
+
+  const totalComments = await Comment.countDocuments({
+    video: videoObjectId,
+  });
 
 
   return res.status(200).json(
@@ -55,7 +157,7 @@ const addComment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid video id");
   }
 
-  if (!content || !content.trim()) {
+  if (typeof content !== "string" || !content.trim()) {
     throw new ApiError(400, "Comment content is required");
   }
 
@@ -77,7 +179,7 @@ const addComment = asyncHandler(async (req, res) => {
 
 
   const commentResponse = {
-    ...populatedComment.toObject(),
+    ...populatedComment.toObject(), // why we use toObject() here? because we want to convert the mongoose document to a plain javascript object so that we can add new fields to it
     likeCount: 0,
     isLiked: false,
   };
@@ -89,16 +191,14 @@ const addComment = asyncHandler(async (req, res) => {
 
 
 const updateComment = asyncHandler(async (req, res) => {
-  // TODO: update a comment
   const { commentId } = req.params;
   const { content } = req.body;
-  console.log(content);
 
   if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "Invalid video id");
+    throw new ApiError(400, "Invalid comment id");
   }
 
-  if (!content || !content.trim()) {
+  if (typeof content !== "string" || !content.trim()) {
     throw new ApiError(400, "Comment content is required");
   }
 
@@ -115,7 +215,20 @@ const updateComment = asyncHandler(async (req, res) => {
   comment.content = content.trim();
   await comment.save();
 
-  const updatedComment = await comment.populate("owner", "username avatar");
+  const populatedComment = await comment.populate("owner", "username avatar");
+  const likeCount = await Like.countDocuments({ comment: comment._id });
+  const isLiked = Boolean(
+    await Like.exists({
+      comment: comment._id,
+      likedBy: req.user._id,
+    })
+  );
+
+  const updatedComment = {
+    ...populatedComment.toObject(),
+    likeCount,
+    isLiked,
+  };
 
   return res
     .status(200)
@@ -123,12 +236,10 @@ const updateComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
-  // TODO: delete a comment
-
   const { commentId } = req.params;
 
   if (!isValidObjectId(commentId)) {
-    throw new ApiError(400, "Invalid video id");
+    throw new ApiError(400, "Invalid comment id");
   }
 
   const comment = await Comment.findById(commentId);
@@ -144,7 +255,7 @@ const deleteComment = asyncHandler(async (req, res) => {
   await comment.deleteOne();
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Comment delete successfully"));
+    .json(new ApiResponse(200, null, "Comment deleted successfully"));
 });
 
 export { getVideoComments, addComment, updateComment, deleteComment };

@@ -62,6 +62,8 @@ userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+// jwt is a bearer token that is used to authenticate the user. It is generated using the user's id, email, username, and full name. The token is signed using the ACCESS_TOKEN_SECRET and expires in ACCESS_TOKEN_EXPIRY.
+
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
@@ -72,7 +74,7 @@ userSchema.methods.generateAccessToken = function () {
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY, 
     }
   );
 };

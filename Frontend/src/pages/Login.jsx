@@ -1,85 +1,104 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../features/auth/authThunks";
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Play, Mail, Lock, User } from "lucide-react";
+import Input from "../components/Input";
+
+import Button from "../components/Button";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Login = () => {
-  const dispatch = useDispatch();
+  const { login, isSubmitting } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
-  const { isAuthenticated, loading, error } = useSelector(
-    (state) => state.auth
-  );
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      identifier: "", // Can be email or username
+      password: "",
+    },
+  });
 
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const onSubmit = async (data) => {
+    const isEmail = data.identifier.includes("@");
+    const payload = isEmail
+      ? { email: data.identifier, password: data.password }
+      : { username: data.identifier, password: data.password };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    dispatch(loginUser({ identifier, password }));
+    const result = await login(payload);
+    if (result.success) {
+      navigate(from, { replace: true });
+    }
   };
 
-  useEffect(() => {
-   if(isAuthenticated){
-    navigate("/")
-   }
-  }, [isAuthenticated, navigate]);
-
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-card">
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to continue to VideoTube</p>
-
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="identifier">Email or Username</label>
-              <input
-                id="identifier"
-                type="text"
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Enter email or username"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                required
-              />
-            </div>
-
-            {error && <p className="form-error global-error">{error}</p>}
-
-            <button type="submit" disabled={loading} className="auth-btn">
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          <div className="auth-footer">
-            <p>
-              Don't have an account?{' '}
-              <Link to="/register" className="auth-link">
-                Create one
-              </Link>
-            </p>
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-zinc-950 text-white">
+      <div className="w-full max-w-md p-8 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl space-y-6">
+        {/* Brand Logo */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-600/10 text-red-500 mb-2 border border-red-500/20">
+            <Play className="w-6 h-6 fill-current" />
           </div>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome Back</h1>
+          <p className="text-xs text-zinc-400">
+            Sign in to your account to upload and explore videos
+          </p>
+        </div>
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <Input
+            label="Email or Username"
+            placeholder="Enter your email or @username"
+            icon={User}
+            required
+            error={errors.identifier?.message}
+            {...register("identifier", {
+              required: "Email or username is required",
+            })}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            placeholder="••••••••"
+            icon={Lock}
+            required
+            error={errors.password?.message}
+            {...register("password", {
+              required: "Password is required",
+              minLength: {
+                value: 6,
+                message: "Password must be at least 6 characters",
+              },
+            })}
+          />
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="w-full mt-2"
+            isLoading={isSubmitting}
+          >
+            Sign In
+          </Button>
+        </form>
+
+        {/* Footer Link */}
+        <div className="text-center text-xs text-zinc-400">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            className="text-red-400 font-semibold hover:underline"
+          >
+            Create account
+          </Link>
         </div>
       </div>
     </div>
