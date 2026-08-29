@@ -63,9 +63,15 @@ export const updateAccountDetailsApi = async (data) => {
 export const updateAvatarApi = async (avatarFile) => {
   const formData = new FormData();
   formData.append("avatar", avatarFile);
-  const response = await axiosInstance.patch(USER_ENDPOINTS.UPDATE_AVATAR, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await axiosInstance.patch(
+    USER_ENDPOINTS.UPDATE_AVATAR,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return response.data;
 };
 
@@ -75,8 +81,14 @@ export const updateAvatarApi = async (avatarFile) => {
 export const updateCoverImageApi = async (coverImageFile) => {
   const formData = new FormData();
   formData.append("coverImage", coverImageFile);
-  const response = await axiosInstance.patch(USER_ENDPOINTS.UPDATE_COVER_IMAGE, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const response = await axiosInstance.patch(
+    USER_ENDPOINTS.UPDATE_COVER_IMAGE,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
   return response.data;
 };

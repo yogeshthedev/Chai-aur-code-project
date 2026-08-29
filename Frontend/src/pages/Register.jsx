@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, Mail, Lock, User, AtSign, Camera, Image } from "lucide-react";
+import { Play, Mail, Lock, User, AtSign, Camera, Image as ImageIcon } from "lucide-react";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { useAuthStore } from "../store/useAuthStore";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 const Register = () => {
   const { register: registerUser, isSubmitting } = useAuthStore();
@@ -62,27 +63,34 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-zinc-950 text-white">
-      <div className="w-full max-w-lg p-8 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl space-y-6">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-(--bg-primary) text-(--text-primary) relative">
+      {/* Absolute top right theme toggle */}
+      <div className="absolute top-5 right-5">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-lg p-8 sm:p-10 bg-white dark:bg-zinc-900/90 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-xl shadow-zinc-200/40 dark:shadow-none space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-600/10 text-red-500 mb-2 border border-red-500/20">
-            <Play className="w-6 h-6 fill-current" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-600 text-white shadow-md shadow-red-500/20 mb-2">
+            <Play className="w-6 h-6 fill-current ml-0.5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Create Channel Account</h1>
-          <p className="text-xs text-zinc-400">
-            Join the community, upload videos, and build your audience
+          <h1 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+            Create your account
+          </h1>
+          <p className="text-xs text-(--text-muted)">
+            Join VideoTube to share videos, create playlists, and build your audience
           </p>
         </div>
 
         {/* Register Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Avatar & Cover Upload Row */}
-          <div className="flex items-center gap-4 p-3 bg-zinc-800/60 rounded-xl border border-zinc-800">
+          <div className="flex items-center gap-4 p-3.5 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
             {/* Avatar Picker */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <label className="cursor-pointer group flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-dashed border-zinc-600 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
+                <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
@@ -90,7 +98,7 @@ const Register = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Camera className="w-5 h-5 text-zinc-400 group-hover:text-red-400" />
+                    <Camera className="w-5 h-5 text-(--text-muted) group-hover:text-red-500 transition-colors" />
                   )}
                 </div>
                 <input
@@ -99,7 +107,7 @@ const Register = () => {
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
-                <span className="text-[10px] text-zinc-400 mt-1 font-medium group-hover:text-red-400">
+                <span className="text-[10px] text-(--text-muted) mt-1 font-semibold group-hover:text-red-500">
                   Avatar *
                 </span>
               </label>
@@ -108,7 +116,7 @@ const Register = () => {
             {/* Cover Image Picker */}
             <div className="flex-1">
               <label className="cursor-pointer group block">
-                <div className="h-16 rounded-lg bg-zinc-800 border-2 border-dashed border-zinc-600 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
+                <div className="h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
                   {coverPreview ? (
                     <img
                       src={coverPreview}
@@ -116,9 +124,9 @@ const Register = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="flex items-center gap-2 text-zinc-400 group-hover:text-red-400 text-xs">
-                      <Image className="w-4 h-4" />
-                      <span>Optional Cover Image</span>
+                    <div className="flex items-center gap-2 text-(--text-muted) group-hover:text-red-500 text-xs font-medium">
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Optional Cover Banner</span>
                     </div>
                   )}
                 </div>
@@ -131,7 +139,7 @@ const Register = () => {
               </label>
             </div>
           </div>
-          {fileError && <p className="text-xs text-red-400">{fileError}</p>}
+          {fileError && <p className="text-xs text-red-500">{fileError}</p>}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
@@ -155,7 +163,7 @@ const Register = () => {
                 required: "Username is required",
                 pattern: {
                   value: /^[a-zA-Z0-9_]+$/,
-                  message: "Only letters, numbers, and underscores",
+                  message: "Letters, numbers, & underscores only",
                 },
               })}
             />
@@ -205,11 +213,11 @@ const Register = () => {
         </form>
 
         {/* Footer Link */}
-        <div className="text-center text-xs text-zinc-400">
+        <div className="text-center text-xs text-(--text-muted) pt-2">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-red-400 font-semibold hover:underline"
+            className="text-red-500 font-semibold hover:underline"
           >
             Sign In
           </Link>

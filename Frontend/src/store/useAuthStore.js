@@ -18,13 +18,12 @@ export const useAuthStore = create((set) => ({
     set({ isLoading: true });
     try {
       const response = await getCurrentUserApi();
-      if (response?.data) {
-        set({ user: response.data, isAuthenticated: true, isLoading: false });
-      } else {
-        set({ user: null, isAuthenticated: false, isLoading: false });
-      }
-    } catch (error) {
+      const user = response?.data;
+      set({ user: user || null, isAuthenticated: Boolean(user) });
+    } catch {
       set({ user: null, isAuthenticated: false, isLoading: false });
+    } finally {
+      set({ isLoading: false });
     }
   },
 
@@ -73,9 +72,9 @@ export const useAuthStore = create((set) => ({
       await logoutUserApi();
       set({ user: null, isAuthenticated: false });
       toast.success("Logged out successfully");
-    } catch (error) {
+    } catch {
       set({ user: null, isAuthenticated: false });
-      toast.error("Logged out from session");
+      toast.error("Session ended locally");
     }
   },
 

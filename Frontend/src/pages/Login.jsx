@@ -1,11 +1,11 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Play, Mail, Lock, User } from "lucide-react";
+import { Play, Lock, User } from "lucide-react";
 import Input from "../components/Input";
-
 import Button from "../components/Button";
 import { useAuthStore } from "../store/useAuthStore";
+import ThemeToggle from "../components/common/ThemeToggle";
 
 const Login = () => {
   const { login, isSubmitting } = useAuthStore();
@@ -37,15 +37,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-zinc-950 text-white">
-      <div className="w-full max-w-md p-8 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-2xl space-y-6">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-(--bg-primary) text-(--text-primary) relative">
+      {/* Absolute top right theme toggle */}
+      <div className="absolute top-5 right-5">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-md p-8 sm:p-10 bg-white dark:bg-zinc-900/90 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-xl shadow-zinc-200/40 dark:shadow-none space-y-6">
         {/* Brand Logo */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-red-600/10 text-red-500 mb-2 border border-red-500/20">
-            <Play className="w-6 h-6 fill-current" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-600 text-white shadow-md shadow-red-500/20 mb-2">
+            <Play className="w-6 h-6 fill-current ml-0.5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Welcome Back</h1>
-          <p className="text-xs text-zinc-400">
+          <h1 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+            Welcome back
+          </h1>
+          <p className="text-xs text-(--text-muted)">
             Sign in to your account to upload and explore videos
           </p>
         </div>
@@ -54,7 +61,7 @@ const Login = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input
             label="Email or Username"
-            placeholder="Enter your email or @username"
+            placeholder="name@example.com or username"
             icon={User}
             required
             error={errors.identifier?.message}
@@ -91,13 +98,13 @@ const Login = () => {
         </form>
 
         {/* Footer Link */}
-        <div className="text-center text-xs text-zinc-400">
+        <div className="text-center text-xs text-(--text-muted) pt-2">
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-red-400 font-semibold hover:underline"
+            className="text-red-500 font-semibold hover:underline"
           >
-            Create account
+            Create an account
           </Link>
         </div>
       </div>

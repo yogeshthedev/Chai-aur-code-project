@@ -14,6 +14,12 @@ const axiosInstance = axios.create({
   },
 });
 
+// This client refreshes the session without entering the protected-request interceptor.
+const refreshClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
 // Flag to avoid infinite refresh loops
 let isRefreshing = false;
 let failedQueue = [];
@@ -34,14 +40,21 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const authEndpoints = [
+      USER_ENDPOINTS.LOGIN,
+      USER_ENDPOINTS.REGISTER,
+      USER_ENDPOINTS.REFRESH_TOKEN,
+    ];
+    const isAuthEndpoint = authEndpoints.some((endpoint) =>
+      originalRequest?.url?.endsWith(endpoint)
+    );
 
     // If error is 401 and we haven't already retried this request
     if (
       error.response?.status === 401 &&
+      originalRequest &&
       !originalRequest._retry &&
-      originalRequest.url !== USER_ENDPOINTS.LOGIN &&
-      originalRequest.url !== USER_ENDPOINTS.REGISTER &&
-      originalRequest.url !== USER_ENDPOINTS.REFRESH_TOKEN
+      !isAuthEndpoint
     ) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -56,10 +69,9 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Attempt to get a new access token using refresh token cookie
-        await axios.post(
+        await refreshClient.post(
           USER_ENDPOINTS.REFRESH_TOKEN,
-          {},
-          { withCredentials: true }
+          {}
         );
 
         isRefreshing = false;

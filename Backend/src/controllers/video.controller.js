@@ -140,7 +140,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   if (!isOwner) {
     video = await Video.findByIdAndUpdate(
       videoId,
-      { $inc: { views: 1 } },
+      { $inc: { views: 1 } }, 
       { new: true }
     ).populate("owner", "fullname avatar");
   }
@@ -148,14 +148,14 @@ const getVideoById = asyncHandler(async (req, res) => {
 
    await User.findByIdAndUpdate(req.user._id, [
     {
-      $set: {
+      $set: { 
         watchHistory: {
-          $slice: [
+          $slice: [ 
             {
-              $concatArrays: [
+              $concatArrays: [ 
                 [video._id],
                 {
-                  $filter: {
+                  $filter: { 
                     input: "$watchHistory",
                     as: "vid",
                     cond: { $ne: ["$$vid", video._id] },
@@ -215,7 +215,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
 const updateVideo = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  //TODO: update video details like title, description, thumbnail
+ 
 
   if (!mongoose.Types.ObjectId.isValid(videoId)) {
     throw new ApiError(400, "Invalid id");
