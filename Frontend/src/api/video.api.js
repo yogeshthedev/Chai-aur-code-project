@@ -28,3 +28,13 @@ export const uploadVideoApi = async (formData) => {
 
   return response.data;
 };
+
+export const deleteVideoApi = async (videoId) => {
+  const response = await axiosInstance.delete(VIDEO_ENDPOINTS.DETAIL(videoId));
+  return response.data;
+};
+
+export const updateVideoApi = async (videoId, data) => {
+  const response = await axiosInstance.patch(VIDEO_ENDPOINTS.DETAIL(videoId), data);
+  return response.data;
+};

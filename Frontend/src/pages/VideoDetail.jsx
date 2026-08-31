@@ -17,6 +17,7 @@ import { toggleVideoLikeApi } from "../api/like.api";
 import CommentSection from "../components/CommentSection";
 import SaveToPlaylistModal from "../components/SaveToPlaylistModal";
 import SubscribeButton from "../components/SubscribeButton";
+import { CustomVideoPlayer } from "../components/player";
 import { useAuthStore } from "../store/useAuthStore";
 
 const formatViews = (views = 0) => {
@@ -51,7 +52,37 @@ const VideoDetail = () => {
 
   const toggleLikeMutation = useMutation({
     mutationFn: () => toggleVideoLikeApi(videoId),
-    onSuccess: () => {
+    onMutate: async () => {
+      // Cancel outgoing refetches so they don't overwrite optimistic update
+      await queryClient.cancelQueries({ queryKey: ["video", videoId] });
+
+      // Snapshot previous state for rollback
+      const previousVideo = queryClient.getQueryData(["video", videoId]);
+
+      // Optimistically update query cache immediately (0ms)
+      queryClient.setQueryData(["video", videoId], (old) => {
+        if (!old?.data) return old;
+        const currentIsLiked = Boolean(old.data.isLiked);
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            isLiked: !currentIsLiked,
+            likeCount: Math.max(0, (old.data.likeCount || 0) + (currentIsLiked ? -1 : 1)),
+          },
+        };
+      });
+
+      return { previousVideo };
+    },
+    onError: (err, _, context) => {
+      // Rollback on error
+      if (context?.previousVideo) {
+        queryClient.setQueryData(["video", videoId], context.previousVideo);
+      }
+      toast.error(err?.response?.data?.message || "Failed to update like status");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["video", videoId] });
       queryClient.invalidateQueries({ queryKey: ["liked-videos"] });
     },
@@ -129,16 +160,13 @@ const VideoDetail = () => {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-7 lg:gap-8 items-start">
         {/* Main Watch Column: Player + Details + Comments */}
         <div className="xl:col-span-8 2xl:col-span-8 3xl:col-span-9 space-y-5">
-          {/* Cinema Video Player Container */}
-          <div className="relative aspect-video w-full overflow-hidden rounded-3xl border border-slate-200/90 dark:border-zinc-800 bg-black shadow-2xl shadow-indigo-500/5 group">
-            <video
-              controls
-              autoPlay
-              src={video.videoFile}
-              poster={video.thumbnail}
-              className="h-full w-full object-contain bg-black"
-            />
-          </div>
+          {/* Custom Cinema Video Player with Modular Controls */}
+          <CustomVideoPlayer
+            src={video.videoFile}
+            poster={video.thumbnail}
+            autoPlay
+            className="border border-slate-200/90 dark:border-zinc-800"
+          />
 
           {/* Title & Metadata Action Bar */}
           <div className="space-y-4 pt-1">

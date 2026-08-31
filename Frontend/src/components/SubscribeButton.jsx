@@ -19,6 +19,9 @@ const SubscribeButton = ({
       await queryClient.cancelQueries({ queryKey: ["video"] });
       await queryClient.cancelQueries({ queryKey: ["channel"] });
 
+      const prevVideo = queryClient.getQueryData(["video"]);
+      const prevChannel = queryClient.getQueryData(["channel"]);
+
       queryClient.setQueriesData({ queryKey: ["video"] }, (oldData) => {
         if (!oldData?.data) return oldData;
 
@@ -53,8 +56,18 @@ const SubscribeButton = ({
           },
         };
       });
+
+      return { prevVideo, prevChannel };
     },
-    onSuccess: () => {
+    onError: (err, _, context) => {
+      if (context?.prevVideo) {
+        queryClient.setQueryData(["video"], context.prevVideo);
+      }
+      if (context?.prevChannel) {
+        queryClient.setQueryData(["channel"], context.prevChannel);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["video"] });
       queryClient.invalidateQueries({ queryKey: ["channel"] });
       queryClient.invalidateQueries({ queryKey: ["channel-videos"] });

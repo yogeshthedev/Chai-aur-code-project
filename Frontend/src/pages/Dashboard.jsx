@@ -1,10 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Film, Heart, Users, Upload, Sparkles } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { BarChart3, Film, Heart, Users, Upload, Sparkles, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { getDashboardStatsApi, getDashboardVideosApi } from "../api/dashboard.api";
+import { deleteVideoApi } from "../api/video.api";
 import VideoCard from "../components/video/VideoCard";
+import { confirmToast } from "../utils/confirmToast";
 
 const Dashboard = () => {
+  const queryClient = useQueryClient();
+
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: getDashboardStatsApi,
@@ -15,6 +20,14 @@ const Dashboard = () => {
     queryKey: ["dashboard-videos"],
     queryFn: getDashboardVideosApi,
     select: (response) => response?.data ?? [],
+  });
+
+  const deleteVideoMutation = useMutation({
+    mutationFn: deleteVideoApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-videos"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    },
   });
 
   const stats = statsData ?? {
@@ -124,7 +137,32 @@ const Dashboard = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
             {videosData.map((video) => (
-              <VideoCard key={video._id} video={video} />
+              <div key={video._id} className="relative group">
+                <VideoCard video={video} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    confirmToast({
+                      title: `Delete video "${video.title}"?`,
+                      message: "This video will be permanently removed from your channel.",
+                      confirmText: "Delete Video",
+                      onConfirm: () => {
+                        const promise = deleteVideoMutation.mutateAsync(video._id);
+                        toast.promise(promise, {
+                          loading: "Deleting video...",
+                          success: "Video deleted successfully",
+                          error: "Failed to delete video",
+                        });
+                      },
+                    });
+                  }}
+                  className="absolute right-2.5 top-2.5 z-10 rounded-full bg-black/80 hover:bg-rose-600 p-1.5 text-white opacity-0 transition group-hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer shadow-md backdrop-blur-xs"
+                  aria-label="Delete video"
+                  title="Delete video"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
             ))}
           </div>
         )}

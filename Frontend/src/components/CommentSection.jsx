@@ -4,6 +4,7 @@ import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { addCommentApi, deleteCommentApi, getVideoCommentsApi, updateCommentApi } from "../api/comment.api";
 import { useAuthStore } from "../store/useAuthStore";
+import { confirmToast } from "../utils/confirmToast";
 
 const CommentSection = ({ videoId }) => {
   const queryClient = useQueryClient();
@@ -23,8 +24,47 @@ const CommentSection = ({ videoId }) => {
 
   const addCommentMutation = useMutation({
     mutationFn: () => addCommentApi({ videoId, content: comment }),
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["comments", videoId] });
+      const prevComments = queryClient.getQueryData(["comments", videoId]);
+
+      const optimisticComment = {
+        _id: "temp-" + Date.now(),
+        content: comment.trim(),
+        createdAt: new Date().toISOString(),
+        owner: {
+          _id: user?._id,
+          fullName: user?.fullName,
+          username: user?.username,
+          avatar: user?.avatar,
+        },
+        likeCount: 0,
+        isLiked: false,
+      };
+
+      queryClient.setQueryData(["comments", videoId], (old) => {
+        if (!old?.data) return old;
+        const currentList = old.data.comments || [];
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            comments: [optimisticComment, ...currentList],
+            totalComments: (old.data.totalComments || currentList.length) + 1,
+          },
+        };
+      });
+
       setComment("");
+      return { prevComments };
+    },
+    onError: (err, _, context) => {
+      if (context?.prevComments) {
+        queryClient.setQueryData(["comments", videoId], context.prevComments);
+      }
+      toast.error(err?.response?.data?.message || "Failed to post comment");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
       queryClient.invalidateQueries({ queryKey: ["video", videoId] });
     },
@@ -41,7 +81,32 @@ const CommentSection = ({ videoId }) => {
 
   const deleteCommentMutation = useMutation({
     mutationFn: (commentId) => deleteCommentApi(commentId),
-    onSuccess: () => {
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: ["comments", videoId] });
+      const prevComments = queryClient.getQueryData(["comments", videoId]);
+
+      queryClient.setQueryData(["comments", videoId], (old) => {
+        if (!old?.data) return old;
+        const updatedList = (old.data.comments || []).filter((c) => c._id !== deletedId);
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            comments: updatedList,
+            totalComments: Math.max(0, (old.data.totalComments || 1) - 1),
+          },
+        };
+      });
+
+      return { prevComments };
+    },
+    onError: (err, _, context) => {
+      if (context?.prevComments) {
+        queryClient.setQueryData(["comments", videoId], context.prevComments);
+      }
+      toast.error(err?.response?.data?.message || "Failed to delete comment");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
       queryClient.invalidateQueries({ queryKey: ["video", videoId] });
     },
@@ -156,8 +221,19 @@ const CommentSection = ({ videoId }) => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => deleteCommentMutation.mutate(item._id)}
+                        onClick={() => {
+                          confirmToast({
+                            title: "Delete comment?",
+                            message: "Are you sure you want to delete this comment?",
+                            confirmText: "Delete",
+                            onConfirm: () => {
+                              deleteCommentMutation.mutate(item._id);
+                            },
+                          });
+                        }}
                         className="inline-flex items-center gap-1 rounded-lg p-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition cursor-pointer"
+                        aria-label="Delete comment"
+                        title="Delete comment"
                       >
                         <Trash2 size={12} />
                       </button>
