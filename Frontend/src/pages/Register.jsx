@@ -63,34 +63,34 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-(--bg-primary) text-(--text-primary) relative">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 relative">
       {/* Absolute top right theme toggle */}
       <div className="absolute top-5 right-5">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-lg p-8 sm:p-10 bg-white dark:bg-zinc-900/90 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-xl shadow-zinc-200/40 dark:shadow-none space-y-6">
+      <div className="w-full max-w-lg p-8 sm:p-10 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-600 text-white shadow-md shadow-red-500/20 mb-2">
-            <Play className="w-6 h-6 fill-current ml-0.5" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/25 mb-2">
+            <Play className="w-5 h-5 fill-current ml-0.5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
             Create your account
           </h1>
-          <p className="text-xs text-(--text-muted)">
-            Join VideoTube to share videos, create playlists, and build your audience
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
+            Join VideoFlow to share videos, create playlists, and build your audience
           </p>
         </div>
 
         {/* Register Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Avatar & Cover Upload Row */}
-          <div className="flex items-center gap-4 p-3.5 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl border border-zinc-200/80 dark:border-zinc-800">
+          <div className="flex items-center gap-4 p-3.5 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-200 dark:border-zinc-700/80">
             {/* Avatar Picker */}
             <div className="relative shrink-0">
               <label className="cursor-pointer group flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
+                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-dashed border-slate-300 dark:border-zinc-700 group-hover:border-indigo-500 flex items-center justify-center overflow-hidden transition-all shadow-xs">
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
@@ -98,7 +98,7 @@ const Register = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Camera className="w-5 h-5 text-(--text-muted) group-hover:text-red-500 transition-colors" />
+                    <Camera className="w-5 h-5 text-slate-400 dark:text-zinc-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
                   )}
                 </div>
                 <input
@@ -107,7 +107,7 @@ const Register = () => {
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
-                <span className="text-[10px] text-(--text-muted) mt-1 font-semibold group-hover:text-red-500">
+                <span className="text-[10px] text-slate-500 dark:text-zinc-400 mt-1 font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                   Avatar *
                 </span>
               </label>
@@ -116,7 +116,7 @@ const Register = () => {
             {/* Cover Image Picker */}
             <div className="flex-1">
               <label className="cursor-pointer group block">
-                <div className="h-16 rounded-xl bg-zinc-100 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-700 group-hover:border-red-500 flex items-center justify-center overflow-hidden transition-all">
+                <div className="h-16 rounded-xl bg-slate-100 dark:bg-zinc-800 border-2 border-dashed border-slate-300 dark:border-zinc-700 group-hover:border-indigo-500 flex items-center justify-center overflow-hidden transition-all shadow-xs">
                   {coverPreview ? (
                     <img
                       src={coverPreview}
@@ -124,7 +124,7 @@ const Register = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="flex items-center gap-2 text-(--text-muted) group-hover:text-red-500 text-xs font-medium">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 text-xs font-medium">
                       <ImageIcon className="w-4 h-4" />
                       <span>Optional Cover Banner</span>
                     </div>
@@ -139,7 +139,7 @@ const Register = () => {
               </label>
             </div>
           </div>
-          {fileError && <p className="text-xs text-red-500">{fileError}</p>}
+          {fileError && <p className="text-xs text-rose-500">{fileError}</p>}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
@@ -205,7 +205,7 @@ const Register = () => {
             type="submit"
             variant="primary"
             size="lg"
-            className="w-full mt-2"
+            className="w-full mt-2 rounded-2xl"
             isLoading={isSubmitting}
           >
             Create Account
@@ -213,11 +213,11 @@ const Register = () => {
         </form>
 
         {/* Footer Link */}
-        <div className="text-center text-xs text-(--text-muted) pt-2">
+        <div className="text-center text-xs text-slate-500 dark:text-zinc-400 pt-2">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-red-500 font-semibold hover:underline"
+            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
           >
             Sign In
           </Link>

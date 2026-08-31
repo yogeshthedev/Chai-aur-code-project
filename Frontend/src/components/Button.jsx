@@ -3,15 +3,15 @@ import { Loader2 } from "lucide-react";
 
 const variants = {
   primary:
-    "bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-medium shadow-sm shadow-red-500/20 focus-visible:ring-2 focus-visible:ring-red-500/40",
+    "bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-sm shadow-indigo-500/25 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
   secondary:
-    "bg-zinc-100 hover:bg-zinc-200 active:bg-zinc-300 text-zinc-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:active:bg-zinc-600 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700/80 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600",
+    "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:active:bg-zinc-600 dark:text-zinc-100 border border-slate-200 dark:border-zinc-700/80 focus-visible:ring-2 focus-visible:ring-slate-400 dark:focus-visible:ring-zinc-600",
   outline:
-    "bg-transparent hover:bg-zinc-100 active:bg-zinc-200 text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:active:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600",
+    "bg-transparent hover:bg-slate-100 active:bg-slate-200 text-slate-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:active:bg-zinc-700 border border-slate-300 dark:border-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
   ghost:
-    "bg-transparent hover:bg-zinc-100 active:bg-zinc-200 text-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-700 focus-visible:ring-2 focus-visible:ring-zinc-400",
+    "bg-transparent hover:bg-slate-100 active:bg-slate-200 text-slate-700 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
   danger:
-    "bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 border border-red-200 dark:bg-red-950/30 dark:hover:bg-red-950/50 dark:active:bg-red-950/70 dark:text-red-400 dark:border-red-900/40 focus-visible:ring-2 focus-visible:ring-red-500/40",
+    "bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 dark:active:bg-rose-950/70 dark:text-rose-400 dark:border-rose-900/40 focus-visible:ring-2 focus-visible:ring-rose-500/40",
 };
 
 const sizes = {

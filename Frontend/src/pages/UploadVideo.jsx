@@ -61,50 +61,50 @@ const UploadVideo = () => {
   };
 
   return (
-    <div className="w-full max-w-6xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-500 mb-2">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-2">
           <Sparkles size={13} />
           <span>Creator Studio</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-(--text-primary)">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
           Upload a new video
         </h1>
-        <p className="text-xs text-(--text-muted) mt-1">
+        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
           Share your video content with viewers around the world
         </p>
       </div>
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-6 md:p-8 shadow-sm"
+        className="space-y-6 rounded-3xl border border-slate-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 p-6 md:p-8 shadow-sm"
       >
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Left Column: Title & Description */}
           <div className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-                Video Title <span className="text-red-500">*</span>
+                Video Title <span className="text-indigo-600 dark:text-indigo-400">*</span>
               </label>
               <input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Give your video an engaging title"
-                className="w-full rounded-2xl border border-slate-300 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-900 px-4 py-3 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none transition focus:ring-2 focus:ring-red-500/20 focus:border-red-500/80"
+                className="w-full rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-800/80 px-4 py-3 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none transition focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/80"
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-                Description <span className="text-red-500">*</span>
+                Description <span className="text-indigo-600 dark:text-indigo-400">*</span>
               </label>
               <textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Tell viewers what your video is about, include hashtags or links"
                 rows={8}
-                className="w-full rounded-2xl border border-slate-300 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-900 px-4 py-3 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none transition focus:ring-2 focus:ring-red-500/20 focus:border-red-500/80 resize-none"
+                className="w-full rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-800/80 px-4 py-3 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none transition focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/80 resize-none"
               />
             </div>
           </div>
@@ -114,17 +114,17 @@ const UploadVideo = () => {
             {/* Video File Dropzone */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-                Video File <span className="text-red-500">*</span>
+                Video File <span className="text-indigo-600 dark:text-indigo-400">*</span>
               </label>
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-900/40 p-5 text-center text-slate-500 dark:text-zinc-400 transition hover:border-red-500 hover:text-red-500 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200/70 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 group-hover:text-red-500 transition">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/40 p-5 text-center text-slate-500 dark:text-zinc-400 transition hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-400 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-zinc-300 group-hover:bg-indigo-600 group-hover:text-white transition">
                   <Film size={20} />
                 </div>
                 <div className="text-xs">
-                  <span className="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-red-500">
+                  <span className="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                     {videoFile ? videoFile.name : "Click to select video"}
                   </span>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-0.5">MP4, WebM, MOV</p>
+                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">MP4, WebM, MOV</p>
                 </div>
                 <input
                   type="file"
@@ -137,7 +137,7 @@ const UploadVideo = () => {
                 <video
                   src={videoPreview}
                   controls
-                  className="mt-2 aspect-video w-full rounded-2xl bg-black object-contain border border-slate-300 dark:border-zinc-800"
+                  className="mt-2 aspect-video w-full rounded-2xl bg-black object-contain border border-slate-200 dark:border-zinc-800"
                 />
               )}
             </div>
@@ -145,17 +145,17 @@ const UploadVideo = () => {
             {/* Thumbnail Dropzone */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-                Thumbnail <span className="text-red-500">*</span>
+                Thumbnail <span className="text-indigo-600 dark:text-indigo-400">*</span>
               </label>
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-900/40 p-5 text-center text-slate-500 dark:text-zinc-400 transition hover:border-red-500 hover:text-red-500 group">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200/70 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 group-hover:text-red-500 transition">
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50/60 dark:bg-zinc-800/40 p-5 text-center text-slate-500 dark:text-zinc-400 transition hover:border-indigo-500 hover:text-indigo-600 dark:hover:border-indigo-400 dark:hover:text-indigo-400 group">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-zinc-300 group-hover:bg-indigo-600 group-hover:text-white transition">
                   <ImageUp size={20} />
                 </div>
                 <div className="text-xs">
-                  <span className="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-red-500">
+                  <span className="font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                     {thumbnailFile ? thumbnailFile.name : "Click to select thumbnail"}
                   </span>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-500 mt-0.5">PNG, JPG, WebP</p>
+                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">PNG, JPG, WebP</p>
                 </div>
                 <input
                   type="file"
@@ -168,7 +168,7 @@ const UploadVideo = () => {
                 <img
                   src={thumbnailPreview}
                   alt="Thumbnail preview"
-                  className="mt-2 aspect-video w-full rounded-2xl bg-slate-100 dark:bg-zinc-800 object-cover border border-slate-300 dark:border-zinc-800"
+                  className="mt-2 aspect-video w-full rounded-2xl bg-slate-100 dark:bg-zinc-800 object-cover border border-slate-200 dark:border-zinc-800"
                 />
               )}
             </div>
@@ -188,7 +188,7 @@ const UploadVideo = () => {
           <button
             type="submit"
             disabled={mutation.isPending}
-            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm shadow-red-500/20 hover:bg-red-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-sm shadow-indigo-500/20 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer"
           >
             <CloudUpload size={16} />
             <span>{mutation.isPending ? "Uploading Video..." : "Publish Video"}</span>

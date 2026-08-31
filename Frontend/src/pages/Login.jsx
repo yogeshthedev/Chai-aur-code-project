@@ -37,22 +37,22 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-(--bg-primary) text-(--text-primary) relative">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 relative">
       {/* Absolute top right theme toggle */}
       <div className="absolute top-5 right-5">
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-md p-8 sm:p-10 bg-white dark:bg-zinc-900/90 rounded-3xl border border-zinc-200/80 dark:border-zinc-800 shadow-xl shadow-zinc-200/40 dark:shadow-none space-y-6">
+      <div className="w-full max-w-md p-8 sm:p-10 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
         {/* Brand Logo */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-600 text-white shadow-md shadow-red-500/20 mb-2">
-            <Play className="w-6 h-6 fill-current ml-0.5" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/25 mb-2">
+            <Play className="w-5 h-5 fill-current ml-0.5" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-(--text-primary)">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
             Welcome back
           </h1>
-          <p className="text-xs text-(--text-muted)">
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Sign in to your account to upload and explore videos
           </p>
         </div>
@@ -90,7 +90,7 @@ const Login = () => {
             type="submit"
             variant="primary"
             size="lg"
-            className="w-full mt-2"
+            className="w-full mt-2 rounded-2xl"
             isLoading={isSubmitting}
           >
             Sign In
@@ -98,11 +98,11 @@ const Login = () => {
         </form>
 
         {/* Footer Link */}
-        <div className="text-center text-xs text-(--text-muted) pt-2">
+        <div className="text-center text-xs text-slate-500 dark:text-zinc-400 pt-2">
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-red-500 font-semibold hover:underline"
+            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
           >
             Create an account
           </Link>

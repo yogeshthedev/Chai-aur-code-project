@@ -25,11 +25,16 @@ const studioNav = [
 
 const RootLayout = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const toggleMobileSidebar = () => {
-    setIsMobileSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => {
+    if (window.innerWidth >= 768) {
+      setIsSidebarCollapsed((prev) => !prev);
+    } else {
+      setIsMobileSidebarOpen((prev) => !prev);
+    }
   };
 
   const closeMobileSidebar = () => {
@@ -42,62 +47,76 @@ const RootLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-(--bg-primary) text-(--text-primary) selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50/60 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 selection:bg-indigo-500/20 selection:text-indigo-900 dark:selection:text-indigo-200 transition-colors">
       {/* Sticky Glassmorphic Header */}
-      <header className="sticky top-0 z-40 h-16 w-full border-b border-slate-200/90 dark:border-zinc-800/90 bg-white/95 dark:bg-[#09090b]/90 backdrop-blur-xl transition-colors">
-        <Navbar onToggleSidebar={toggleMobileSidebar} />
+      <header className="sticky top-0 z-40 h-16 w-full border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl transition-colors">
+        <Navbar onToggleSidebar={toggleSidebar} />
       </header>
 
       {/* Main Layout Area */}
       <div className="flex">
         {/* Desktop Sidebar */}
-        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-60 shrink-0 flex-col justify-between overflow-y-auto border-r border-slate-200/90 dark:border-zinc-800/90 bg-white dark:bg-[#09090b] p-3.5 md:flex transition-colors">
+        <aside
+          className={`sticky top-16 hidden h-[calc(100vh-4rem)] shrink-0 flex-col justify-between overflow-y-auto border-r border-slate-200/80 dark:border-zinc-800/80 bg-white/60 dark:bg-[#09090b]/60 backdrop-blur-md p-3 md:flex transition-all duration-300 ${
+            isSidebarCollapsed ? "w-18" : "w-60"
+          }`}
+        >
           {/* Top Navigation Links */}
           <div className="space-y-6">
             <div>
-              <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                Feeds
-              </p>
+              {!isSidebarCollapsed && (
+                <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  Feeds
+                </p>
+              )}
               <nav className="space-y-1">
                 {primaryNav.map(({ to, label, icon: Icon }) => (
                   <NavLink
                     key={to}
                     to={to}
                     end={to === "/"}
+                    title={isSidebarCollapsed ? label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150 ${
+                      `flex items-center gap-3 rounded-xl py-2.5 text-xs font-semibold transition-all duration-150 ${
+                        isSidebarCollapsed ? "justify-center px-0" : "px-3"
+                      } ${
                         isActive
-                          ? "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200/80 dark:border-red-900/40 shadow-xs"
+                          ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 shadow-xs"
                           : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100 border border-transparent"
                       }`
                     }
                   >
-                    <Icon size={17} />
-                    <span>{label}</span>
+                    <Icon size={18} className="shrink-0" />
+                    {!isSidebarCollapsed && <span>{label}</span>}
                   </NavLink>
                 ))}
               </nav>
             </div>
 
-            <div className="border-t border-slate-200/90 dark:border-zinc-800/90 pt-4">
-              <p className="px-3 pb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-                Studio
-              </p>
+            <div className="border-t border-slate-200/80 dark:border-zinc-800/80 pt-4">
+              {!isSidebarCollapsed && (
+                <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                  Studio
+                </p>
+              )}
               <nav className="space-y-1">
                 {studioNav.map(({ to, label, icon: Icon }) => (
                   <NavLink
                     key={to}
                     to={to}
+                    title={isSidebarCollapsed ? label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-150 ${
+                      `flex items-center gap-3 rounded-xl py-2.5 text-xs font-semibold transition-all duration-150 ${
+                        isSidebarCollapsed ? "justify-center px-0" : "px-3"
+                      } ${
                         isActive
-                          ? "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200/80 dark:border-red-900/40 shadow-xs"
+                          ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/50 shadow-xs"
                           : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-zinc-800/70 dark:hover:text-zinc-100 border border-transparent"
                       }`
                     }
                   >
-                    <Icon size={17} />
-                    <span>{label}</span>
+                    <Icon size={18} className="shrink-0" />
+                    {!isSidebarCollapsed && <span>{label}</span>}
                   </NavLink>
                 ))}
               </nav>
@@ -105,14 +124,17 @@ const RootLayout = () => {
           </div>
 
           {/* Bottom Sidebar Action: Logout */}
-          <div className="border-t border-slate-200/90 dark:border-zinc-800/90 pt-3">
+          <div className="border-t border-slate-200/80 dark:border-zinc-800/80 pt-3">
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
+              title={isSidebarCollapsed ? "Log out" : undefined}
+              className={`flex w-full items-center gap-2.5 rounded-xl py-2.5 text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer ${
+                isSidebarCollapsed ? "justify-center px-0" : "px-3"
+              }`}
             >
-              <LogOut size={16} />
-              <span>Log out</span>
+              <LogOut size={17} className="shrink-0" />
+              {!isSidebarCollapsed && <span>Log out</span>}
             </button>
           </div>
         </aside>
@@ -131,7 +153,7 @@ const RootLayout = () => {
                   <button
                     type="button"
                     onClick={closeMobileSidebar}
-                    className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                    className="rounded-lg p-1.5 text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 cursor-pointer"
                   >
                     <X size={18} />
                   </button>
@@ -146,10 +168,9 @@ const RootLayout = () => {
                         end={to === "/"}
                         onClick={closeMobileSidebar}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
-                            isActive
-                              ? "bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200/80"
-                              : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${isActive
+                            ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-800/60"
+                            : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
                           }`
                         }
                       >
@@ -166,7 +187,7 @@ const RootLayout = () => {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition cursor-pointer"
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
                 >
                   <LogOut size={16} />
                   <span>Log out</span>
@@ -176,24 +197,23 @@ const RootLayout = () => {
           </div>
         )}
 
-        {/* Content Outlet */}
-        <main className="min-w-0 flex-1 p-4 pb-20 md:p-6 md:pb-8">
+        {/* Content Outlet - Fulfills entire available space without middle squeeze */}
+        <main className="w-full min-w-0 flex-1 px-4 py-5 pb-20 sm:px-6 sm:py-6 lg:px-8 lg:py-7 md:pb-10">
           <Outlet />
         </main>
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-slate-200/90 bg-white/95 py-2 backdrop-blur-xl dark:border-zinc-800/90 dark:bg-[#09090b]/95 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-slate-200/80 bg-white/90 py-2 backdrop-blur-xl dark:border-zinc-800/80 dark:bg-[#09090b]/90 md:hidden">
         {primaryNav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             end={to === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-1 px-3 py-1 text-[10px] font-medium transition ${
-                isActive
-                  ? "text-red-500 font-semibold"
-                  : "text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              `flex flex-col items-center gap-1 px-3 py-1 text-[10px] font-medium transition ${isActive
+                ? "text-indigo-600 dark:text-indigo-400 font-semibold"
+                : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100"
               }`
             }
           >

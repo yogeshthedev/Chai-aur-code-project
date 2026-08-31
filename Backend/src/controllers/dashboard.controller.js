@@ -43,9 +43,11 @@ const getChannelVideos = asyncHandler(async (req, res) => {
 
   const ChannelId = req.user._id;
 
-  const channelVideos = await Video.find({ owner: ChannelId }).sort({
-    createdAt: -1,
-  });
+  const channelVideos = await Video.find({ owner: ChannelId })
+    .populate("owner", "fullName username avatar")
+    .sort({
+      createdAt: -1,
+    });
 
   res
     .status(200)

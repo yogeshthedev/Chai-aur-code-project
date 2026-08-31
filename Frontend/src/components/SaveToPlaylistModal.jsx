@@ -86,17 +86,17 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
                 type="button"
                 onClick={() => handleSave(playlist._id)}
                 disabled={mutation.isPending}
-                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 dark:border-zinc-800/80 bg-slate-50 dark:bg-zinc-800/40 px-4 py-3 text-left transition hover:border-red-500 hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-[0.99] disabled:opacity-50 cursor-pointer group"
+                className="flex w-full items-center justify-between rounded-2xl border border-slate-200 dark:border-zinc-800/80 bg-slate-50/80 dark:bg-zinc-800/40 px-4 py-3 text-left transition hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-[0.99] disabled:opacity-50 cursor-pointer group shadow-2xs"
               >
                 <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-red-500 transition-colors">
+                  <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {playlist.name}
                   </p>
-                  <p className="text-[11px] text-slate-600 dark:text-zinc-400">
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400">
                     {playlist.videos?.length || 0} videos
                   </p>
                 </div>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-700/60 text-slate-700 dark:text-zinc-300 group-hover:bg-red-600 group-hover:text-white transition">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-700/60 text-slate-700 dark:text-zinc-300 group-hover:bg-indigo-600 group-hover:text-white transition shadow-xs">
                   <Plus size={14} />
                 </div>
               </button>

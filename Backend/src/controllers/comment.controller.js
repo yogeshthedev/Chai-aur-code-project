@@ -106,6 +106,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
         updatedAt: 1,
         owner: {
           _id: 1,
+          fullName: 1,
           username: 1,
           avatar: 1,
         },
@@ -174,7 +175,7 @@ const addComment = asyncHandler(async (req, res) => {
 
   const populatedComment = await comment.populate(
     "owner",
-    "username avatar"
+    "fullName username avatar"
   );
 
 
@@ -215,7 +216,7 @@ const updateComment = asyncHandler(async (req, res) => {
   comment.content = content.trim();
   await comment.save();
 
-  const populatedComment = await comment.populate("owner", "username avatar");
+  const populatedComment = await comment.populate("owner", "fullName username avatar");
   const likeCount = await Like.countDocuments({ comment: comment._id });
   const isLiked = Boolean(
     await Like.exists({

@@ -49,8 +49,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
   const sortOptions = { [sortField]: sortDirection };
 
-  // 6️⃣ Fetch videos
+  // 6️⃣ Fetch videos with owner info populated
   const videos = await Video.find(filter)
+    .populate("owner", "fullName username avatar")
     .sort(sortOptions)
     .skip(skip)
     .limit(limit);
@@ -124,14 +125,14 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   let video = await Video.findById(videoId).populate(
     "owner",
-    "username avatar fullname"
+    "fullName username avatar"
   );
 
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
 
-  const isOwner = userId && video.owner._id.toString() === userId.toString();
+  const isOwner = userId && video.owner?._id?.toString() === userId.toString();
 
   if (!video.isPublished && !isOwner) {
     throw new ApiError(403, "This video is not published yet");
@@ -142,33 +143,34 @@ const getVideoById = asyncHandler(async (req, res) => {
       videoId,
       { $inc: { views: 1 } }, 
       { new: true }
-    ).populate("owner", "fullname avatar");
+    ).populate("owner", "fullName username avatar");
   }
 
-
-   await User.findByIdAndUpdate(req.user._id, [
-    {
-      $set: { 
-        watchHistory: {
-          $slice: [ 
-            {
-              $concatArrays: [ 
-                [video._id],
-                {
-                  $filter: { 
-                    input: "$watchHistory",
-                    as: "vid",
-                    cond: { $ne: ["$$vid", video._id] },
+  if (req.user?._id) {
+    await User.findByIdAndUpdate(req.user._id, [
+      {
+        $set: { 
+          watchHistory: {
+            $slice: [ 
+              {
+                $concatArrays: [ 
+                  [video._id],
+                  {
+                    $filter: { 
+                      input: "$watchHistory",
+                      as: "vid",
+                      cond: { $ne: ["$$vid", video._id] },
+                    },
                   },
-                },
-              ],
-            },
-            50,
-          ],
+                ],
+              },
+              50,
+            ],
+          },
         },
       },
-    },
-  ]);
+    ]);
+  }
 
   const likeCount = await Like.countDocuments({ video: videoId });
 
@@ -276,11 +278,11 @@ const deleteVideo = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You are not allowed to delete video");
   }
 
-  await Video.deleteOne(videoId);
+  await Video.findByIdAndDelete(videoId);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Video delete successfully"));
+    .json(new ApiResponse(200, null, "Video deleted successfully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {

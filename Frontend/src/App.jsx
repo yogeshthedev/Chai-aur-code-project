@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { Play } from "lucide-react";
 import { useAuthStore } from "./store/useAuthStore";
+import { useThemeStore } from "./store/useThemeStore";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
@@ -21,19 +22,21 @@ import RootLayout from "./layouts/RootLayout";
 
 function App() {
   const { checkAuth, isLoading } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
 
   useEffect(() => {
     checkAuth();
+    setTheme(theme);
   }, [checkAuth]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-(--bg-primary) flex flex-col items-center justify-center text-(--text-primary)">
-        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-red-600 text-white shadow-lg shadow-red-500/25 animate-pulse">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] flex flex-col items-center justify-center text-slate-900 dark:text-zinc-100 transition-colors">
+        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25 animate-pulse">
           <Play className="w-6 h-6 fill-current ml-0.5" />
         </div>
-        <p className="text-[11px] font-bold text-(--text-muted) mt-4 tracking-widest uppercase">
-          Loading VideoTube...
+        <p className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 mt-4 tracking-widest uppercase">
+          Loading VideoFlow...
         </p>
       </div>
     );
@@ -45,13 +48,19 @@ function App() {
       <Toaster
         position="top-right"
         toastOptions={{
-          className: "!rounded-2xl !px-4 !py-3 !text-xs !font-semibold !shadow-xl !backdrop-blur-md",
+          className: "!rounded-2xl !px-4 !py-3 !text-xs !font-semibold !shadow-xl !backdrop-blur-md !border",
           style: {
-            background: "rgba(24, 24, 27, 0.95)",
-            color: "#f4f4f5",
-            border: "1px solid rgba(63, 63, 70, 0.4)",
+            background: "var(--bg-surface)",
+            color: "var(--text-primary)",
+            borderColor: "var(--border-color)",
           },
           success: {
+            iconTheme: {
+              primary: "#6366f1",
+              secondary: "#ffffff",
+            },
+          },
+          error: {
             iconTheme: {
               primary: "#ef4444",
               secondary: "#ffffff",

@@ -33,23 +33,24 @@ const Navbar = ({ onToggleSidebar }) => {
 
   return (
     <div className="flex h-16 w-full items-center justify-between gap-3 px-4 md:px-6">
-      {/* Left: Mobile Toggle & Brand */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Left: Sidebar Toggle & Brand */}
+      <div className="flex items-center gap-2.5 shrink-0">
         <button
           type="button"
           onClick={onToggleSidebar}
-          aria-label="Toggle navigation menu"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800/80 dark:hover:text-white md:hidden transition-colors"
+          aria-label="Toggle sidebar"
+          title="Toggle sidebar"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800/80 dark:hover:text-white transition-colors cursor-pointer"
         >
           <Menu size={20} />
         </button>
 
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 to-red-500 text-white shadow-md shadow-red-500/20 transition-transform duration-200 group-hover:scale-105">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/25 transition-transform duration-200 group-hover:scale-105">
             <span className="text-base font-black tracking-tight">V</span>
           </div>
-          <span className="hidden sm:inline text-lg font-bold tracking-tight text-(--text-primary)">
-            Video<span className="text-red-500">Tube</span>
+          <span className="hidden sm:inline text-lg font-bold tracking-tight text-slate-900 dark:text-zinc-100">
+            Video<span className="text-indigo-600 dark:text-indigo-400 font-extrabold">Flow</span>
           </span>
         </Link>
       </div>
@@ -62,28 +63,29 @@ const Navbar = ({ onToggleSidebar }) => {
         }`}
       >
         <div
-          className={`flex w-full items-center rounded-full border bg-slate-100 dark:bg-zinc-900/90 px-3.5 py-1.5 transition-all duration-200 ${
+          className={`flex w-full items-center rounded-full border bg-slate-100/90 dark:bg-zinc-900/90 px-4 py-2 transition-all duration-200 ${
             isFocused
-              ? "border-slate-400 dark:border-zinc-600 ring-2 ring-slate-400/20 dark:ring-zinc-600/30 bg-white dark:bg-zinc-900"
+              ? "border-indigo-500/80 ring-2 ring-indigo-500/20 bg-white dark:bg-zinc-900 shadow-sm"
               : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
           }`}
         >
-          <Search size={16} className="text-slate-500 dark:text-zinc-500 shrink-0 mr-2.5" />
+          <Search size={16} className={`shrink-0 mr-2.5 transition-colors ${isFocused ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-zinc-500"}`} />
           <input
             id="site-search"
-            type="search"
+            type="text"
             value={query}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search videos, channels, topics..."
-            className="w-full bg-transparent text-sm text-(--text-primary) placeholder:text-slate-500 dark:placeholder:text-zinc-500 outline-none"
+            placeholder="Search videos, creators, playlists..."
+            className="w-full bg-transparent text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none"
           />
           {query && (
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 transition"
+              aria-label="Clear search query"
+              className="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:text-zinc-500 dark:hover:text-white dark:hover:bg-zinc-800 transition cursor-pointer"
             >
               <X size={14} />
             </button>
@@ -96,7 +98,7 @@ const Navbar = ({ onToggleSidebar }) => {
         <Link
           to="/upload"
           aria-label="Upload video"
-          className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white px-3.5 py-1.5 text-xs font-semibold shadow-xs shadow-red-500/20 transition active:scale-95 cursor-pointer"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-semibold shadow-sm shadow-indigo-500/20 transition active:scale-95 cursor-pointer"
         >
           <Upload size={14} />
           <span>Upload</span>
@@ -114,10 +116,10 @@ const Navbar = ({ onToggleSidebar }) => {
             <img
               src={user.avatar}
               alt={user.fullName || user.username || "Your channel"}
-              className="h-8 w-8 rounded-full object-cover ring-2 ring-slate-200 dark:ring-zinc-700"
+              className="h-8.5 w-8.5 rounded-full object-cover ring-2 ring-slate-200 dark:ring-zinc-700"
             />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 font-semibold text-xs ring-2 ring-slate-300 dark:ring-zinc-700">
+            <div className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-zinc-800 dark:text-zinc-200 font-semibold text-xs ring-2 ring-slate-200 dark:ring-zinc-700">
               {user?.username ? user.username.slice(0, 1).toUpperCase() : <UserCircle size={20} />}
             </div>
           )}
