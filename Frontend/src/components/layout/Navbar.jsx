@@ -43,13 +43,10 @@ const Navbar = ({ onToggleSidebar }) => {
 
         <Link to="/" className="flex items-center gap-2 group">
           <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#18181B] border border-white/12 text-[#FAFAF8] font-display font-black text-sm transition-colors group-hover:border-[#FF5A36]">
-            R
+            V
           </div>
           <span className="font-display font-extrabold text-base tracking-tight text-[#FAFAF8]">
-            REELIO<span className="text-[#FF5A36]">.</span>
-          </span>
-          <span className="hidden sm:inline-block rounded-xs bg-white/6 px-1.5 py-0.2 text-[9px] font-mono uppercase tracking-widest text-[#71717A] border border-white/6">
-            PRO
+            VIDRA<span className="text-[#FF5A36]">.</span>
           </span>
         </Link>
       </div>

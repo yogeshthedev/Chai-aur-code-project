@@ -104,26 +104,31 @@ const Profile = () => {
     event.target.value = "";
   };
 
-  const handleCroppedImage = async (croppedBlob) => {
-    const file = new File(
-      [croppedBlob],
-      cropperConfig.cropType === "avatar" ? "avatar.jpg" : "cover.jpg",
-      { type: "image/jpeg" }
-    );
-    const formData = new FormData();
-
+  const handleCroppedImage = async (croppedFile) => {
     const isAvatar = cropperConfig.cropType === "avatar";
-    const uploadApi = isAvatar ? updateAvatarApi : updateCoverImageApi;
+    const file = croppedFile instanceof File
+      ? croppedFile
+      : new File(
+          [croppedFile],
+          isAvatar ? "avatar.jpg" : "cover.jpg",
+          { type: "image/jpeg" }
+        );
+
+    const formData = new FormData();
     formData.append(isAvatar ? "avatar" : "coverImage", file);
 
+    const uploadApi = isAvatar ? updateAvatarApi : updateCoverImageApi;
     const promise = uploadApi(formData);
 
     toast.promise(promise, {
       loading: isAvatar ? "Updating profile picture..." : "Updating cover banner...",
       success: (response) => {
         const updatedUser = response?.data;
-        setUser(updatedUser);
-        queryClient.setQueryData(["current-user"], { data: updatedUser });
+        if (updatedUser) {
+          setUser(updatedUser);
+          queryClient.setQueryData(["current-user"], { data: updatedUser });
+          queryClient.invalidateQueries({ queryKey: ["current-user"] });
+        }
         setCropperConfig((prev) => ({ ...prev, isOpen: false }));
         return isAvatar ? "Avatar updated!" : "Cover banner updated!";
       },

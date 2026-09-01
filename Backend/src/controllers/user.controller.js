@@ -302,15 +302,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-  if (!avatar.url) {
-    throw new ApiError(400, "Error while uploading on avatar");
+  if (!avatar?.url) {
+    throw new ApiError(400, "Failed to upload avatar image to Cloudinary");
   }
-
-  fs.unlink(avatarLocalPath, (err) => {
-    if (err) {
-      console.error("Error deleting local avatar file:", err);
-    }
-  });
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -336,17 +330,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-  if (!coverImage.url) {
-    throw new ApiError(400, "Error while uploading on avatar");
+  if (!coverImage?.url) {
+    throw new ApiError(400, "Failed to upload cover image to Cloudinary");
   }
-
-  fs.unlink(coverImageLocalPath, (err) => {
-    if (err) {
-      console.error("Error deleting local cover image file:", err);
-    }
-  });
-
-
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -369,6 +355,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   if (!username?.trim()) {
     throw new ApiError(400, "username is missing");
   }
+
+  const currentUserId = req.user?._id
+    ? new mongoose.Types.ObjectId(req.user._id)
+    : null;
 
   const channel = await User.aggregate([
     {
@@ -397,14 +387,17 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         subscribersCount: {
           $size: "$subscribers",
         },
-
+        subscriberCount: {
+          $size: "$subscribers",
+        },
         channelsSubscribedToCount: {
           $size: "$subscribedTo",
         },
-
         isSubscribed: {
           $cond: {
-            if: { $in: [req.user?._id, "$subscribers.subscriber"] }, // $ in indicate feild and $in is used to check if the user is subscribed to the channel
+            if: currentUserId
+              ? { $in: [currentUserId, "$subscribers.subscriber"] }
+              : false,
             then: true,
             else: false,
           },
@@ -416,6 +409,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         fullName: 1,
         username: 1,
         subscribersCount: 1,
+        subscriberCount: 1,
         channelsSubscribedToCount: 1,
         isSubscribed: 1,
         avatar: 1,
@@ -424,7 +418,6 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  console.log(channel)
 
   if (!channel?.length) {
     throw new ApiError(404, "channel does not exists");

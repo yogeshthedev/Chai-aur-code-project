@@ -6,11 +6,7 @@ import { USER_ENDPOINTS } from "../utils/constants";
  * Uses multipart/form-data for file uploads.
  */
 export const registerUserApi = async (formData) => {
-  const response = await axiosInstance.post(USER_ENDPOINTS.REGISTER, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  const response = await axiosInstance.post(USER_ENDPOINTS.REGISTER, formData);
   return response.data;
 };
 
@@ -58,37 +54,39 @@ export const updateAccountDetailsApi = async (data) => {
 };
 
 /**
- * Update user avatar image.
+ * Update user avatar image (accepts File or FormData).
  */
-export const updateAvatarApi = async (avatarFile) => {
-  const formData = new FormData();
-  formData.append("avatar", avatarFile);
+export const updateAvatarApi = async (avatarInput) => {
+  let formData;
+  if (avatarInput instanceof FormData) {
+    formData = avatarInput;
+  } else {
+    formData = new FormData();
+    formData.append("avatar", avatarInput);
+  }
+
   const response = await axiosInstance.patch(
     USER_ENDPOINTS.UPDATE_AVATAR,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
   return response.data;
 };
 
 /**
- * Update user cover image.
+ * Update user cover image (accepts File or FormData).
  */
-export const updateCoverImageApi = async (coverImageFile) => {
-  const formData = new FormData();
-  formData.append("coverImage", coverImageFile);
+export const updateCoverImageApi = async (coverImageInput) => {
+  let formData;
+  if (coverImageInput instanceof FormData) {
+    formData = coverImageInput;
+  } else {
+    formData = new FormData();
+    formData.append("coverImage", coverImageInput);
+  }
+
   const response = await axiosInstance.patch(
     USER_ENDPOINTS.UPDATE_COVER_IMAGE,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
+    formData
   );
   return response.data;
 };

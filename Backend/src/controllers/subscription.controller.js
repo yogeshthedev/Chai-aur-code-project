@@ -28,13 +28,12 @@ const toggleSubscription = asyncHandler(async (req, res) => {
   // 4️⃣ If exists → unsubscribe
   if (existingSubscription) {
     await Subscription.deleteOne({
-      subscriber: userId,
-      channel: channelId,
+      _id: existingSubscription._id,
     });
 
     return res
       .status(200)
-      .json(new ApiResponse(200, null, "Unsubscribed successfully"));
+      .json(new ApiResponse(200, { isSubscribed: false }, "Unsubscribed successfully"));
   }
 
   // 5️⃣ Else → subscribe
@@ -45,7 +44,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Subscribed successfully"));
+    .json(new ApiResponse(200, { isSubscribed: true }, "Subscribed successfully"));
 });
 
 // controller to return subscriber list of a channel

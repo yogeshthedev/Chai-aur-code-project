@@ -17,8 +17,10 @@ import { getUserPlaylistsApi } from "../api/playlist.api";
 import SubscribeButton from "../components/SubscribeButton";
 import NotificationControl from "../components/channel/NotificationControl";
 import VideoCard from "../components/video/VideoCard";
+import { useAuthStore } from "../store/useAuthStore";
 
 const Channel = () => {
+  const { user } = useAuthStore();
   const { username } = useParams();
   const [activeTab, setActiveTab] = useState("videos"); // 'videos' | 'playlists'
   const [copied, setCopied] = useState(false);
@@ -173,13 +175,23 @@ const Channel = () => {
                 <span>{copied ? "Copied" : "Share"}</span>
               </button>
 
-              <NotificationControl initialLevel="personalized" />
-
-              <SubscribeButton
-                channelId={profile._id}
-                isSubscribed={profile.isSubscribed}
-                subscriberCount={profile.subscribersCount || 0}
-              />
+              {user?._id?.toString() === profile._id?.toString() ? (
+                <Link
+                  to="/profile"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] px-3.5 py-2 text-xs font-mono text-[#FAFAF8] transition cursor-pointer"
+                >
+                  <span>Edit Profile</span>
+                </Link>
+              ) : (
+                <>
+                  <NotificationControl initialLevel="personalized" />
+                  <SubscribeButton
+                    channelId={profile._id}
+                    isSubscribed={profile.isSubscribed}
+                    subscriberCount={profile.subscribersCount ?? profile.subscriberCount ?? 0}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>

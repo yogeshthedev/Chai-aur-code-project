@@ -25,7 +25,7 @@ const Register = lazy(() => import("./pages/Register"));
 const PageLoader = () => (
   <div className="w-full min-h-[50vh] flex items-center justify-center">
     <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-[#18181B] border border-white/10 text-[#FAFAF8] font-display font-bold text-xs animate-pulse">
-      R<span className="text-[#FF5A36]">.</span>
+      V<span className="text-[#FF5A36]">.</span>
     </div>
   </div>
 );
@@ -87,10 +87,10 @@ function App() {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center text-[#FAFAF8]">
         <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[#18181B] border border-white/15 text-[#FAFAF8] font-display font-black text-lg animate-pulse">
-          R<span className="text-[#FF5A36]">.</span>
+          V<span className="text-[#FF5A36]">.</span>
         </div>
         <p className="font-mono text-[11px] font-medium text-[#71717A] mt-4 tracking-widest uppercase">
-          Initializing Reelio Index...
+          Initializing Vidra Index...
         </p>
       </div>
     );

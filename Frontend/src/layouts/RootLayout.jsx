@@ -165,7 +165,7 @@ const RootLayout = () => {
             <div className="relative z-10 flex h-full w-64 flex-col justify-between bg-[#0A0A0A] border-r border-white/10 p-4 shadow-2xl">
               <div>
                 <div className="flex items-center justify-between pb-3 border-b border-white/8">
-                  <span className="font-display font-bold text-sm text-[#FAFAF8]">REELIO.</span>
+                  <span className="font-display font-bold text-sm text-[#FAFAF8]">VIDRA.</span>
                   <button
                     type="button"
                     onClick={closeMobileSidebar}

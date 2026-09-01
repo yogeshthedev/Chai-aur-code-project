@@ -20,58 +20,82 @@ const SubscribeButton = ({
       if (!optimistic) return;
 
       await queryClient.cancelQueries({ queryKey: ["video"] });
+      await queryClient.cancelQueries({ queryKey: ["channel-profile"] });
       await queryClient.cancelQueries({ queryKey: ["channel"] });
 
-      const prevVideo = queryClient.getQueryData(["video"]);
-      const prevChannel = queryClient.getQueryData(["channel"]);
-
       queryClient.setQueriesData({ queryKey: ["video"] }, (oldData) => {
-        if (!oldData?.data) return oldData;
+        if (!oldData) return oldData;
+        const currentVideo = oldData.data || oldData;
+        const currentIsSubscribed = Boolean(currentVideo.owner?.isSubscribed ?? currentVideo.isSubscribed);
+        const currentCount = currentVideo.owner?.subscriberCount ?? currentVideo.owner?.subscribersCount ?? currentVideo.subscriberCount ?? 0;
+        const nextIsSubscribed = !currentIsSubscribed;
+        const nextCount = currentIsSubscribed ? Math.max(0, currentCount - 1) : currentCount + 1;
 
-        return {
-          ...oldData,
-          data: {
-            ...oldData.data,
-            owner: {
-              ...oldData.data.owner,
-              isSubscribed: !oldData.data.owner?.isSubscribed,
-              subscriberCount: Math.max(
-                0,
-                (oldData.data.owner?.subscriberCount ?? 0) + (oldData.data.owner?.isSubscribed ? -1 : 1)
-              ),
+        const updatedOwner = currentVideo.owner
+          ? {
+              ...currentVideo.owner,
+              isSubscribed: nextIsSubscribed,
+              subscriberCount: nextCount,
+              subscribersCount: nextCount,
+            }
+          : currentVideo.owner;
+
+        if (oldData.data) {
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              isSubscribed: nextIsSubscribed,
+              owner: updatedOwner,
             },
-          },
-        };
-      });
-
-      queryClient.setQueriesData({ queryKey: ["channel"] }, (oldData) => {
-        if (!oldData?.data) return oldData;
-
+          };
+        }
         return {
           ...oldData,
-          data: {
-            ...oldData.data,
-            isSubscribed: !oldData.data.isSubscribed,
-            subscribersCount: Math.max(
-              0,
-              (oldData.data.subscribersCount ?? 0) + (oldData.data.isSubscribed ? -1 : 1)
-            ),
-          },
+          isSubscribed: nextIsSubscribed,
+          owner: updatedOwner,
         };
       });
 
-      return { prevVideo, prevChannel };
+      queryClient.setQueriesData({ queryKey: ["channel-profile"] }, (oldData) => {
+        if (!oldData) return oldData;
+        const currentProfile = oldData.data || oldData;
+        const currentIsSubscribed = Boolean(currentProfile.isSubscribed);
+        const currentCount = currentProfile.subscribersCount ?? currentProfile.subscriberCount ?? 0;
+        const nextIsSubscribed = !currentIsSubscribed;
+        const nextCount = currentIsSubscribed ? Math.max(0, currentCount - 1) : currentCount + 1;
+
+        if (oldData.data) {
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              isSubscribed: nextIsSubscribed,
+              subscribersCount: nextCount,
+              subscriberCount: nextCount,
+            },
+          };
+        }
+        return {
+          ...oldData,
+          isSubscribed: nextIsSubscribed,
+          subscribersCount: nextCount,
+          subscriberCount: nextCount,
+        };
+      });
     },
-    onError: (err, _, context) => {
-      if (context?.prevVideo) {
-        queryClient.setQueryData(["video"], context.prevVideo);
-      }
-      if (context?.prevChannel) {
-        queryClient.setQueryData(["channel"], context.prevChannel);
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Failed to update subscription");
+    },
+    onSuccess: (res) => {
+      const isSub = res?.data?.isSubscribed;
+      if (typeof isSub === "boolean") {
+        toast.success(isSub ? "Subscribed to channel" : "Unsubscribed from channel");
       }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["video"] });
+      queryClient.invalidateQueries({ queryKey: ["channel-profile"] });
       queryClient.invalidateQueries({ queryKey: ["channel"] });
       queryClient.invalidateQueries({ queryKey: ["channel-videos"] });
     },

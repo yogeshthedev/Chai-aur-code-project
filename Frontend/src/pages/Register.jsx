@@ -102,22 +102,24 @@ const Register = () => {
     e.target.value = "";
   };
 
-  const handleCropComplete = (croppedBlob) => {
+  const handleCropComplete = (croppedFile, previewUrl) => {
     const isAvatar = cropperConfig.cropType === "avatar";
-    const file = new File(
-      [croppedBlob],
-      isAvatar ? "avatar.jpg" : "cover.jpg",
-      { type: "image/jpeg" }
-    );
-    const previewUrl = URL.createObjectURL(croppedBlob);
+    const file = croppedFile instanceof File
+      ? croppedFile
+      : new File(
+          [croppedFile],
+          isAvatar ? "avatar.jpg" : "cover.jpg",
+          { type: "image/jpeg" }
+        );
+    const url = previewUrl || URL.createObjectURL(file);
 
     if (isAvatar) {
       setAvatarFile(file);
-      setAvatarPreview(previewUrl);
+      setAvatarPreview(url);
       setFileError("");
     } else {
       setCoverFile(file);
-      setCoverPreview(previewUrl);
+      setCoverPreview(url);
     }
     setCropperConfig((prev) => ({ ...prev, isOpen: false }));
   };

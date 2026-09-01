@@ -59,6 +59,10 @@ const VideoDetail = () => {
 
   const video = data;
 
+  const currentUserId = user?._id?.toString();
+  const videoOwnerId = (video?.owner?._id || video?.owner)?.toString();
+  const isOwnVideo = Boolean(currentUserId && videoOwnerId && currentUserId === videoOwnerId);
+
   const likeMutation = useMutation({
     mutationFn: () => toggleVideoLikeApi(videoId),
     onMutate: async () => {
@@ -66,16 +70,29 @@ const VideoDetail = () => {
       const previous = queryClient.getQueryData(["video", videoId]);
 
       queryClient.setQueryData(["video", videoId], (old) => {
-        if (!old?.data) return old;
-        const currentIsLiked = Boolean(old.data.isLiked);
-        const currentCount = old.data.likesCount || 0;
+        if (!old) return old;
+        const currentVideo = old.data || old;
+        const currentIsLiked = Boolean(currentVideo.isLiked);
+        const currentCount = currentVideo.likesCount ?? currentVideo.likeCount ?? 0;
+        const nextCount = currentIsLiked ? Math.max(0, currentCount - 1) : currentCount + 1;
+        const nextIsLiked = !currentIsLiked;
+
+        if (old.data) {
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              isLiked: nextIsLiked,
+              likesCount: nextCount,
+              likeCount: nextCount,
+            },
+          };
+        }
         return {
           ...old,
-          data: {
-            ...old.data,
-            isLiked: !currentIsLiked,
-            likesCount: currentIsLiked ? Math.max(0, currentCount - 1) : currentCount + 1,
-          },
+          isLiked: nextIsLiked,
+          likesCount: nextCount,
+          likeCount: nextCount,
         };
       });
 
@@ -208,12 +225,12 @@ const VideoDetail = () => {
                   </p>
                 </div>
 
-                {video.owner?._id && (
+                {!isOwnVideo && video.owner?._id && (
                   <div className="ml-2">
                     <SubscribeButton
                       channelId={video.owner._id}
-                      isSubscribed={video.isSubscribed}
-                      subscriberCount={video.owner?.subscribersCount || 0}
+                      isSubscribed={video.owner?.isSubscribed ?? video.isSubscribed}
+                      subscriberCount={video.owner?.subscribersCount ?? video.owner?.subscriberCount ?? 0}
                     />
                   </div>
                 )}
@@ -237,7 +254,7 @@ const VideoDetail = () => {
                   }`}
                 >
                   <ThumbsUp size={14} className={video.isLiked ? "fill-current" : ""} />
-                  <span>{video.likesCount || 0}</span>
+                  <span>{video.likesCount ?? video.likeCount ?? 0}</span>
                 </button>
 
                 <button

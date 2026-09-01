@@ -202,10 +202,13 @@ const getVideoById = asyncHandler(async (req, res) => {
   const videoResponse = {
     ...video.toObject(),
     likeCount,
+    likesCount: likeCount,
     isLiked,
+    isSubscribed,
     owner: {
       ...video.owner.toObject(),
       subscriberCount,
+      subscribersCount: subscriberCount,
       isSubscribed,
     },
   };

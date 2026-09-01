@@ -14,6 +14,14 @@ const axiosInstance = axios.create({
   },
 });
 
+// Auto-delete Content-Type for FormData requests so browser attaches correct multipart boundary
+axiosInstance.interceptors.request.use((config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+  return config;
+});
+
 // This client refreshes the session without entering the protected-request interceptor.
 const refreshClient = axios.create({
   baseURL: API_BASE_URL,
