@@ -3,19 +3,19 @@ import {
   ArrowLeft,
   Share2,
   ListPlus,
-  UserCircle,
   ThumbsUp,
   ChevronDown,
   ChevronUp,
-  Check,
-  Play,
+  ShieldCheck,
+  MessageSquare,
+  BookOpen,
   ListOrdered,
-  Plus,
+  Check,
+  VideoOff
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { MessageSquare, BookOpen } from "lucide-react";
 import { getVideoByIdApi, getVideosApi } from "../api/video.api";
 import { toggleVideoLikeApi } from "../api/like.api";
 import CommentSection from "../components/CommentSection";
@@ -38,58 +38,54 @@ const VideoDetail = () => {
   const queryClient = useQueryClient();
   const playerRef = useRef(null);
   const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
-  const [activeBottomTab, setActiveBottomTab] = useState("comments"); // 'comments' | 'notes'
+  const [activeBottomTab, setActiveBottomTab] = useState("discussion"); // 'discussion' | 'notes' | 'chapters'
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["video", videoId],
     queryFn: () => getVideoByIdApi(videoId),
     enabled: Boolean(videoId),
+    select: (response) => response?.data,
   });
 
-  // Fetch recommended videos
+  // Fetch recommended videos from backend
   const { data: recommendedData } = useQuery({
-    queryKey: ["videos", { page: 1, limit: 8, query: "" }],
-    queryFn: () => getVideosApi({ page: 1, limit: 8, query: "" }),
+    queryKey: ["videos", { page: 1, limit: 8 }],
+    queryFn: () => getVideosApi({ page: 1, limit: 8 }),
+    select: (response) => response?.data?.videos ?? [],
   });
 
-  const video = data?.data;
-  const recommendedVideos = (recommendedData?.data?.videos ?? []).filter(
-    (v) => v._id !== videoId
-  );
+  const video = data;
 
-  const toggleLikeMutation = useMutation({
+  const likeMutation = useMutation({
     mutationFn: () => toggleVideoLikeApi(videoId),
     onMutate: async () => {
-      // Cancel outgoing refetches so they don't overwrite optimistic update
       await queryClient.cancelQueries({ queryKey: ["video", videoId] });
+      const previous = queryClient.getQueryData(["video", videoId]);
 
-      // Snapshot previous state for rollback
-      const previousVideo = queryClient.getQueryData(["video", videoId]);
-
-      // Optimistically update query cache immediately (0ms)
       queryClient.setQueryData(["video", videoId], (old) => {
         if (!old?.data) return old;
         const currentIsLiked = Boolean(old.data.isLiked);
+        const currentCount = old.data.likesCount || 0;
         return {
           ...old,
           data: {
             ...old.data,
             isLiked: !currentIsLiked,
-            likeCount: Math.max(0, (old.data.likeCount || 0) + (currentIsLiked ? -1 : 1)),
+            likesCount: currentIsLiked ? Math.max(0, currentCount - 1) : currentCount + 1,
           },
         };
       });
 
-      return { previousVideo };
+      return { previous };
     },
-    onError: (err, _, context) => {
-      // Rollback on error
-      if (context?.previousVideo) {
-        queryClient.setQueryData(["video", videoId], context.previousVideo);
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["video", videoId], context.previous);
       }
-      toast.error(err?.response?.data?.message || "Failed to update like status");
+      toast.error("Failed to update like status");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["video", videoId] });
@@ -97,375 +93,350 @@ const VideoDetail = () => {
     },
   });
 
-  const handleShare = async () => {
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard!");
-      }
-    } catch {
-      toast.error("Unable to copy link");
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    toast.success("Video link copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSeek = (time) => {
+    if (playerRef.current && typeof playerRef.current.seekTo === "function") {
+      playerRef.current.seekTo(time);
     }
   };
 
   if (isLoading) {
     return (
       <div className="w-full space-y-6">
-        <div className="h-6 w-32 animate-pulse rounded-lg bg-slate-200/80 dark:bg-zinc-800" />
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="aspect-video w-full animate-pulse rounded-3xl bg-slate-200/80 dark:bg-zinc-800" />
-            <div className="h-7 w-3/4 animate-pulse rounded-lg bg-slate-200/80 dark:bg-zinc-800" />
-            <div className="h-20 w-full animate-pulse rounded-2xl bg-slate-200/80 dark:bg-zinc-800" />
-          </div>
-          <div className="lg:col-span-1 space-y-3">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="flex gap-3 animate-pulse">
-                <div className="h-20 w-36 rounded-2xl bg-slate-200/80 dark:bg-zinc-800 shrink-0" />
-                <div className="flex-1 space-y-2 py-1">
-                  <div className="h-4 w-full rounded bg-slate-200/80 dark:bg-zinc-800" />
-                  <div className="h-3 w-1/2 rounded bg-slate-200/80 dark:bg-zinc-800" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <div className="aspect-video w-full rounded-md bg-[#18181B] border border-white/6 animate-pulse" />
+        <div className="h-20 w-full rounded-md bg-[#18181B] border border-white/6 animate-pulse" />
       </div>
     );
   }
 
   if (isError || !video) {
     return (
-      <div className="mx-auto max-w-lg rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/20 p-8 text-center my-12 shadow-xs">
-        <h2 className="text-lg font-bold text-rose-700 dark:text-rose-300">Video not found</h2>
-        <p className="mt-2 text-xs text-rose-600/80 dark:text-rose-400/80">
-          This video may have been removed or is currently unavailable.
+      <div className="rounded-lg border border-white/8 bg-[#121212] p-12 text-center space-y-4 my-10 max-w-lg mx-auto">
+        <VideoOff size={36} className="mx-auto text-[#71717A]" />
+        <h2 className="font-display font-bold text-lg text-[#FAFAF8]">Video Not Found</h2>
+        <p className="font-mono text-xs text-[#71717A]">
+          This video may have been removed, or the link is broken.
         </p>
         <Link
           to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 border border-slate-300 dark:border-zinc-700 px-5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-700 transition shadow-xs"
+          className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] px-4 py-2 font-mono text-xs font-bold text-[#0A0A0A]"
         >
-          <ArrowLeft size={14} /> Back to feed
+          <ArrowLeft size={13} />
+          <span>Back to Home</span>
         </Link>
       </div>
     );
   }
 
+  const chapters = video.chapters || [];
+  const recommendedVideos = (recommendedData || []).filter((v) => v._id !== videoId);
+
   return (
-    <div className="w-full space-y-6">
-      {/* Top breadcrumb navigation */}
-      <div className="flex items-center justify-between">
+    <div className="w-full space-y-6 pb-16">
+      {/* Top Breadcrumb */}
+      <div className="flex items-center justify-between border-b border-white/8 pb-3">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-mono font-medium text-[#A1A1AA] hover:text-[#FF5A36] transition-colors"
         >
-          <ArrowLeft size={15} /> Back to feed
+          <ArrowLeft size={14} />
+          <span>Home</span>
+          <span className="text-white/20">/</span>
+          <span className="text-[#FAFAF8] truncate max-w-xs">{video.title}</span>
         </Link>
-        <span className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-          Playing in Cinema Mode
-        </span>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-7 lg:gap-8 items-start">
-        {/* Main Watch Column: Player + Details + Comments */}
-        <div className="xl:col-span-8 2xl:col-span-8 3xl:col-span-9 space-y-5">
-          {/* Custom Cinema Video Player with Modular Controls */}
-          <CustomVideoPlayer
-            src={video.videoFile}
-            poster={video.thumbnail}
-            autoPlay
-            playerRef={playerRef}
-            onTimeUpdate={(t) => setPlayerCurrentTime(t)}
-            chapters={video.chapters || []}
-            className="border border-slate-200/90 dark:border-zinc-800"
-          />
+      {/* Main 12-Column Responsive Cinema Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left 8-Column Player & Work Area */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Custom Cinema Player */}
+          <div className="overflow-hidden rounded-lg border border-white/8 bg-black shadow-2xl">
+            <CustomVideoPlayer
+              ref={playerRef}
+              src={video.videoFile}
+              poster={video.thumbnail}
+              title={video.title}
+              onTimeUpdate={setPlayerCurrentTime}
+            />
+          </div>
 
-          {/* Title & Metadata Action Bar */}
-          <div className="space-y-4 pt-1">
-            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-snug">
+          {/* Video Title & Quick Actions */}
+          <div className="space-y-4">
+            <h1 className="font-display font-black text-xl sm:text-2xl text-[#FAFAF8] leading-tight">
               {video.title}
             </h1>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-zinc-800/80">
-              {/* Creator Info & Subscription */}
-              <div className="flex items-center gap-3.5">
+            {/* Author Strip & Action Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/8 pb-4">
+              {/* Channel Info */}
+              <div className="flex items-center gap-3">
                 <Link
                   to={video.owner?.username ? `/c/${video.owner.username}` : "#"}
-                  className="flex items-center gap-3 group"
+                  className="relative shrink-0 rounded-full ring-2 ring-white/10 overflow-hidden"
                 >
-                  <div className="relative">
-                    {video.owner?.avatar ? (
-                      <img
-                        src={video.owner.avatar}
-                        alt={video.owner.fullName || video.owner.username || "Channel"}
-                        className="h-11 w-11 rounded-full object-cover ring-2 ring-slate-200 dark:ring-zinc-800 transition-transform group-hover:scale-105 shadow-sm"
-                      />
-                    ) : (
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 dark:bg-zinc-800 text-sm font-bold text-indigo-700 dark:text-zinc-200 ring-2 ring-slate-200 dark:ring-zinc-800">
-                        {video.owner?.username ? video.owner.username.slice(0, 1).toUpperCase() : "C"}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                        {video.owner?.fullName || video.owner?.username || "Unknown Channel"}
-                      </p>
+                  {video.owner?.avatar ? (
+                    <img
+                      src={video.owner.avatar}
+                      alt={video.owner.username}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center bg-[#18181B] text-[#FAFAF8] text-sm font-bold font-display">
+                      {video.owner?.username?.slice(0, 1).toUpperCase() || "U"}
                     </div>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                      {formatViews(video.owner?.subscriberCount || 0)} subscribers
-                    </p>
-                  </div>
+                  )}
                 </Link>
 
-                {video.owner?._id && user?._id !== video.owner._id && (
+                <div>
+                  <Link
+                    to={video.owner?.username ? `/c/${video.owner.username}` : "#"}
+                    className="flex items-center gap-1.5 font-display font-bold text-sm text-[#FAFAF8] hover:text-[#FF5A36] transition-colors"
+                  >
+                    <span>{video.owner?.fullName || video.owner?.username || "Creator"}</span>
+                    <ShieldCheck size={14} className="text-[#FF5A36]" />
+                  </Link>
+
+                  <p className="font-mono text-xs text-[#71717A]">
+                    @{video.owner?.username || "creator"}
+                  </p>
+                </div>
+
+                {video.owner?._id && (
                   <div className="ml-2">
                     <SubscribeButton
                       channelId={video.owner._id}
-                      isSubscribed={Boolean(video.owner.isSubscribed)}
-                      subscriberCount={video.owner.subscriberCount || 0}
+                      isSubscribed={video.isSubscribed}
+                      subscriberCount={video.owner?.subscribersCount || 0}
                     />
                   </div>
                 )}
               </div>
 
-              {/* Action Buttons Group */}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Like Button */}
+              {/* Action Buttons: Like, Save to Playlist, Share */}
+              <div className="flex items-center gap-2 self-start sm:self-auto">
                 <button
                   type="button"
-                  onClick={() => toggleLikeMutation.mutate()}
-                  disabled={toggleLikeMutation.isPending}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-xs ${
+                  onClick={() => {
+                    if (!user) {
+                      toast.error("Please sign in to like videos");
+                      return;
+                    }
+                    likeMutation.mutate();
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-mono transition-colors cursor-pointer ${
                     video.isLiked
-                      ? "bg-indigo-50 text-indigo-600 border border-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800/60"
-                      : "bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-800"
+                      ? "bg-[#FF5A36] text-[#0A0A0A] font-bold"
+                      : "bg-[#18181B] text-[#FAFAF8] border border-white/10 hover:bg-[#222226]"
                   }`}
                 >
-                  <ThumbsUp size={15} className={video.isLiked ? "fill-current" : ""} />
-                  <span>{formatViews(video.likeCount)}</span>
+                  <ThumbsUp size={14} className={video.isLiked ? "fill-current" : ""} />
+                  <span>{video.likesCount || 0}</span>
                 </button>
 
-                {/* Share Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!user) {
+                      toast.error("Please sign in to save videos to playlists");
+                      return;
+                    }
+                    setIsPlaylistModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] px-3.5 py-2 text-xs font-mono text-[#FAFAF8] transition cursor-pointer"
+                >
+                  <ListPlus size={14} />
+                  <span>Save</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-800 px-4 py-2 text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] px-3.5 py-2 text-xs font-mono text-[#FAFAF8] transition cursor-pointer"
                 >
-                  <Share2 size={15} />
-                  <span>Share</span>
-                </button>
-
-                {/* Save to playlist */}
-                <button
-                  type="button"
-                  onClick={() => setIsPlaylistModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-800 px-4 py-2 text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-xs"
-                >
-                  <ListPlus size={15} />
-                  <span>Save</span>
+                  {copied ? <Check size={14} className="text-[#2DD4BF]" /> : <Share2 size={14} />}
+                  <span>{copied ? "Copied" : "Share"}</span>
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Description Card */}
-          <div
-            onClick={() => setIsDescriptionExpanded((p) => !p)}
-            className="cursor-pointer rounded-3xl border border-slate-200/80 bg-white/90 hover:bg-white dark:border-zinc-800/90 dark:bg-zinc-900/60 dark:hover:bg-zinc-900/80 p-5 md:p-6 transition shadow-xs space-y-3"
-          >
-            <div className="flex items-center gap-3 text-xs font-semibold text-slate-600 dark:text-zinc-400">
-              <span className="font-bold text-slate-900 dark:text-zinc-100">{formatViews(video.views)} views</span>
-              <span>•</span>
-              <span>
-                {video.createdAt
-                  ? new Date(video.createdAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })
-                  : "Recently"}
-              </span>
-            </div>
+            {/* Description Box */}
+            <div className="rounded-lg border border-white/8 bg-[#121212] p-4 space-y-2">
+              <div className="flex items-center gap-3 font-mono text-xs text-[#71717A]">
+                <span>{formatViews(video.views)} views</span>
+                <span>•</span>
+                <span>
+                  {video.createdAt
+                    ? new Date(video.createdAt).toLocaleDateString(undefined, {
+                        month: "long",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "Recently published"}
+                </span>
+              </div>
 
-            <p
-              className={`whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-zinc-300 ${
-                isDescriptionExpanded ? "" : "line-clamp-3"
-              }`}
-            >
-              {video.description || "No description provided."}
-            </p>
-
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-            >
-              {isDescriptionExpanded ? (
-                <>
-                  Show less <ChevronUp size={14} />
-                </>
-              ) : (
-                <>
-                  Show more <ChevronDown size={14} />
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Interactive Bottom Tabs: Comments vs Timestamped Notes */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-zinc-800 pb-1">
-              <button
-                type="button"
-                onClick={() => setActiveBottomTab("comments")}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
-                  activeBottomTab === "comments"
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs"
-                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+              <div
+                className={`font-sans text-xs text-[#D4D4D8] leading-relaxed whitespace-pre-wrap ${
+                  !isDescriptionExpanded && "line-clamp-3"
                 }`}
               >
-                <MessageSquare size={14} />
-                <span>Discussion & Comments</span>
+                {video.description}
+              </div>
+
+              {video.description && video.description.length > 150 && (
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                  className="inline-flex items-center gap-1 font-mono text-xs text-[#FF5A36] hover:underline pt-1 cursor-pointer"
+                >
+                  <span>{isDescriptionExpanded ? "Show less" : "Show more"}</span>
+                  {isDescriptionExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Interactive Bottom Tabs: Discussion | Personal Code Notes | Chapters */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 border-b border-white/8 pb-2">
+              <button
+                type="button"
+                onClick={() => setActiveBottomTab("discussion")}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs transition cursor-pointer ${
+                  activeBottomTab === "discussion"
+                    ? "bg-[#FF5A36]/12 text-[#FF5A36] border border-[#FF5A36]/40 font-semibold"
+                    : "text-[#71717A] hover:text-[#FAFAF8]"
+                }`}
+              >
+                <MessageSquare size={13} />
+                <span>Discussion</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveBottomTab("notes")}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs transition cursor-pointer ${
                   activeBottomTab === "notes"
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                    ? "bg-[#FF5A36]/12 text-[#FF5A36] border border-[#FF5A36]/40 font-semibold"
+                    : "text-[#71717A] hover:text-[#FAFAF8]"
                 }`}
               >
-                <BookOpen size={14} />
-                <span>Personal Notes</span>
+                <BookOpen size={13} />
+                <span>Personal Code Notes</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setActiveBottomTab("chapters")}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
-                  activeBottomTab === "chapters"
-                    ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs"
-                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
-                }`}
-              >
-                <ListOrdered size={14} />
-                <span>Chapters ({video.chapters?.length || 0})</span>
-              </button>
+              {chapters.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setActiveBottomTab("chapters")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono text-xs transition cursor-pointer ${
+                    activeBottomTab === "chapters"
+                      ? "bg-[#FF5A36]/12 text-[#FF5A36] border border-[#FF5A36]/40 font-semibold"
+                      : "text-[#71717A] hover:text-[#FAFAF8]"
+                  }`}
+                >
+                  <ListOrdered size={13} />
+                  <span>Chapters ({chapters.length})</span>
+                </button>
+              )}
             </div>
 
             {/* Tab 1: Comments */}
-            {activeBottomTab === "comments" && (
-              <CommentSection
-                videoId={videoId}
-                likeCount={video.likeCount || 0}
-                isLiked={Boolean(video.isLiked)}
-                videoOwnerId={video.owner?._id}
-              />
+            {activeBottomTab === "discussion" && (
+              <CommentSection videoId={videoId} />
             )}
 
-            {/* Tab 2: Timestamped Notes & Code */}
+            {/* Tab 2: Notes */}
             {activeBottomTab === "notes" && (
               <VideoNotesSection
                 videoId={videoId}
-                currentTime={playerCurrentTime}
-                onSeek={(t) => playerRef.current?.seek(t)}
+                playerCurrentTime={playerCurrentTime}
+                onSeek={handleSeek}
               />
             )}
 
-            {/* Tab 3: Chapters Timeline */}
+            {/* Tab 3: Chapters */}
             {activeBottomTab === "chapters" && (
-              <div className="space-y-3">
-                {(!video.chapters || video.chapters.length === 0) ? (
-                  <div className="flex min-h-40 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-8 text-center text-slate-500 dark:text-zinc-400">
-                    <ListOrdered size={28} className="mb-2 text-slate-400 dark:text-zinc-500" />
-                    <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">No chapters configured</h4>
-                    <p className="mt-1 text-[11px] max-w-xs">
-                      The creator has not marked specific chapter milestones for this video.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-2.5 sm:grid-cols-2">
-                    {video.chapters.map((ch, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => playerRef.current?.seek(ch.startTime)}
-                        className="group flex items-start gap-3 rounded-2xl border border-slate-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 p-3.5 text-left hover:border-indigo-500/50 hover:shadow-md transition active:scale-98 cursor-pointer"
-                      >
-                        <span className="flex h-7 px-2 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition">
-                          {formatTime(ch.startTime)}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
-                            {ch.title}
-                          </h4>
-                          {ch.description && (
-                            <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
-                              {ch.description}
-                            </p>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
+              <div className="rounded-lg border border-white/8 bg-[#121212] divide-y divide-white/6">
+                {chapters.map((chap, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSeek(chap.startTime)}
+                    className="w-full p-3.5 flex items-center justify-between hover:bg-[#18181B] transition text-left cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-bold text-[#FF5A36] bg-[#FF5A36]/10 px-2 py-0.5 rounded border border-[#FF5A36]/20">
+                        {formatTime(chap.startTime)}
+                      </span>
+                      <span className="font-display font-bold text-xs sm:text-sm text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors">
+                        {chap.title}
+                      </span>
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </div>
         </div>
 
-        {/* Sidebar - Up Next (Sticky on Desktop) */}
-        <div className="xl:col-span-4 2xl:col-span-4 3xl:col-span-3 space-y-4 xl:sticky xl:top-20">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-zinc-100">
-              Related Videos
-            </h2>
-            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">
-              {recommendedVideos.length} recommendations
+        {/* Right 4-Column Recommended Publications */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="flex items-center justify-between border-b border-white/8 pb-2">
+            <h3 className="font-display font-bold text-sm text-[#FAFAF8]">
+              Recommended
+            </h3>
+            <span className="font-mono text-xs text-[#71717A]">
+              {recommendedVideos.length} videos
             </span>
           </div>
 
           <div className="space-y-3">
-            {recommendedVideos.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 p-6 text-center text-xs text-slate-500 dark:text-zinc-500">
-                No related videos found at this moment.
-              </div>
-            ) : (
-              recommendedVideos.map((rec) => (
-                <Link
-                  key={rec._id}
-                  to={`/videos/${rec._id}`}
-                  className="group flex gap-3.5 rounded-2xl p-2.5 transition-all duration-200 bg-white/60 hover:bg-white dark:bg-zinc-900/40 dark:hover:bg-zinc-900 border border-slate-200/70 hover:border-slate-300 dark:border-zinc-800/80 dark:hover:border-zinc-700 shadow-2xs hover:shadow-xs"
-                >
-                  <div className="relative aspect-video h-20 w-36 shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-800 border border-slate-200/80 dark:border-zinc-800">
-                    <img
-                      src={rec.thumbnail}
-                      alt={rec.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 flex flex-col justify-center py-0.5">
-                    <h3 className="line-clamp-2 text-xs font-bold leading-snug text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {rec.title}
-                    </h3>
-                    <p className="mt-1 truncate text-[11px] font-medium text-slate-500 dark:text-zinc-400">
-                      {rec.owner?.fullName || rec.owner?.username || "Creator"}
-                    </p>
-                    <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-0.5">
-                      {formatViews(rec.views)} views
-                    </p>
-                  </div>
-                </Link>
-              ))
-            )}
+            {recommendedVideos.map((rec) => (
+              <Link
+                key={rec._id}
+                to={`/videos/${rec._id}`}
+                className="flex gap-3 group p-2 rounded-md hover:bg-[#121212] transition"
+              >
+                {/* 16:9 Mini Thumbnail */}
+                <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded bg-[#18181B] border border-white/8">
+                  <img
+                    src={rec.thumbnail}
+                    alt={rec.title}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {rec.duration !== undefined && (
+                    <span className="absolute bottom-1 right-1 rounded-xs bg-black/90 px-1 py-0.2 font-mono text-[9px] text-[#FAFAF8]">
+                      {formatTime(rec.duration)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <h4 className="font-display font-bold text-xs text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors line-clamp-2 leading-snug">
+                    {rec.title}
+                  </h4>
+                  <p className="font-mono text-[11px] text-[#71717A] truncate">
+                    {rec.owner?.fullName || rec.owner?.username || "Creator"}
+                  </p>
+                  <p className="font-mono text-[10px] text-[#71717A]">
+                    {formatViews(rec.views)} views
+                  </p>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
 
+      {/* Save to Playlist Modal */}
       <SaveToPlaylistModal
         isOpen={isPlaylistModalOpen}
         onClose={() => setIsPlaylistModalOpen(false)}
@@ -476,5 +447,3 @@ const VideoDetail = () => {
 };
 
 export default VideoDetail;
-
-

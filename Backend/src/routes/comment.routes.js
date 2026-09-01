@@ -5,13 +5,15 @@ import {
     getVideoComments,
     updateComment,
 } from "../controllers/comment.controller.js"
-import {verifyJWT} from "../middlewares/auth.middleware.js"
+import { optionalVerifyJWT, verifyJWT } from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
+// Public route to get video comments
+router.route("/:videoId").get(optionalVerifyJWT, getVideoComments);
 
-router.route("/:videoId").get(getVideoComments).post(addComment);
-router.route("/c/:commentId").delete(deleteComment).patch(updateComment);
+// Protected routes (require auth)
+router.route("/:videoId").post(verifyJWT, addComment);
+router.route("/c/:commentId").delete(verifyJWT, deleteComment).patch(verifyJWT, updateComment);
 
 export default router

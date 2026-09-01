@@ -6,11 +6,10 @@ import {
   VideoOff,
   X,
   ListVideo,
-  Sparkles,
   Play,
   Film,
-  Layers,
-  User,
+  Share2,
+  Check
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -21,16 +20,19 @@ import {
   removeVideoFromPlaylistApi,
   updatePlaylistApi,
 } from "../api/playlist.api";
-import VideoCard from "../components/video/VideoCard";
 import { confirmToast } from "../utils/confirmToast";
+import { formatTime } from "../components/player/useVideoPlayer";
+import { useAuthStore } from "../store/useAuthStore";
 
 const PlaylistDetail = () => {
   const { playlistId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["playlist", playlistId],
@@ -40,6 +42,7 @@ const PlaylistDetail = () => {
   });
 
   const playlist = data;
+  const isOwner = Boolean(user?._id && (playlist?.owner?._id === user._id || playlist?.owner === user._id));
 
   const updateMutation = useMutation({
     mutationFn: updatePlaylistApi,
@@ -50,8 +53,8 @@ const PlaylistDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
     },
     onError: (error) => {
-      const message = error?.response?.data?.message || "Unable to update playlist";
-      toast.error(message);
+      const msg = error?.response?.data?.message || "Failed to update playlist";
+      toast.error(msg);
     },
   });
 
@@ -62,8 +65,8 @@ const PlaylistDetail = () => {
       navigate("/playlists");
     },
     onError: (error) => {
-      const message = error?.response?.data?.message || "Unable to delete playlist";
-      toast.error(message);
+      const msg = error?.response?.data?.message || "Failed to delete playlist";
+      toast.error(msg);
     },
   });
 
@@ -74,64 +77,56 @@ const PlaylistDetail = () => {
       queryClient.invalidateQueries({ queryKey: ["playlist", playlistId] });
     },
     onError: (error) => {
-      const message = error?.response?.data?.message || "Unable to remove video";
-      toast.error(message);
+      const msg = error?.response?.data?.message || "Failed to remove video";
+      toast.error(msg);
     },
   });
 
   const handleSave = (event) => {
     event.preventDefault();
-    if (!name.trim() && !description.trim()) {
-      toast.error("Enter a name or description to update");
+    if (!name.trim()) {
+      toast.error("Please enter a title");
       return;
     }
 
     updateMutation.mutate({
       playlistId,
       payload: {
-        ...(name.trim() ? { name: name.trim() } : {}),
-        ...(description.trim() ? { description: description.trim() } : {}),
+        name: name.trim(),
+        description: description.trim(),
       },
     });
   };
 
-  const handleDeletePlaylist = () => {
-    confirmToast({
-      title: `Delete playlist "${playlist?.name}"?`,
-      message: "This playlist collection will be permanently deleted.",
-      confirmText: "Delete Playlist",
-      onConfirm: () => {
-        const promise = deleteMutation.mutateAsync(playlistId);
-        toast.promise(promise, {
-          loading: "Deleting playlist...",
-          success: "Playlist deleted",
-          error: "Unable to delete playlist",
-        });
-      },
-    });
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    toast.success("Playlist link copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (isLoading) {
     return (
       <div className="w-full space-y-6">
-        <div className="h-6 w-32 animate-pulse rounded-lg bg-slate-200/80 dark:bg-zinc-800" />
-        <div className="h-64 w-full animate-pulse rounded-3xl bg-slate-200/80 dark:bg-zinc-800" />
+        <div className="h-6 w-32 animate-pulse rounded bg-[#18181B]" />
+        <div className="h-48 w-full animate-pulse rounded-lg bg-[#18181B]" />
       </div>
     );
   }
 
   if (isError || !playlist) {
     return (
-      <div className="mx-auto max-w-lg rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/50 p-8 text-center my-12 shadow-xs">
-        <h2 className="text-lg font-bold text-rose-700 dark:text-rose-300">Playlist not found</h2>
-        <p className="mt-1 text-xs text-rose-600/80 dark:text-rose-400/80">
-          This playlist may have been deleted or does not exist.
+      <div className="rounded-lg border border-white/8 bg-[#121212] p-12 text-center space-y-4 my-10 max-w-lg mx-auto">
+        <h2 className="font-display font-bold text-lg text-[#FAFAF8]">Playlist Not Found</h2>
+        <p className="font-mono text-xs text-[#71717A]">
+          This playlist does not exist or may have been deleted.
         </p>
         <Link
           to="/playlists"
-          className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 border border-slate-300 dark:border-zinc-700 px-5 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-700 transition shadow-xs"
+          className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] px-4 py-2 font-mono text-xs font-bold text-[#0A0A0A]"
         >
-          <ArrowLeft size={14} /> Back to playlists
+          <ArrowLeft size={13} />
+          <span>Back to Playlists</span>
         </Link>
       </div>
     );
@@ -142,20 +137,26 @@ const PlaylistDetail = () => {
   const coverImage = firstVideo?.thumbnail;
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-7 pb-16">
       {/* Top Breadcrumb */}
-      <Link
-        to="/playlists"
-        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-      >
-        <ArrowLeft size={15} /> Back to collections
-      </Link>
+      <div className="flex items-center justify-between border-b border-white/8 pb-3">
+        <Link
+          to="/playlists"
+          className="inline-flex items-center gap-2 text-xs font-mono font-medium text-[#A1A1AA] hover:text-[#FF5A36] transition-colors"
+        >
+          <ArrowLeft size={14} />
+          <span>Playlists</span>
+          <span className="text-white/20">/</span>
+          <span className="text-[#FAFAF8] truncate max-w-xs">{playlist.name}</span>
+        </Link>
+      </div>
 
-      {/* Playlist Hero Showcase Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-zinc-800 bg-gradient-to-br from-indigo-50/80 via-white to-slate-50/80 dark:from-zinc-900 dark:via-zinc-900/90 dark:to-zinc-950 p-6 md:p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-center">
-          {/* Album Cover Art */}
-          <div className="relative aspect-video md:aspect-square w-full md:w-56 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-800 shadow-xl flex items-center justify-center group">
+      {/* Playlist Hero Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Playlist Card */}
+        <div className="lg:col-span-4 rounded-lg border border-white/8 bg-[#121212] p-5 space-y-5 lg:sticky lg:top-20">
+          {/* Cover Artwork */}
+          <div className="relative aspect-video lg:aspect-4/3 w-full overflow-hidden rounded-md bg-[#18181B] border border-white/8 flex items-center justify-center group">
             {coverImage ? (
               <img
                 src={coverImage}
@@ -163,204 +164,269 @@ const PlaylistDetail = () => {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="flex flex-col items-center justify-center text-white/90 gap-2 p-6 text-center">
+              <div className="flex flex-col items-center justify-center text-[#71717A] gap-2 p-6 text-center">
                 <ListVideo size={36} />
-                <span className="text-xs font-bold uppercase tracking-wider opacity-80">Collection</span>
+                <span className="font-mono text-xs uppercase">Empty Playlist</span>
               </div>
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent opacity-80" />
 
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              {firstVideo && (
-                <Link
-                  to={`/videos/${firstVideo._id}`}
-                  className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-indigo-600 shadow-xl transform scale-90 group-hover:scale-100 transition-transform"
-                >
+            {firstVideo && (
+              <Link
+                to={`/videos/${firstVideo._id}`}
+                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FF5A36] text-[#0A0A0A] shadow-xl hover:scale-105 transition-transform">
                   <Play size={20} className="fill-current ml-0.5" />
-                </Link>
-              )}
-            </div>
+                </div>
+              </Link>
+            )}
           </div>
 
-          {/* Playlist Info & Meta */}
-          <div className="min-w-0 flex-1 space-y-3">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-              <Sparkles size={13} />
-              <span>Playlist Collection</span>
+          {/* Metadata */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="rounded-xs bg-[#FF5A36]/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#FF5A36] border border-[#FF5A36]/20">
+                Collection
+              </span>
+              <span className="font-mono text-xs text-[#71717A]">
+                {videos.length} {videos.length === 1 ? "video" : "videos"}
+              </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100 leading-tight">
+            <h1 className="font-display font-black text-xl sm:text-2xl text-[#FAFAF8] leading-snug">
               {playlist.name}
             </h1>
 
-            <p className="text-xs md:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed max-w-2xl">
-              {playlist.description || "No description provided."}
-            </p>
+            {playlist.description && (
+              <p className="font-sans text-xs leading-relaxed text-[#A1A1AA]">
+                {playlist.description}
+              </p>
+            )}
 
-            <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-500 dark:text-zinc-400">
-              <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                {videos.length} {videos.length === 1 ? "video" : "videos"}
-              </span>
-              <span>•</span>
-              <span>
-                Created {playlist.createdAt ? new Date(playlist.createdAt).toLocaleDateString() : "recently"}
-              </span>
-            </div>
-
-            {/* Actions Bar */}
-            <div className="flex flex-wrap items-center gap-3 pt-3">
+            {/* Action Buttons */}
+            <div className="pt-3 border-t border-white/6 flex flex-col gap-2">
               {firstVideo && (
                 <Link
                   to={`/videos/${firstVideo._id}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-bold shadow-md shadow-indigo-500/25 active:scale-95 transition cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] py-2.5 px-4 font-mono text-xs font-bold transition active:scale-95 cursor-pointer shadow-sm"
                 >
-                  <Play size={15} className="fill-current" />
+                  <Play size={14} className="fill-current" />
                   <span>Play All</span>
                 </Link>
               )}
 
-              <button
-                type="button"
-                onClick={() => {
-                  setName(playlist.name || "");
-                  setDescription(playlist.description || "");
-                  setIsEditModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-xs font-semibold text-slate-800 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-700 active:scale-95 transition cursor-pointer shadow-xs"
-              >
-                <Edit3 size={14} />
-                <span>Edit Playlist</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] py-2 text-xs font-mono text-[#FAFAF8] transition cursor-pointer"
+                >
+                  {copied ? <Check size={13} className="text-[#2DD4BF]" /> : <Share2 size={13} />}
+                  <span>{copied ? "Copied" : "Share"}</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleDeletePlaylist}
-                disabled={deleteMutation.isPending}
-                className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/30 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 active:scale-95 transition cursor-pointer shadow-xs"
-              >
-                <Trash2 size={14} />
-                <span>Delete</span>
-              </button>
+                {isOwner && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setName(playlist.name || "");
+                        setDescription(playlist.description || "");
+                        setIsEditModalOpen(true);
+                      }}
+                      className="p-2 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] text-[#FAFAF8] transition cursor-pointer"
+                      title="Edit playlist"
+                    >
+                      <Edit3 size={14} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        confirmToast({
+                          title: `Delete "${playlist.name}"?`,
+                          message: "This playlist will be permanently deleted.",
+                          confirmText: "Delete",
+                          onConfirm: () => {
+                            deleteMutation.mutate(playlistId);
+                          },
+                        });
+                      }}
+                      className="p-2 rounded-md border border-rose-900/30 bg-rose-950/20 hover:bg-rose-950/40 text-rose-400 transition cursor-pointer"
+                      title="Delete playlist"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Videos Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-zinc-800/80 pb-3">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100">
-            Playlist Videos ({videos.length})
-          </h2>
+        {/* Right Column: Video Sequence List */}
+        <div className="lg:col-span-8 space-y-3">
+          <div className="flex items-center justify-between border-b border-white/8 pb-3">
+            <div className="flex items-center gap-2">
+              <Film size={15} className="text-[#FF5A36]" />
+              <h2 className="font-display font-bold text-base text-[#FAFAF8]">
+                Playlist Videos ({videos.length})
+              </h2>
+            </div>
+          </div>
+
+          {videos.length === 0 ? (
+            <div className="rounded-lg border border-white/8 bg-[#121212] p-12 text-center space-y-3">
+              <VideoOff size={32} className="mx-auto text-[#71717A]" />
+              <h3 className="font-display font-bold text-sm text-[#FAFAF8]">
+                No videos in this playlist
+              </h3>
+              <p className="font-mono text-xs text-[#71717A] max-w-xs mx-auto">
+                Save videos to this playlist while browsing to build your collection.
+              </p>
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] px-4 py-2 font-mono text-xs font-bold text-[#0A0A0A]"
+              >
+                Browse Videos
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {videos.map((video, idx) => {
+                const numStr = (idx + 1).toString().padStart(2, "0");
+                return (
+                  <div
+                    key={video._id}
+                    className="flex items-center gap-3.5 rounded-lg border border-white/6 bg-[#121212] hover:bg-[#18181B] hover:border-white/16 p-3 transition-colors group"
+                  >
+                    {/* Track Number */}
+                    <span className="font-mono text-xs font-bold text-[#71717A] group-hover:text-[#FF5A36] transition-colors w-6 text-center shrink-0">
+                      {numStr}
+                    </span>
+
+                    {/* Thumbnail */}
+                    <Link
+                      to={`/videos/${video._id}`}
+                      className="relative aspect-video h-16 w-28 shrink-0 overflow-hidden rounded bg-[#18181B] border border-white/8 cursor-pointer"
+                    >
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {video.duration !== undefined && (
+                        <span className="absolute bottom-1 right-1 rounded-xs bg-black/90 px-1 py-0.2 font-mono text-[9px] text-[#FAFAF8]">
+                          {formatTime(video.duration)}
+                        </span>
+                      )}
+                    </Link>
+
+                    {/* Details */}
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        to={`/videos/${video._id}`}
+                        className="font-display font-bold text-xs sm:text-sm text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors line-clamp-1 block"
+                      >
+                        {video.title}
+                      </Link>
+
+                      <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-[11px] text-[#71717A]">
+                        <span className="text-[#A1A1AA]">
+                          {video.owner?.fullName || video.owner?.username || "Creator"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Remove Action */}
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          confirmToast({
+                            title: "Remove from playlist?",
+                            message: `Remove "${video.title}" from this playlist?`,
+                            confirmText: "Remove",
+                            onConfirm: () => {
+                              removeVideoMutation.mutate({ playlistId, videoId: video._id });
+                            },
+                          });
+                        }}
+                        className="p-1.5 rounded text-[#71717A] hover:text-[#EF4444] opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer shrink-0"
+                        title="Remove from playlist"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-
-        {videos.length === 0 ? (
-          <div className="flex min-h-56 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-8 text-center text-slate-500 dark:text-zinc-400">
-            <VideoOff size={32} className="mb-2 text-slate-400 dark:text-zinc-500" />
-            <h3 className="text-sm font-bold text-slate-900 dark:text-zinc-100">No videos in this playlist</h3>
-            <p className="mt-1 text-xs max-w-xs">
-              Browse videos in the feed and click "Save" on any video to add it to this collection.
-            </p>
-            <Link
-              to="/"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
-            >
-              Browse Videos
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
-            {videos.map((video) => (
-              <div key={video._id} className="relative group">
-                <VideoCard video={video} />
-                <button
-                  type="button"
-                  onClick={() => {
-                    confirmToast({
-                      title: "Remove from playlist?",
-                      message: `Remove "${video.title}" from this collection?`,
-                      confirmText: "Remove",
-                      onConfirm: () => {
-                        const promise = removeVideoMutation.mutateAsync({ playlistId, videoId: video._id });
-                        toast.promise(promise, {
-                          loading: "Removing video...",
-                          success: "Video removed from playlist",
-                          error: "Unable to remove video",
-                        });
-                      },
-                    });
-                  }}
-                  className="absolute right-2.5 top-2.5 z-10 rounded-full bg-black/80 hover:bg-rose-600 p-1.5 text-white opacity-0 transition group-hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer shadow-md backdrop-blur-xs"
-                  aria-label="Remove video from playlist"
-                  title="Remove from playlist"
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Edit Details Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/80 backdrop-blur-xs"
             onClick={() => setIsEditModalOpen(false)}
           />
 
-          <div className="relative w-full max-w-md rounded-3xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 sm:p-7 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-zinc-800/80">
-              <h2 className="text-base font-bold text-slate-900 dark:text-zinc-100">
+          <div className="relative w-full max-w-md rounded-lg border border-white/12 bg-[#121212] p-6 shadow-2xl z-10 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/8">
+              <h2 className="font-display font-bold text-sm text-[#FAFAF8]">
                 Edit Playlist Details
               </h2>
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition cursor-pointer"
+                className="p-1 rounded text-[#71717A] hover:text-[#FAFAF8]"
               >
-                <X size={16} />
+                <X size={15} />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="mt-5 space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+            <form onSubmit={handleSave} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="font-mono text-xs text-[#71717A] uppercase tracking-wider">
                   Playlist Title
                 </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-800/70 px-4 py-2.5 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
+                  className="w-full rounded-md border border-white/10 bg-[#18181B] px-3 py-2 text-xs text-[#FAFAF8] outline-none focus:border-[#FF5A36]"
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+              <div className="space-y-1">
+                <label className="font-mono text-xs text-[#71717A] uppercase tracking-wider">
                   Description
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-800/70 px-4 py-2.5 text-sm text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition resize-none"
+                  className="w-full rounded-md border border-white/10 bg-[#18181B] px-3 py-2 text-xs text-[#FAFAF8] outline-none focus:border-[#FF5A36] resize-none"
                 />
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-zinc-800/80">
+              <div className="pt-2 border-t border-white/8 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="rounded-full px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition cursor-pointer"
+                  className="px-3 py-1.5 font-mono text-xs text-[#71717A] hover:text-[#FAFAF8]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updateMutation.isPending}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700 active:scale-95 disabled:opacity-50 transition cursor-pointer"
+                  className="rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-4 py-1.5 font-mono text-xs font-bold text-[#0A0A0A]"
                 >
-                  <span>{updateMutation.isPending ? "Saving..." : "Save Changes"}</span>
+                  {updateMutation.isPending ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -372,5 +438,3 @@ const PlaylistDetail = () => {
 };
 
 export default PlaylistDetail;
-
-

@@ -19,6 +19,7 @@ const PlayerControls = ({
   duration,
   bufferedPercent,
   chapters = [],
+  segments = [],
   volume,
   isMuted,
   playbackRate,
@@ -45,12 +46,13 @@ const PlayerControls = ({
         showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
     >
-      {/* Dynamic Scrub Progress Bar with Chapters & Hover Tooltip */}
+      {/* Dynamic Scrub Progress Bar with Chapters, Skip Segments & Hover Tooltip */}
       <ProgressBar
         currentTime={currentTime}
         duration={duration}
         bufferedPercent={bufferedPercent}
         chapters={chapters}
+        segments={segments}
         onSeek={onSeek}
       />
 
@@ -117,7 +119,7 @@ const PlayerControls = ({
         <div className="flex items-center gap-1 sm:gap-1.5">
           {/* Quick Playback Speed Indicator */}
           {playbackRate !== 1 && (
-            <span className="rounded-md bg-indigo-600/80 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-white">
+            <span className="rounded bg-[#FF5A36] px-1.5 py-0.2 font-mono text-[10px] font-bold tracking-wider text-[#0A0A0A]">
               {playbackRate}x
             </span>
           )}
@@ -130,7 +132,7 @@ const PlayerControls = ({
               aria-label="Picture in Picture (P)"
               title="Picture in Picture (P)"
               className={`hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/15 active:scale-95 transition cursor-pointer ${
-                isPiP ? "text-indigo-400 bg-white/15" : ""
+                isPiP ? "text-[#FF5A36] bg-white/15" : ""
               }`}
             >
               <PictureInPicture2 size={18} />
@@ -144,7 +146,7 @@ const PlayerControls = ({
             aria-label="Theater Mode (T)"
             title="Theater Mode (T)"
             className={`hidden sm:flex h-9 w-9 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/15 active:scale-95 transition cursor-pointer ${
-              isTheaterMode ? "text-indigo-400 bg-white/15" : ""
+              isTheaterMode ? "text-[#FF5A36] bg-white/15" : ""
             }`}
           >
             <Tv size={18} />

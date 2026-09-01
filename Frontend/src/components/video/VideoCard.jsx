@@ -1,6 +1,8 @@
+import React from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "react-router-dom";
-import { Play, CheckCircle2 } from "lucide-react";
+import { Play } from "lucide-react";
+import { formatTime } from "../player/useVideoPlayer";
 
 const formatViews = (views = 0) => {
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
@@ -8,91 +10,86 @@ const formatViews = (views = 0) => {
   return views.toString();
 };
 
-const formatDuration = (duration = 0) => {
-  const minutes = Math.floor(duration / 60);
-  const seconds = Math.floor(duration % 60).toString().padStart(2, "0");
-  return `${minutes}:${seconds}`;
-};
-
 const VideoCard = ({ video }) => {
   if (!video) return null;
 
   return (
-    <div className="group flex flex-col min-w-0 transition-transform duration-200">
-      {/* Video Thumbnail Link */}
-      <Link
-        to={`/videos/${video._id}`}
-        className="relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs group-hover:shadow-md transition-all duration-300"
-      >
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-        />
+    <div className="group flex flex-col min-w-0 transition-colors duration-150">
+      {/* Video Thumbnail Frame (16:9 ratio, 8px radius, subtle border) */}
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-[#121212] border border-white/8 transition-all duration-200 group-hover:border-white/20">
+        <Link to={`/videos/${video._id}`} className="block h-full w-full">
+          <img
+            src={video.thumbnail}
+            alt={video.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
 
-        {/* Subtle gradient vignette on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Vignette Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50 group-hover:opacity-75 transition-opacity duration-200" />
 
-        {/* Hover Play Button Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/95 dark:bg-zinc-900/90 text-indigo-600 dark:text-indigo-400 shadow-xl backdrop-blur-md transform scale-90 group-hover:scale-100 transition-transform duration-200">
-            <Play size={20} className="fill-current ml-0.5" />
+          {/* Center Play Icon on Hover */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FF5A36] text-[#0A0A0A] shadow-xl">
+              <Play size={18} className="fill-current ml-0.5" />
+            </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Duration Badge */}
+        {/* Bottom Duration Badge (JetBrains Mono) */}
         {video.duration !== undefined && (
-          <span className="absolute bottom-2.5 right-2.5 rounded-lg bg-black/75 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur-md shadow-sm">
-            {formatDuration(video.duration)}
-          </span>
+          <div className="absolute bottom-2 right-2 rounded-xs bg-[#0A0A0A]/90 px-1.5 py-0.5 text-[10px] font-mono text-[#FAFAF8] border border-white/10 backdrop-blur-md">
+            {formatTime(video.duration)}
+          </div>
         )}
-      </Link>
+      </div>
 
-      {/* Video Meta Info */}
-      <div className="mt-3.5 flex gap-3 min-w-0">
+      {/* Video Details & Meta Information */}
+      <div className="mt-3 flex gap-3 min-w-0">
         {/* Channel Avatar */}
         <Link
           to={video.owner?.username ? `/c/${video.owner.username}` : "#"}
-          className="shrink-0 transition-transform hover:scale-105 active:scale-95 pt-0.5"
-          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 pt-0.5 group/avatar"
         >
           {video.owner?.avatar ? (
             <img
               src={video.owner.avatar}
               alt={video.owner.username || "Channel"}
-              className="h-10 w-10 rounded-full object-cover ring-1 ring-slate-200 dark:ring-zinc-800"
+              className="h-9 w-9 rounded-full object-cover ring-1 ring-white/10 group-hover/avatar:ring-[#FF5A36] transition-all duration-150"
             />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-zinc-800 text-xs font-bold text-indigo-700 dark:text-zinc-200 ring-1 ring-slate-200 dark:ring-zinc-800">
-              {video.owner?.username ? video.owner.username.slice(0, 1).toUpperCase() : "V"}
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#18181B] text-xs font-bold text-[#FAFAF8] ring-1 ring-white/10">
+              {video.owner?.username ? video.owner.username.slice(0, 1).toUpperCase() : "U"}
             </div>
           )}
         </Link>
 
-        {/* Title & Metadata */}
+        {/* Video Title & Secondary Metadata */}
         <div className="min-w-0 flex-1">
           <Link to={`/videos/${video._id}`} className="block">
-            <h3 className="line-clamp-2 text-[15px] sm:text-base font-bold leading-snug tracking-tight text-slate-900 dark:text-zinc-100 transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+            <h3 className="font-display font-bold text-sm sm:text-[15px] leading-snug text-[#FAFAF8] line-clamp-2 transition-colors duration-150 group-hover:text-[#FF5A36]">
               {video.title}
             </h3>
           </Link>
 
-          <Link
-            to={video.owner?.username ? `/c/${video.owner.username}` : "#"}
-            className="mt-1 inline-flex items-center gap-1 truncate text-xs font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span>{video.owner?.fullName || video.owner?.username || "Unknown Creator"}</span>
-          </Link>
+          {/* Channel Name */}
+          <div className="mt-1 flex items-center gap-1.5 truncate text-xs font-medium text-[#A1A1AA] hover:text-[#FAFAF8] transition-colors">
+            <Link
+              to={video.owner?.username ? `/c/${video.owner.username}` : "#"}
+              className="truncate hover:underline"
+            >
+              {video.owner?.fullName || video.owner?.username || "Creator"}
+            </Link>
+          </div>
 
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-500">
+          {/* Metrics Line (Views • Timestamp) */}
+          <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-mono text-[#71717A]">
             <span>{formatViews(video.views)} views</span>
             <span>•</span>
             <span>
               {video.createdAt
                 ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true })
-                : "Just now"}
+                : "Recently"}
             </span>
           </div>
         </div>
@@ -102,5 +99,3 @@ const VideoCard = ({ video }) => {
 };
 
 export default VideoCard;
-
-

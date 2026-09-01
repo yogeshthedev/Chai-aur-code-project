@@ -12,7 +12,7 @@ const ProtectedRoute = () => {
   return isAuthenticated ? (
     <Outlet />
   ) : (
-    <Navigate to="/login" replace state={{ from: location }} />
+    <Navigate to="/login" replace state={{ backgroundLocation: { pathname: "/" }, from: location }} />
   );
 };
 

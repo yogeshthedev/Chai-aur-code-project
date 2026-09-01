@@ -15,33 +15,33 @@ const Input = forwardRef(
     ref
   ) => {
     return (
-      <div className="w-full space-y-1.5 text-left">
+      <div className="w-full space-y-1 text-left">
         {label && (
-          <label className="block text-xs font-semibold tracking-wide text-slate-600 dark:text-zinc-400 uppercase">
-            {label} {required && <span className="text-indigo-600 dark:text-indigo-400">*</span>}
+          <label className="block font-mono text-xs text-[#71717A] uppercase tracking-wider">
+            {label} {required && <span className="text-[#FF5A36]">*</span>}
           </label>
         )}
-        <div className="relative rounded-2xl">
+        <div className="relative">
           {Icon && (
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-zinc-500">
-              <Icon className="w-4 h-4" />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717A]">
+              <Icon className="w-3.5 h-3.5" />
             </div>
           )}
           <input
             ref={ref}
             type={type}
             placeholder={placeholder}
-            className={`w-full px-4 py-2.5 text-sm bg-slate-50/80 dark:bg-zinc-850 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 rounded-2xl border transition-all duration-200 outline-none focus:ring-2 focus:ring-indigo-500/20 ${
-              Icon ? "pl-10" : ""
+            className={`w-full px-3.5 py-2 text-xs bg-[#18181B] text-[#FAFAF8] placeholder:text-[#71717A] rounded-md border transition-colors outline-none focus:border-[#FF5A36] ${
+              Icon ? "pl-9" : ""
             } ${
               error
-                ? "border-rose-500 focus:border-rose-500 text-rose-900 dark:text-rose-200"
-                : "border-slate-200 dark:border-zinc-700/80 focus:border-indigo-500/80 hover:border-slate-300 dark:hover:border-zinc-600"
+                ? "border-rose-500 text-rose-300"
+                : "border-white/10 hover:border-white/20"
             } ${className}`}
             {...props}
           />
         </div>
-        {error && <p className="text-xs text-rose-500 mt-1">{error}</p>}
+        {error && <p className="font-mono text-[11px] text-rose-500 mt-1">{error}</p>}
       </div>
     );
   }
@@ -50,5 +50,3 @@ const Input = forwardRef(
 Input.displayName = "Input";
 
 export default Input;
-
-

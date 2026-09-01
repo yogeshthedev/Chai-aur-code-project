@@ -9,14 +9,14 @@ const ThemeToggle = () => {
     <button
       type="button"
       onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-300 transition-all duration-200 hover:scale-105 active:scale-95 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-700 outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+      aria-label={isDark ? "Switch to Creamy Light mode" : "Switch to Dark mode"}
+      title={isDark ? "Switch to Creamy Light mode" : "Switch to Dark mode"}
+      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-[#18181B] text-[#A1A1AA] hover:text-[#FAFAF8] hover:border-white/20 transition-all duration-150 active:scale-95 cursor-pointer"
     >
       {isDark ? (
-        <Sun size={17} className="transition-transform duration-300 rotate-0 hover:rotate-45" />
+        <Sun size={15} className="text-[#E5A93C] transition-transform duration-200 hover:rotate-45" />
       ) : (
-        <Moon size={17} className="transition-transform duration-300 -rotate-12 hover:rotate-0" />
+        <Moon size={15} className="text-[#FF5A36] transition-transform duration-200" />
       )}
     </button>
   );

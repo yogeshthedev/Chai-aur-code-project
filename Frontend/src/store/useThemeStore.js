@@ -4,16 +4,25 @@ import { persist } from "zustand/middleware";
 const applyTheme = (theme) => {
   if (typeof document !== "undefined") {
     const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-      root.style.colorScheme = "dark";
-      root.setAttribute("data-theme", "dark");
-    } else {
+    const body = document.body;
+    if (theme === "light") {
       root.classList.remove("dark");
       root.classList.add("light");
       root.style.colorScheme = "light";
       root.setAttribute("data-theme", "light");
+      if (body) {
+        body.classList.remove("dark");
+        body.classList.add("light");
+      }
+    } else {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      root.style.colorScheme = "dark";
+      root.setAttribute("data-theme", "dark");
+      if (body) {
+        body.classList.add("dark");
+        body.classList.remove("light");
+      }
     }
   }
 };
@@ -26,19 +35,19 @@ try {
     if (parsed?.state?.theme) {
       applyTheme(parsed.state.theme);
     } else {
-      applyTheme("light");
+      applyTheme("dark");
     }
   } else {
-    applyTheme("light");
+    applyTheme("dark");
   }
 } catch {
-  applyTheme("light");
+  applyTheme("dark");
 }
 
 export const useThemeStore = create(
   persist(
     (set) => ({
-      theme: "light",
+      theme: "dark",
 
       setTheme: (theme) => {
         applyTheme(theme);

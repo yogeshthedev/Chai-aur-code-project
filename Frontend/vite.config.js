@@ -18,5 +18,23 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Threshold in kB for chunk size warnings
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // Separate third-party dependencies into isolated, cacheable vendor chunks
+        manualChunks: {
+          // React Core & Router dependencies
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Server state management
+          'query-vendor': ['@tanstack/react-query'],
+          // UI Icons
+          'lucide-icons': ['lucide-react'],
+        },
+      },
+    },
+  },
 })
+
 

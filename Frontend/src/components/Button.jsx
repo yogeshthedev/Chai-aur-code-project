@@ -3,21 +3,21 @@ import { Loader2 } from "lucide-react";
 
 const variants = {
   primary:
-    "bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-sm shadow-indigo-500/25 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
+    "bg-[#FF5A36] hover:bg-[#FF704E] active:bg-[#E44824] text-[#0A0A0A] font-bold shadow-xs",
   secondary:
-    "bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:active:bg-zinc-600 dark:text-zinc-100 border border-slate-200 dark:border-zinc-700/80 focus-visible:ring-2 focus-visible:ring-slate-400 dark:focus-visible:ring-zinc-600",
+    "bg-[#18181B] hover:bg-[#222226] text-[#FAFAF8] border border-white/10",
   outline:
-    "bg-transparent hover:bg-slate-100 active:bg-slate-200 text-slate-700 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:active:bg-zinc-700 border border-slate-300 dark:border-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
+    "bg-transparent hover:bg-white/6 text-[#FAFAF8] border border-white/12 hover:border-white/25",
   ghost:
-    "bg-transparent hover:bg-slate-100 active:bg-slate-200 text-slate-700 dark:text-zinc-300 dark:hover:bg-zinc-800/70 dark:active:bg-zinc-700 focus-visible:ring-2 focus-visible:ring-indigo-500/40",
+    "bg-transparent hover:bg-white/6 text-[#A1A1AA] hover:text-[#FAFAF8]",
   danger:
-    "bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 border border-rose-200 dark:bg-rose-950/30 dark:hover:bg-rose-950/50 dark:active:bg-rose-950/70 dark:text-rose-400 dark:border-rose-900/40 focus-visible:ring-2 focus-visible:ring-rose-500/40",
+    "bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30",
 };
 
 const sizes = {
-  sm: "px-3 py-1.5 text-xs rounded-lg gap-1.5",
-  md: "px-4 py-2 text-sm rounded-xl gap-2",
-  lg: "px-5 py-2.5 text-base rounded-xl gap-2.5",
+  sm: "px-3 py-1.5 text-xs rounded-md gap-1.5 font-mono",
+  md: "px-4 py-2 text-xs rounded-md gap-2 font-mono",
+  lg: "px-5 py-2.5 text-sm rounded-md gap-2.5 font-mono",
 };
 
 const Button = ({
@@ -43,9 +43,9 @@ const Button = ({
       {...props}
     >
       {isLoading ? (
-        <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
       ) : Icon ? (
-        <Icon className="w-4 h-4 shrink-0" />
+        <Icon className="w-3.5 h-3.5 shrink-0" />
       ) : null}
       {children}
     </button>

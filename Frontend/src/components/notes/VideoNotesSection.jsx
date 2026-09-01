@@ -139,11 +139,11 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
 
   if (!user) {
     return (
-      <div className="flex min-h-52 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-8 text-center">
-        <Lock size={28} className="mb-2 text-slate-400 dark:text-zinc-500" />
-        <h4 className="text-sm font-bold text-slate-900 dark:text-zinc-100">Sign in to take personal notes</h4>
-        <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400 max-w-xs">
-          Capture your thoughts, ideas, takeaways, and bookmarks attached to timestamps.
+      <div className="flex min-h-44 flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-[#121212] p-8 text-center">
+        <Lock size={24} className="mb-2 text-[#71717A]" />
+        <h4 className="font-display text-xs font-bold text-[#FAFAF8]">Sign in to take personal code notes</h4>
+        <p className="mt-1 font-mono text-[11px] text-[#71717A] max-w-xs">
+          Capture takeaways, architecture ideas, and code references linked to video timestamps.
         </p>
       </div>
     );
@@ -152,12 +152,12 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
   return (
     <div className="space-y-4">
       {/* Top Controls: Quick Add Note, Search, Export */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white/70 dark:bg-zinc-900/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-zinc-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-[#121212] p-3 rounded-lg border border-white/8">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleOpenCreate}
-            className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 text-xs font-bold shadow-xs active:scale-95 transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-3.5 py-1.5 font-mono text-xs font-bold shadow-xs active:scale-95 transition cursor-pointer"
           >
             <Plus size={14} />
             <span>Add Note at {formatTime(currentTime)}</span>
@@ -167,8 +167,8 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-700 transition cursor-pointer shadow-2xs"
-              title="Download all notes as a file"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] px-3 py-1.5 text-xs font-mono text-[#FAFAF8] transition cursor-pointer"
+              title="Download all notes as markdown"
             >
               <Download size={13} />
               <span>Export</span>
@@ -181,14 +181,14 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
           <div className="relative flex-1 sm:max-w-xs">
             <Search
               size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#71717A]"
             />
             <input
               type="text"
-              placeholder="Search your notes..."
+              placeholder="Filter notes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-full border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 pl-8 pr-3 py-1 text-xs text-slate-900 dark:text-zinc-100 outline-none focus:border-indigo-500"
+              className="w-full rounded-md border border-white/10 bg-[#18181B] pl-8 pr-3 py-1 text-xs text-[#FAFAF8] placeholder:text-[#71717A] outline-none focus:border-[#FF5A36]"
             />
           </div>
         )}
@@ -197,23 +197,23 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
       {/* Notes List or Empty State */}
       {isLoading ? (
         <div className="space-y-3">
-          {Array.from({ length: 3 }, (_, idx) => (
+          {Array.from({ length: 2 }, (_, idx) => (
             <div
               key={idx}
-              className="h-24 w-full animate-pulse rounded-2xl bg-slate-200/80 dark:bg-zinc-800/80"
+              className="h-20 w-full animate-pulse rounded-lg bg-[#18181B] border border-white/6"
             />
           ))}
         </div>
       ) : filteredNotes.length === 0 ? (
-        <div className="flex min-h-44 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 dark:border-zinc-800 bg-white/30 dark:bg-zinc-900/10 p-8 text-center text-slate-500 dark:text-zinc-400">
-          <BookOpen size={28} className="mb-2 text-slate-400 dark:text-zinc-500" />
-          <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">
+        <div className="flex min-h-36 flex-col items-center justify-center rounded-lg border border-dashed border-white/10 bg-[#121212] p-8 text-center text-[#71717A]">
+          <BookOpen size={24} className="mb-2 text-[#71717A]" />
+          <h4 className="font-display text-xs font-bold text-[#FAFAF8]">
             {searchQuery ? "No matching notes found" : "No notes yet for this video"}
           </h4>
-          <p className="mt-1 text-[11px] max-w-xs">
+          <p className="mt-1 font-mono text-[11px] max-w-xs text-[#71717A]">
             {searchQuery
-              ? "Try searching for another word."
-              : "Click 'Add Note' to save your takeaways, ideas, and timestamps."}
+              ? "Try searching for another keyword."
+              : "Click 'Add Note' to save code snippets and takeaways with timestamp markers."}
           </p>
         </div>
       ) : (

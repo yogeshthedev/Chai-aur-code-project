@@ -1,4 +1,4 @@
-﻿import { Volume2, Volume1, VolumeX } from "lucide-react";
+import { Volume2, Volume1, VolumeX } from "lucide-react";
 import { useState } from "react";
 
 const VolumeControl = ({ volume = 1, isMuted = false, onVolumeChange, onToggleMute }) => {
@@ -41,9 +41,9 @@ const VolumeControl = ({ volume = 1, isMuted = false, onVolumeChange, onToggleMu
           step="0.02"
           value={effectiveVolume}
           onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-          className="h-1.5 w-20 appearance-none rounded-full bg-white/30 accent-indigo-500 cursor-pointer outline-none transition"
+          className="h-1.5 w-20 appearance-none rounded-full bg-white/30 accent-[#FF5A36] cursor-pointer outline-none transition"
           style={{
-            background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${effectiveVolume * 100}%, rgba(255,255,255,0.25) ${effectiveVolume * 100}%, rgba(255,255,255,0.25) 100%)`,
+            background: `linear-gradient(to right, #FF5A36 0%, #FF5A36 ${effectiveVolume * 100}%, rgba(255,255,255,0.25) ${effectiveVolume * 100}%, rgba(255,255,255,0.25) 100%)`,
           }}
         />
       </div>

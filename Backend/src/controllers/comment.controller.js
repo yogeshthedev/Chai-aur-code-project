@@ -33,7 +33,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
 
   const videoObjectId = new mongoose.Types.ObjectId(videoId);
-  const currentUserId = new mongoose.Types.ObjectId(req.user._id);
+  const currentUserId = req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null;
 
   const comments = await Comment.aggregate([
     {

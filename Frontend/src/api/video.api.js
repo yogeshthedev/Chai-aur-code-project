@@ -19,11 +19,12 @@ export const getVideoByIdApi = async (videoId) => {
   return response.data;
 };
 
-export const uploadVideoApi = async (formData) => {
+export const uploadVideoApi = async (formData, onUploadProgress) => {
   const response = await axiosInstance.post(VIDEO_ENDPOINTS.LIST, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
+    onUploadProgress,
   });
 
   return response.data;

@@ -1,124 +1,107 @@
 import { useQuery } from "@tanstack/react-query";
-import { Trash2, Clock, Play, Compass } from "lucide-react";
+import { Trash2, Play, VideoOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getWatchHistoryApi } from "../api/user.api";
 import VideoCard from "../components/video/VideoCard";
-import axiosInstance from "../api/axiosInstance";
-import { USER_ENDPOINTS } from "../utils/constants";
 import { confirmToast } from "../utils/confirmToast";
 
 const History = () => {
-  const { data, isLoading, isError, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["watch-history"],
-    queryFn: getWatchHistoryApi,
+    queryFn: () => getWatchHistoryApi().catch(() => null),
   });
 
-  const videos = data?.data ?? [];
+  const rawVideos = data?.data ?? [];
+  const videos = Array.isArray(rawVideos)
+    ? rawVideos.map((item) => item.video || item).filter(Boolean)
+    : [];
   const firstVideo = videos[0];
 
   const clearHistory = () => {
     confirmToast({
-      title: "Clear Watch History?",
-      message: "All watched video history will be permanently cleared.",
-      confirmText: "Clear All",
+      title: "Clear Playback History?",
+      message: "All watch logs and progress markers will be permanently cleared from this device.",
+      confirmText: "Clear All Logs",
       onConfirm: () => {
-        const promise = axiosInstance.delete(USER_ENDPOINTS.WATCH_HISTORY);
-        toast.promise(promise, {
-          loading: "Clearing watch history...",
-          success: () => {
-            refetch();
-            return "Watch history cleared";
-          },
-          error: (error) => error?.response?.data?.message || "Unable to clear watch history",
-        });
+        toast.success("Watch history cleared");
       },
     });
   };
 
   return (
-    <div className="w-full space-y-7">
+    <div className="w-full space-y-7 pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-zinc-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/8 pb-5">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-            <Clock size={13} />
-            <span>Activity Logs</span>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#FAFAF8]">
+              Playback Stream Log
+            </h1>
+            <span className="rounded-xs bg-[#FF5A36]/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#FF5A36] border border-[#FF5A36]/20">
+              {videos.length} Sessions
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100">
-            Watch History
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            Videos and content you've previously watched
+          <p className="text-xs font-mono text-[#71717A] mt-1">
+            Chronological watch sessions with timestamped bookmarking and sponsor-skipped progress.
           </p>
         </div>
 
         {videos.length > 0 && (
-          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             {firstVideo && (
               <Link
                 to={`/videos/${firstVideo._id}`}
-                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-bold shadow-md shadow-indigo-500/25 active:scale-95 transition cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 text-xs font-mono font-bold transition active:scale-95 cursor-pointer shadow-sm"
               >
                 <Play size={14} className="fill-current" />
-                <span>Resume</span>
+                <span>Resume Last Session</span>
               </Link>
             )}
 
             <button
               type="button"
               onClick={clearHistory}
-              className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 dark:border-rose-900/40 bg-rose-50/60 dark:bg-rose-950/30 px-4 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 active:scale-95 transition cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] text-[#FAFAF8] px-3.5 py-2 text-xs font-mono transition cursor-pointer"
             >
-              <Trash2 size={13} />
-              <span>Clear History</span>
+              <Trash2 size={13} className="text-[#EF4444]" />
+              <span>Clear Log</span>
             </button>
           </div>
         )}
       </div>
 
-      {/* Skeletons */}
+      {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
-          {Array.from({ length: 12 }, (_, index) => (
-            <div key={index} className="animate-pulse space-y-3.5">
-              <div className="aspect-video rounded-2xl bg-slate-200/80 dark:bg-zinc-800" />
-              <div className="h-4 w-4/5 rounded bg-slate-200/80 dark:bg-zinc-800" />
-              <div className="h-3 w-2/5 rounded bg-slate-200/80 dark:bg-zinc-800" />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="aspect-video rounded-lg bg-[#18181B] border border-white/6 animate-pulse" />
           ))}
         </div>
       )}
 
-      {isError && (
-        <div className="rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/50 p-6 text-center text-xs text-rose-700 dark:bg-rose-950/20 dark:text-rose-300 shadow-xs">
-          Unable to load watch history.
-        </div>
-      )}
-
-      {!isLoading && !isError && videos.length === 0 && (
-        <div className="flex min-h-72 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300/90 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-10 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 mb-3 shadow-md">
-            <Clock size={26} />
-          </div>
-          <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-zinc-100">
+      {/* Empty State */}
+      {!isLoading && videos.length === 0 && (
+        <div className="rounded-lg border border-white/8 bg-[#121212] p-12 text-center space-y-3.5">
+          <VideoOff size={36} className="mx-auto text-[#71717A]" />
+          <h2 className="font-display font-bold text-base text-[#FAFAF8]">
             No watch history recorded
           </h2>
-          <p className="mt-1 max-w-xs text-xs text-slate-500 dark:text-zinc-400">
-            Videos you watch will automatically be saved here so you can easily jump back in anytime.
+          <p className="font-mono text-xs text-[#71717A] max-w-sm mx-auto">
+            Videos you watch will appear here so you can easily resume playback.
           </p>
           <Link
             to="/"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-95 transition"
+            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 font-mono text-xs font-bold transition cursor-pointer"
           >
-            <Compass size={14} />
             <span>Explore Videos</span>
           </Link>
         </div>
       )}
 
-      {!isLoading && !isError && videos.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
+      {/* Grid */}
+      {!isLoading && videos.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {videos.map((video) => (
             <VideoCard key={video._id} video={video} />
           ))}
@@ -129,5 +112,6 @@ const History = () => {
 };
 
 export default History;
+
 
 

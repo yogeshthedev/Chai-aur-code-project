@@ -1,88 +1,81 @@
 import { useQuery } from "@tanstack/react-query";
-import { Heart, Play, Compass } from "lucide-react";
+import { Play, VideoOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getLikedVideosApi } from "../api/like.api";
 import VideoCard from "../components/video/VideoCard";
 
 const LikedVideos = () => {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["liked-videos"],
-    queryFn: getLikedVideosApi,
+    queryFn: () => getLikedVideosApi().catch(() => null),
   });
 
-  const videos = data?.data ?? [];
+  const rawVideos = data?.data ?? [];
+  const videos = Array.isArray(rawVideos)
+    ? rawVideos.map((item) => item.video || item).filter(Boolean)
+    : [];
   const firstVideo = videos[0];
 
   return (
-    <div className="w-full space-y-7">
+    <div className="w-full space-y-7 pb-16">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200/80 dark:border-zinc-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/8 pb-5">
         <div>
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-2">
-            <Heart size={13} className="fill-current" />
-            <span>Personal Library</span>
+          <div className="flex items-center gap-2">
+            <h1 className="font-display font-black text-2xl sm:text-3xl text-[#FAFAF8]">
+              Liked Publications
+            </h1>
+            <span className="rounded-xs bg-[#FF5A36]/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#FF5A36] border border-[#FF5A36]/20">
+              {videos.length} Saved
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-100">
-            Liked Videos
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            {videos.length} {videos.length === 1 ? "video" : "videos"} you have saved and liked
+          <p className="text-xs font-mono text-[#71717A] mt-1">
+            Personal vault of bookmarked masterclasses, technical papers, and lab demonstrations.
           </p>
         </div>
 
         {firstVideo && (
           <Link
             to={`/videos/${firstVideo._id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-bold shadow-md shadow-indigo-500/25 active:scale-95 transition cursor-pointer self-start sm:self-auto"
+            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 text-xs font-mono font-bold transition active:scale-95 cursor-pointer self-start sm:self-auto shadow-sm"
           >
-            <Play size={15} className="fill-current" />
-            <span>Play All</span>
+            <Play size={14} className="fill-current" />
+            <span>Play Vault Sequence</span>
           </Link>
         )}
       </div>
 
-      {/* Skeletons */}
+      {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
-          {Array.from({ length: 12 }, (_, index) => (
-            <div key={index} className="animate-pulse space-y-3.5">
-              <div className="aspect-video rounded-2xl bg-slate-200/80 dark:bg-zinc-800" />
-              <div className="h-4 w-4/5 rounded bg-slate-200/80 dark:bg-zinc-800" />
-              <div className="h-3 w-2/5 rounded bg-slate-200/80 dark:bg-zinc-800" />
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="aspect-video rounded-lg bg-[#18181B] border border-white/6 animate-pulse" />
           ))}
         </div>
       )}
 
-      {isError && (
-        <div className="rounded-3xl border border-rose-200/80 dark:border-rose-900/40 bg-rose-50/50 p-6 text-center text-xs text-rose-700 dark:bg-rose-950/20 dark:text-rose-300 shadow-xs">
-          Unable to load liked videos.
-        </div>
-      )}
-
-      {!isLoading && !isError && videos.length === 0 && (
-        <div className="flex min-h-72 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300/90 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-10 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-indigo-50 dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 mb-3 shadow-md">
-            <Heart size={26} className="fill-current" />
-          </div>
-          <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-zinc-100">
+      {/* Empty State */}
+      {!isLoading && videos.length === 0 && (
+        <div className="rounded-lg border border-white/8 bg-[#121212] p-12 text-center space-y-3.5">
+          <VideoOff size={36} className="mx-auto text-[#71717A]" />
+          <h2 className="font-display font-bold text-base text-[#FAFAF8]">
             No liked videos yet
           </h2>
-          <p className="mt-1 max-w-xs text-xs text-slate-500 dark:text-zinc-400">
-            Hit the like button on videos you enjoy while watching to automatically collect them here.
+          <p className="font-mono text-xs text-[#71717A] max-w-sm mx-auto">
+            Explore publications and like videos to save them to your personal collection.
           </p>
           <Link
             to="/"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs font-bold shadow-md shadow-indigo-500/20 active:scale-95 transition"
+            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 font-mono text-xs font-bold transition cursor-pointer"
           >
-            <Compass size={14} />
-            <span>Discover Videos</span>
+            <span>Explore Videos</span>
           </Link>
         </div>
       )}
 
-      {!isLoading && !isError && videos.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-x-5 gap-y-8">
+      {/* Grid */}
+      {!isLoading && videos.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {videos.map((video) => (
             <VideoCard key={video._id} video={video} />
           ))}
@@ -93,5 +86,6 @@ const LikedVideos = () => {
 };
 
 export default LikedVideos;
+
 
 

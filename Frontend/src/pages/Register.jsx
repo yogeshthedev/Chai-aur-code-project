@@ -1,21 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { Play, Mail, Lock, User, AtSign, Camera, Image as ImageIcon } from "lucide-react";
-import Input from "../components/Input";
-import Button from "../components/Button";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Mail, Lock, User, AtSign, Camera, Image as ImageIcon, ArrowRight, Eye, EyeOff, X } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
-import ThemeToggle from "../components/common/ThemeToggle";
+import ImageCropperModal from "../components/common/ImageCropperModal";
+import Input from "../components/Input";
+import toast from "react-hot-toast";
 
 const Register = () => {
-  const { register: registerUser, isSubmitting } = useAuthStore();
+  const { register: registerUser, isSubmitting, isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const backgroundLocation =
+    location.state?.backgroundLocation || location.state?.from || { pathname: "/" };
 
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const [fileError, setFileError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [cropperConfig, setCropperConfig] = useState({
+    isOpen: false,
+    imageSrc: "",
+    cropType: "avatar",
+    fileName: "",
+  });
+
+  // If user is already authenticated, close popup
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(backgroundLocation?.pathname || "/", { replace: true });
+    }
+  }, [isAuthenticated, navigate, backgroundLocation]);
+
+  // Lock body scroll while modal is open & add Escape key listener
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (!cropperConfig.isOpen) {
+          navigate(backgroundLocation?.pathname || "/");
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [navigate, backgroundLocation, cropperConfig.isOpen]);
 
   const {
     register,
@@ -23,33 +58,80 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
-      setFileError("");
-    }
+  const handleClose = () => {
+    navigate(backgroundLocation?.pathname || "/");
   };
 
-  const handleCoverChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setCoverFile(file);
-      setCoverPreview(URL.createObjectURL(file));
+  const handleAvatarSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
     }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropperConfig({
+        isOpen: true,
+        imageSrc: reader.result,
+        cropType: "avatar",
+        fileName: file.name || "avatar.jpg",
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCoverSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropperConfig({
+        isOpen: true,
+        imageSrc: reader.result,
+        cropType: "cover",
+        fileName: file.name || "cover.jpg",
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCropComplete = (croppedBlob) => {
+    const isAvatar = cropperConfig.cropType === "avatar";
+    const file = new File(
+      [croppedBlob],
+      isAvatar ? "avatar.jpg" : "cover.jpg",
+      { type: "image/jpeg" }
+    );
+    const previewUrl = URL.createObjectURL(croppedBlob);
+
+    if (isAvatar) {
+      setAvatarFile(file);
+      setAvatarPreview(previewUrl);
+      setFileError("");
+    } else {
+      setCoverFile(file);
+      setCoverPreview(previewUrl);
+    }
+    setCropperConfig((prev) => ({ ...prev, isOpen: false }));
   };
 
   const onSubmit = async (data) => {
     if (!avatarFile) {
-      setFileError("Avatar image is required");
+      setFileError("Avatar image is required for your curator profile");
       return;
     }
 
     const formData = new FormData();
-    formData.append("fullName", data.fullName);
-    formData.append("email", data.email);
-    formData.append("username", data.username.toLowerCase());
+    formData.append("fullName", data.fullName.trim());
+    formData.append("email", data.email.trim());
+    formData.append("username", data.username.toLowerCase().trim());
     formData.append("password", data.password);
     formData.append("avatar", avatarFile);
     if (coverFile) {
@@ -58,171 +140,240 @@ const Register = () => {
 
     const result = await registerUser(formData);
     if (result.success) {
-      navigate("/login");
+      navigate("/login", { state: { backgroundLocation, from: location.state?.from } });
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 relative">
-      {/* Absolute top right theme toggle */}
-      <div className="absolute top-5 right-5">
-        <ThemeToggle />
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Dimmed Blurred Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+        onClick={handleClose}
+      />
 
-      <div className="w-full max-w-lg p-8 sm:p-10 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-zinc-800 shadow-xl shadow-slate-200/50 dark:shadow-none space-y-6">
-        {/* Brand Header */}
-        <div className="text-center space-y-1">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/25 mb-2">
-            <Play className="w-5 h-5 fill-current ml-0.5" />
+      {/* Modal Dialog Card */}
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl border border-white/12 bg-[#121212] p-6 sm:p-7 shadow-2xl z-10 space-y-5 animate-in zoom-in-95 duration-200">
+        {/* Header Strip */}
+        <div className="flex items-start justify-between pb-3.5 border-b border-white/8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-[#18181B] border border-white/15 text-[#FAFAF8] font-display font-black text-sm">
+              R<span className="text-[#FF5A36]">.</span>
+            </div>
+            <div>
+              <h2 className="font-display font-bold text-base text-[#FAFAF8]">
+                Create Curator Account
+              </h2>
+              <p className="font-mono text-[11px] text-[#71717A]">
+                Claim your channel handle and start sharing publications
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
-            Create your account
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-zinc-400">
-            Join VideoFlow to share videos, create playlists, and build your audience
-          </p>
+
+          <button
+            type="button"
+            onClick={handleClose}
+            aria-label="Close modal"
+            className="p-1 rounded-md text-[#71717A] hover:text-[#FAFAF8] hover:bg-white/6 transition cursor-pointer"
+          >
+            <X size={16} />
+          </button>
         </div>
 
-        {/* Register Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Avatar & Cover Upload Row */}
-          <div className="flex items-center gap-4 p-3.5 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl border border-slate-200 dark:border-zinc-700/80">
-            {/* Avatar Picker */}
-            <div className="relative shrink-0">
-              <label className="cursor-pointer group flex flex-col items-center">
-                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 border-2 border-dashed border-slate-300 dark:border-zinc-700 group-hover:border-indigo-500 flex items-center justify-center overflow-hidden transition-all shadow-xs">
-                  {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt="Avatar Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Camera className="w-5 h-5 text-slate-400 dark:text-zinc-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                />
-                <span className="text-[10px] text-slate-500 dark:text-zinc-400 mt-1 font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                  Avatar *
-                </span>
-              </label>
+        {/* Tab Switcher */}
+        <div className="flex rounded-lg bg-[#18181B] p-1 border border-white/6 font-mono text-xs">
+          <Link
+            to="/login"
+            state={{ backgroundLocation, from: location.state?.from }}
+            className="flex-1 py-1.5 rounded-md text-center text-[#71717A] hover:text-[#FAFAF8] transition"
+          >
+            Sign In
+          </Link>
+          <button
+            type="button"
+            className="flex-1 py-1.5 rounded-md bg-[#FF5A36] text-[#0A0A0A] font-bold shadow-xs cursor-default"
+          >
+            Create Account
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+          {/* Avatar & Banner Upload Dropzone */}
+          <div className="space-y-1">
+            <label className="block font-mono text-xs text-[#71717A] uppercase tracking-wider">
+              Profile Images <span className="text-[#FF5A36]">*</span>
+            </label>
+            <div className="flex items-center gap-3 p-3 bg-[#18181B] rounded-md border border-white/8">
+              {/* Avatar Picker */}
+              <div className="relative shrink-0">
+                <label className="cursor-pointer group flex flex-col items-center">
+                  <div className="w-13 h-13 rounded-full bg-[#121212] border-2 border-dashed border-white/20 group-hover:border-[#FF5A36] flex items-center justify-center overflow-hidden transition-colors">
+                    {avatarPreview ? (
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Camera className="w-4 h-4 text-[#71717A] group-hover:text-[#FF5A36] transition-colors" />
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarSelect}
+                    className="hidden"
+                  />
+                  <span className="text-[10px] font-mono text-[#71717A] mt-1 group-hover:text-[#FF5A36]">
+                    Avatar *
+                  </span>
+                </label>
+              </div>
+
+              {/* Banner Picker */}
+              <div className="flex-1">
+                <label className="cursor-pointer group block">
+                  <div className="h-13 rounded-md bg-[#121212] border-2 border-dashed border-white/20 group-hover:border-[#FF5A36] flex items-center justify-center overflow-hidden transition-colors px-2">
+                    {coverPreview ? (
+                      <img
+                        src={coverPreview}
+                        alt="Cover"
+                        className="w-full h-full object-cover rounded"
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 text-[#71717A] group-hover:text-[#FF5A36] text-xs font-mono">
+                        <ImageIcon size={14} />
+                        <span>Cover Banner (Optional)</span>
+                      </div>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverSelect}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
-
-            {/* Cover Image Picker */}
-            <div className="flex-1">
-              <label className="cursor-pointer group block">
-                <div className="h-16 rounded-xl bg-slate-100 dark:bg-zinc-800 border-2 border-dashed border-slate-300 dark:border-zinc-700 group-hover:border-indigo-500 flex items-center justify-center overflow-hidden transition-all shadow-xs">
-                  {coverPreview ? (
-                    <img
-                      src={coverPreview}
-                      alt="Cover Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-2 text-slate-500 dark:text-zinc-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 text-xs font-medium">
-                      <ImageIcon className="w-4 h-4" />
-                      <span>Optional Cover Banner</span>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleCoverChange}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-          {fileError && <p className="text-xs text-rose-500">{fileError}</p>}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Full Name"
-              placeholder="John Doe"
-              icon={User}
-              required
-              error={errors.fullName?.message}
-              {...register("fullName", {
-                required: "Full name is required",
-              })}
-            />
-
-            <Input
-              label="Username"
-              placeholder="johndoe"
-              icon={AtSign}
-              required
-              error={errors.username?.message}
-              {...register("username", {
-                required: "Username is required",
-                pattern: {
-                  value: /^[a-zA-Z0-9_]+$/,
-                  message: "Letters, numbers, & underscores only",
-                },
-              })}
-            />
+            {fileError && <p className="font-mono text-[11px] text-rose-500">{fileError}</p>}
           </div>
 
+          {/* Full Name */}
+          <Input
+            label="Full Name"
+            placeholder="Elena Rostova"
+            icon={User}
+            required
+            error={errors.fullName?.message}
+            {...register("fullName", {
+              required: "Full name is required",
+            })}
+          />
+
+          {/* Email */}
           <Input
             label="Email Address"
             type="email"
-            placeholder="john@example.com"
+            placeholder="elena@example.com"
             icon={Mail}
             required
             error={errors.email?.message}
             {...register("email", {
               required: "Email is required",
               pattern: {
-                value: /^\S+@\S+$/i,
-                message: "Enter a valid email address",
+                value: /\S+@\S+\.\S+/,
+                message: "Please enter a valid email address",
               },
             })}
           />
 
+          {/* Username */}
           <Input
-            label="Password"
-            type="password"
-            placeholder="Minimum 6 characters"
-            icon={Lock}
+            label="Channel Handle (@)"
+            placeholder="cinematheque"
+            icon={AtSign}
             required
-            error={errors.password?.message}
-            {...register("password", {
-              required: "Password is required",
+            error={errors.username?.message}
+            {...register("username", {
+              required: "Channel handle is required",
               minLength: {
-                value: 6,
-                message: "Password must be at least 6 characters",
+                value: 3,
+                message: "Username must be at least 3 characters",
               },
             })}
           />
 
-          <Button
+          {/* Password */}
+          <div className="space-y-1">
+            <label className="block font-mono text-xs text-[#71717A] uppercase tracking-wider">
+              Password <span className="text-[#FF5A36]">*</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#71717A]">
+                <Lock size={14} />
+              </div>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                className={`w-full pl-9 pr-10 py-2 text-xs bg-[#18181B] text-[#FAFAF8] placeholder:text-[#71717A] rounded-md border transition-colors outline-none focus:border-[#FF5A36] ${
+                  errors.password ? "border-rose-500 text-rose-300" : "border-white/10 hover:border-white/20"
+                }`}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#71717A] hover:text-[#FAFAF8] transition cursor-pointer"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="font-mono text-[11px] text-rose-500 mt-1">{errors.password.message}</p>
+            )}
+          </div>
+
+          {/* Submit */}
+          <button
             type="submit"
-            variant="primary"
-            size="lg"
-            className="w-full mt-2 rounded-2xl"
-            isLoading={isSubmitting}
+            disabled={isSubmitting}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] py-2.5 px-4 font-mono text-xs font-bold transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-sm mt-2"
           >
-            Create Account
-          </Button>
+            <span>{isSubmitting ? "Creating Account..." : "Create Curator Account"}</span>
+            <ArrowRight size={14} />
+          </button>
         </form>
 
-        {/* Footer Link */}
-        <div className="text-center text-xs text-slate-500 dark:text-zinc-400 pt-2">
-          Already have an account?{" "}
+        {/* Footer */}
+        <div className="pt-2 border-t border-white/6 text-center font-mono text-xs text-[#71717A]">
+          Already registered?{" "}
           <Link
             to="/login"
-            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+            state={{ backgroundLocation, from: location.state?.from }}
+            className="text-[#FF5A36] font-semibold hover:underline"
           >
-            Sign In
+            Sign in to Studio →
           </Link>
         </div>
       </div>
+
+      {/* Image Cropper Modal (z-60) */}
+      <ImageCropperModal
+        isOpen={cropperConfig.isOpen}
+        onClose={() => setCropperConfig((prev) => ({ ...prev, isOpen: false }))}
+        imageSrc={cropperConfig.imageSrc}
+        cropType={cropperConfig.cropType}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   );
 };

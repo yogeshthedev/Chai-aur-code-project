@@ -8,34 +8,36 @@ import {
   updateVideo,
   updateVideoChapters,
 } from "../controllers/video.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { optionalVerifyJWT, verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
 const router = Router();
-router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
 
-router
-  .route("/")
-  .get(getAllVideos)
-  .post(
-    upload.fields([
-      {
-        name: "video",
-        maxCount: 1,
-      },
-      {
-        name: "thumbnail",
-        maxCount: 1,
-      },
-    ]),
-    publishAVideo
-  );
+// Public / Optional Auth Routes
+router.route("/").get(optionalVerifyJWT, getAllVideos);
+router.route("/:videoId").get(optionalVerifyJWT, getVideoById);
+
+// Protected Routes (Require Authentication)
+router.route("/").post(
+  verifyJWT,
+  upload.fields([
+    {
+      name: "video",
+      maxCount: 1,
+    },
+    {
+      name: "thumbnail",
+      maxCount: 1,
+    },
+  ]),
+  publishAVideo
+);
 
 router
   .route("/:videoId")
-  .get(getVideoById)
-  .delete(deleteVideo)
+  .delete(verifyJWT, deleteVideo)
   .patch(
+    verifyJWT,
     upload.fields([
       {
         name: "thumbnail",
@@ -45,7 +47,7 @@ router
     updateVideo
   );
 
-router.route("/:videoId/chapters").patch(updateVideoChapters);
-router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+router.route("/:videoId/chapters").patch(verifyJWT, updateVideoChapters);
+router.route("/toggle/publish/:videoId").patch(verifyJWT, togglePublishStatus);
 
 export default router;

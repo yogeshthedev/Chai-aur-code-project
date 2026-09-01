@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ListPlus, X, Plus } from "lucide-react";
-import { useEffect } from "react";
+import { ListPlus, X, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { addVideoToPlaylistApi, getUserPlaylistsApi } from "../api/playlist.api";
+import { addVideoToPlaylistApi, createPlaylistApi, getUserPlaylistsApi } from "../api/playlist.api";
 import { useAuthStore } from "../store/useAuthStore";
 
 const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const [showCreate, setShowCreate] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["playlists", user?._id],
@@ -21,7 +23,7 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
   const mutation = useMutation({
     mutationFn: addVideoToPlaylistApi,
     onSuccess: (_, variables) => {
-      toast.success("Video added to playlist!");
+      toast.success("Video saved to playlist!");
       queryClient.invalidateQueries({ queryKey: ["playlist", variables.playlistId] });
       queryClient.invalidateQueries({ queryKey: ["playlists", user?._id] });
       onClose();
@@ -29,6 +31,22 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
     onError: (error) => {
       const message = error?.response?.data?.message || "Unable to save to playlist";
       toast.error(message);
+    },
+  });
+
+  const createPlaylistMutation = useMutation({
+    mutationFn: (name) => createPlaylistApi({ name, description: "" }),
+    onSuccess: (res) => {
+      const createdId = res?.data?._id;
+      if (createdId) {
+        mutation.mutate({ playlistId: createdId, videoId });
+      }
+      queryClient.invalidateQueries({ queryKey: ["playlists", user?._id] });
+      setShowCreate(false);
+      setNewTitle("");
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Failed to create playlist");
     },
   });
 
@@ -47,25 +65,6 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
     mutation.mutate({ playlistId, videoId });
   };
 
-  const [showCreate, setShowCreate] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-
-  const createPlaylistMutation = useMutation({
-    mutationFn: (name) => addVideoToPlaylistApi ? createPlaylistApi({ name, description: "" }) : null,
-    onSuccess: (res) => {
-      const createdId = res?.data?._id;
-      if (createdId) {
-        mutation.mutate({ playlistId: createdId, videoId });
-      }
-      queryClient.invalidateQueries({ queryKey: ["playlists", user?._id] });
-      setShowCreate(false);
-      setNewTitle("");
-    },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "Failed to create playlist");
-    },
-  });
-
   const handleQuickCreate = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) {
@@ -76,65 +75,75 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 md:p-7 shadow-2xl space-y-5">
-        <div className="flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-xs transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal Container */}
+      <div className="relative w-full max-w-md rounded-lg border border-white/12 bg-[#121212] p-6 shadow-2xl z-10 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-white/8">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100">Save to Playlist</h2>
-            <p className="text-xs text-slate-600 dark:text-zinc-400">Add to your existing collections</p>
+            <h2 className="font-display font-bold text-sm text-[#FAFAF8]">Save to Playlist</h2>
+            <p className="font-mono text-[11px] text-[#71717A]">Add to your personal video collections</p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 transition cursor-pointer"
-            aria-label="Close playlist modal"
+            className="p-1 rounded text-[#71717A] hover:text-[#FAFAF8] transition cursor-pointer"
+            aria-label="Close modal"
           >
-            <X size={16} />
+            <X size={15} />
           </button>
         </div>
 
         {isLoading ? (
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {Array.from({ length: 3 }, (_, index) => (
-              <div key={index} className="h-14 animate-pulse rounded-2xl bg-slate-100 dark:bg-zinc-800" />
+              <div key={index} className="h-12 animate-pulse rounded-md bg-[#18181B] border border-white/6" />
             ))}
           </div>
         ) : playlists.length === 0 && !showCreate ? (
-          <div className="rounded-2xl border border-dashed border-slate-300 dark:border-zinc-800 p-8 text-center bg-slate-50/50 dark:bg-zinc-900/40">
-            <ListPlus className="mx-auto mb-2 text-indigo-600 dark:text-indigo-400" size={28} />
-            <p className="text-xs font-bold text-slate-900 dark:text-zinc-100">No playlists created yet</p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">Create one right now to save this video.</p>
+          <div className="rounded-lg border border-dashed border-white/10 p-8 text-center bg-[#18181B]/50 space-y-3">
+            <ListPlus className="mx-auto text-[#FF5A36]" size={28} />
+            <div>
+              <p className="font-display font-bold text-xs text-[#FAFAF8]">No playlists created yet</p>
+              <p className="font-mono text-[11px] text-[#71717A] mt-0.5">Create one right now to save this video.</p>
+            </div>
             <button
               type="button"
               onClick={() => setShowCreate(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-4 py-2 text-xs font-bold text-white hover:bg-indigo-700 active:scale-95 transition cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-4 py-1.5 font-mono text-xs font-bold text-[#0A0A0A] active:scale-95 transition cursor-pointer shadow-xs"
             >
-              <Plus size={14} />
+              <Plus size={13} />
               <span>Create New Playlist</span>
             </button>
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
               {playlists.map((playlist) => (
                 <button
                   key={playlist._id}
                   type="button"
                   onClick={() => handleSave(playlist._id)}
                   disabled={mutation.isPending}
-                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200/80 dark:border-zinc-800/80 bg-slate-50/80 dark:bg-zinc-800/40 px-4 py-3 text-left transition hover:border-indigo-500 hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-[0.99] disabled:opacity-50 cursor-pointer group shadow-2xs"
+                  className="flex w-full items-center justify-between rounded-md border border-white/8 bg-[#18181B] px-3.5 py-2.5 text-left transition hover:border-white/20 hover:bg-[#222226] active:scale-[0.99] disabled:opacity-50 cursor-pointer group"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                    <p className="font-display font-bold text-xs text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors truncate">
                       {playlist.name}
                     </p>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                    <p className="font-mono text-[10px] text-[#71717A]">
                       {playlist.videos?.length || 0} {playlist.videos?.length === 1 ? "video" : "videos"}
                     </p>
                   </div>
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-zinc-700/60 text-slate-700 dark:text-zinc-300 group-hover:bg-indigo-600 group-hover:text-white transition shadow-xs shrink-0 ml-2">
-                    <Plus size={14} />
+                  <div className="flex h-6 w-6 items-center justify-center rounded-md bg-white/6 text-[#71717A] group-hover:bg-[#FF5A36] group-hover:text-[#0A0A0A] transition shrink-0 ml-2">
+                    <Plus size={13} />
                   </div>
                 </button>
               ))}
@@ -142,27 +151,27 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
 
             {/* Quick create section */}
             {showCreate ? (
-              <form onSubmit={handleQuickCreate} className="pt-2 border-t border-slate-100 dark:border-zinc-800 space-y-2.5">
+              <form onSubmit={handleQuickCreate} className="pt-2 border-t border-white/8 space-y-2">
                 <input
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="New playlist name..."
                   autoFocus
-                  className="w-full rounded-2xl border border-slate-200 dark:border-zinc-700 bg-slate-50/70 dark:bg-zinc-800/70 px-4 py-2 text-xs text-slate-900 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                  className="w-full rounded-md border border-white/10 bg-[#18181B] px-3 py-2 text-xs text-[#FAFAF8] placeholder:text-[#71717A] outline-none focus:border-[#FF5A36]"
                 />
                 <div className="flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setShowCreate(false)}
-                    className="px-3 py-1 text-xs text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    className="px-3 py-1 font-mono text-xs text-[#71717A] hover:text-[#FAFAF8]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={createPlaylistMutation.isPending || !newTitle.trim()}
-                    className="rounded-full bg-indigo-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-3.5 py-1 font-mono text-xs font-bold text-[#0A0A0A] disabled:opacity-50"
                   >
                     {createPlaylistMutation.isPending ? "Creating..." : "Create & Add"}
                   </button>
@@ -172,9 +181,9 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
               <button
                 type="button"
                 onClick={() => setShowCreate(true)}
-                className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-zinc-800/60 rounded-2xl border border-dashed border-indigo-200 dark:border-indigo-900/40 transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-2 font-mono text-xs font-bold text-[#FF5A36] hover:bg-[#FF5A36]/10 rounded-md border border-dashed border-[#FF5A36]/30 transition cursor-pointer"
               >
-                <Plus size={14} />
+                <Plus size={13} />
                 <span>Create New Playlist</span>
               </button>
             )}
@@ -186,5 +195,3 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
 };
 
 export default SaveToPlaylistModal;
-
-

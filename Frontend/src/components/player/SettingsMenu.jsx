@@ -1,7 +1,5 @@
-import { Settings, Check, ChevronRight, RotateCcw, Gauge, Keyboard } from "lucide-react";
+import { Settings, ChevronRight, RotateCcw, Gauge, Keyboard } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-
-const SPEED_OPTIONS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 const SettingsMenu = ({
   playbackRate = 1,
@@ -52,22 +50,22 @@ const SettingsMenu = ({
 
       {/* Popover Card */}
       {isOpen && (
-        <div className="absolute bottom-12 right-0 z-30 w-52 rounded-2xl border border-white/15 bg-zinc-900/95 p-1.5 text-white shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute bottom-12 right-0 z-30 w-52 rounded-lg border border-white/15 bg-[#121212]/95 p-2 text-white shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           {activeTab === "main" && (
             <div className="space-y-0.5">
               {/* Playback Speed */}
               <button
                 type="button"
                 onClick={() => setActiveTab("speed")}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold hover:bg-white/10 transition cursor-pointer"
+                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-xs font-mono font-medium hover:bg-white/10 transition cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <Gauge size={15} className="text-indigo-400" />
+                  <Gauge size={14} className="text-[#FF5A36]" />
                   <span>Playback Speed</span>
                 </div>
-                <div className="flex items-center gap-1 text-slate-400 font-normal">
-                  <span>{playbackRate === 1 ? "Normal" : `${playbackRate}x`}</span>
-                  <ChevronRight size={14} />
+                <div className="flex items-center gap-1 text-[#71717A] font-normal">
+                  <span>{playbackRate === 1 ? "1.0x" : `${playbackRate}x`}</span>
+                  <ChevronRight size={13} />
                 </div>
               </button>
 
@@ -75,15 +73,15 @@ const SettingsMenu = ({
               <button
                 type="button"
                 onClick={onToggleLoop}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold hover:bg-white/10 transition cursor-pointer"
+                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-xs font-mono font-medium hover:bg-white/10 transition cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <RotateCcw size={15} className="text-indigo-400" />
+                  <RotateCcw size={14} className="text-[#FF5A36]" />
                   <span>Loop Video</span>
                 </div>
                 <div
                   className={`h-4 w-7 rounded-full p-0.5 transition-colors ${
-                    isLooping ? "bg-indigo-600" : "bg-white/20"
+                    isLooping ? "bg-[#FF5A36]" : "bg-white/20"
                   }`}
                 >
                   <div
@@ -101,11 +99,11 @@ const SettingsMenu = ({
                   setIsOpen(false);
                   if (onOpenShortcuts) onOpenShortcuts();
                 }}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold hover:bg-white/10 transition cursor-pointer"
+                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-xs font-mono font-medium hover:bg-white/10 transition cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <Keyboard size={15} className="text-indigo-400" />
-                  <span>Keyboard Shortcuts</span>
+                  <Keyboard size={14} className="text-[#FF5A36]" />
+                  <span>Shortcuts</span>
                 </div>
               </button>
             </div>
@@ -116,32 +114,32 @@ const SettingsMenu = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("main")}
-                className="flex w-full items-center gap-1.5 rounded-xl border-b border-white/10 px-2 py-1.5 text-xs font-bold text-slate-300 hover:bg-white/10 transition cursor-pointer"
+                className="flex w-full items-center gap-1.5 rounded-md border-b border-white/10 px-2 py-1.5 font-mono text-xs font-bold text-[#A1A1AA] hover:bg-white/10 transition cursor-pointer"
               >
-                <ChevronRight size={14} className="rotate-180" />
-                <span>Playback Speed</span>
+                <ChevronRight size={13} className="rotate-180" />
+                <span>Speed Settings</span>
               </button>
 
               {/* Live Speed Value Display & Reset */}
-              <div className="flex items-center justify-between px-1">
-                <span className="text-[11px] text-slate-400 font-medium">Speed</span>
+              <div className="flex items-center justify-between px-1 font-mono text-xs">
+                <span className="text-[#71717A]">Rate</span>
                 <div className="flex items-center gap-2">
-                  <span className="rounded-md bg-indigo-600/80 px-2 py-0.5 text-xs font-bold font-mono text-white">
+                  <span className="rounded bg-[#FF5A36] px-1.5 py-0.2 text-[11px] font-bold text-[#0A0A0A]">
                     {Number(playbackRate).toFixed(2)}x
                   </span>
                   {playbackRate !== 1 && (
                     <button
                       type="button"
                       onClick={() => onPlaybackRateChange(1)}
-                      className="text-[10px] text-indigo-400 hover:text-indigo-300 underline cursor-pointer"
+                      className="text-[10px] text-[#FF5A36] hover:underline cursor-pointer"
                     >
-                      Reset (1x)
+                      Reset
                     </button>
                   )}
                 </div>
               </div>
 
-              {/* Interactive Smooth Slider */}
+              {/* Interactive Slider */}
               <div className="px-1 space-y-1">
                 <input
                   type="range"
@@ -150,16 +148,9 @@ const SettingsMenu = ({
                   step="0.05"
                   value={playbackRate}
                   onChange={(e) => onPlaybackRateChange(parseFloat(e.target.value))}
-                  className="h-1.5 w-full appearance-none rounded-full bg-white/20 accent-indigo-500 cursor-pointer outline-none"
-                  style={{
-                    background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${
-                      ((playbackRate - 0.25) / (2.5 - 0.25)) * 100
-                    }%, rgba(255,255,255,0.2) ${
-                      ((playbackRate - 0.25) / (2.5 - 0.25)) * 100
-                    }%, rgba(255,255,255,0.2) 100%)`,
-                  }}
+                  className="h-1.5 w-full appearance-none rounded-full bg-white/20 accent-[#FF5A36] cursor-pointer outline-none"
                 />
-                <div className="flex justify-between text-[9px] text-slate-400 font-mono">
+                <div className="flex justify-between text-[9px] text-[#71717A] font-mono">
                   <span>0.25x</span>
                   <span>1.0x</span>
                   <span>2.5x</span>
@@ -173,10 +164,10 @@ const SettingsMenu = ({
                     key={rate}
                     type="button"
                     onClick={() => onPlaybackRateChange(rate)}
-                    className={`rounded-lg py-1 text-[11px] font-semibold transition cursor-pointer ${
+                    className={`rounded py-1 font-mono text-[10px] transition cursor-pointer ${
                       playbackRate === rate
-                        ? "bg-indigo-600 text-white font-bold shadow-xs"
-                        : "bg-white/5 text-slate-300 hover:bg-white/15"
+                        ? "bg-[#FF5A36] text-[#0A0A0A] font-bold shadow-xs"
+                        : "bg-white/5 text-[#A1A1AA] hover:bg-white/15"
                     }`}
                   >
                     {rate}x

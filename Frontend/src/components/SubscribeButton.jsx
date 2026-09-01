@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Bell, BellRing, Check } from "lucide-react";
+import { Bell, Check } from "lucide-react";
+import toast from "react-hot-toast";
 import { toggleSubscriptionApi } from "../api/subscription.api";
+import { useAuthStore } from "../store/useAuthStore";
 
 const SubscribeButton = ({
   channelId,
@@ -9,6 +11,7 @@ const SubscribeButton = ({
   className = "",
   optimistic = true,
 }) => {
+  const { user } = useAuthStore();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -74,25 +77,33 @@ const SubscribeButton = ({
     },
   });
 
+  const handleClick = () => {
+    if (!user) {
+      toast.error("Please sign in to subscribe to channels");
+      return;
+    }
+    mutation.mutate();
+  };
+
   return (
     <button
       type="button"
-      onClick={() => mutation.mutate()}
+      onClick={handleClick}
       disabled={mutation.isPending}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 ${
+      className={`inline-flex items-center justify-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-mono transition-all duration-150 active:scale-95 cursor-pointer disabled:opacity-50 ${
         isSubscribed
-          ? "bg-slate-100 text-slate-800 border border-slate-300 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700 dark:hover:bg-zinc-700"
-          : "bg-indigo-600 text-white shadow-sm shadow-indigo-500/20 hover:bg-indigo-700"
+          ? "bg-[#18181B] text-[#FAFAF8] border border-white/10 hover:bg-[#222226]"
+          : "bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] font-bold shadow-xs"
       } ${className}`}
     >
-      {isSubscribed ? <Check size={15} className="text-slate-600 dark:text-zinc-400" /> : <Bell size={15} />}
+      {isSubscribed ? <Check size={13} className="text-[#2DD4BF]" /> : <Bell size={13} />}
       <span>{isSubscribed ? "Subscribed" : "Subscribe"}</span>
       {subscriberCount !== undefined && (
         <span
-          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+          className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
             isSubscribed
-              ? "bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-300"
-              : "bg-indigo-700/70 text-white"
+              ? "bg-white/10 text-[#A1A1AA]"
+              : "bg-black/20 text-[#0A0A0A] font-bold"
           }`}
         >
           {subscriberCount}
@@ -103,5 +114,3 @@ const SubscribeButton = ({
 };
 
 export default SubscribeButton;
-
-

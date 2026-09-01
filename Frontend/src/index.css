@@ -1,52 +1,125 @@
 @import "tailwindcss";
 
+@theme {
+  --font-display: "Cabinet Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Satoshi", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-canvas: var(--bg-canvas);
+  --color-surface-1: var(--bg-surface-1);
+  --color-surface-2: var(--bg-surface-2);
+  --color-surface-3: var(--bg-surface-3);
+  --color-surface-4: var(--bg-surface-4);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-medium: var(--border-medium);
+
+  --color-coral: #FF5A36;
+  --color-coral-hover: #FF704E;
+
+  --color-skip-sponsor: #E5A93C;
+  --color-skip-intro: #2DD4BF;
+  --color-skip-interaction: #A855F7;
+  --color-skip-highlight: #FF5A36;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  color-scheme: light;
-  --bg-primary: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-secondary: #f1f5f9;
-  --bg-tertiary: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --border-color: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --accent: #6366f1;
-  --accent-hover: #4f46e5;
-  --accent-subtle: #eef2ff;
-}
-
-.dark {
+/* ─── Default Dark Tokens ─── */
+:root,
+.dark,
+[data-theme="dark"] {
   color-scheme: dark;
-  --bg-primary: #09090b;
-  --bg-surface: #121215;
-  --bg-secondary: #18181b;
-  --bg-tertiary: #27272a;
-  --text-primary: #f8fafc;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --border-color: #27272a;
-  --border-subtle: #18181b;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-subtle: rgba(99, 102, 241, 0.15);
+
+  /* Surfaces */
+  --bg-canvas: #0A0A0A;
+  --bg-surface-1: #121212;
+  --bg-surface-2: #18181B;
+  --bg-surface-3: #222226;
+  --bg-surface-4: #2A2A30;
+
+  /* Typography */
+  --text-primary: #FAFAF8;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-inverse: #0A0A0A;
+
+  /* Accent */
+  --accent-primary: #FF5A36;
+  --accent-hover: #FF704E;
+  --accent-subtle: rgba(255, 90, 54, 0.12);
+  --accent-border: rgba(255, 90, 54, 0.35);
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --border-active: rgba(255, 255, 255, 0.28);
 }
 
+/* ─── Creamy White Light Tokens ─── */
+.light,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Editorial Warm Cream Surfaces */
+  --bg-canvas: #F8F6F0;       /* Warm editorial cream / parchment */
+  --bg-surface-1: #FFFFFF;     /* Crisp clean white surface */
+  --bg-surface-2: #EFECE4;     /* Cream input & button surface */
+  --bg-surface-3: #E4E0D6;     /* Darker cream hover surface */
+  --bg-surface-4: #D8D3C7;     /* High-contrast element */
+
+  /* Deep Charcoal Typography */
+  --text-primary: #151514;     /* Deep rich charcoal */
+  --text-secondary: #585753;   /* Warm slate charcoal */
+  --text-muted: #8A8882;       /* Warm muted stone */
+  --text-inverse: #FAFAF8;
+
+  /* Accent */
+  --accent-primary: #FF5A36;
+  --accent-hover: #E44824;
+  --accent-subtle: rgba(255, 90, 54, 0.10);
+  --accent-border: rgba(255, 90, 54, 0.35);
+
+  /* Subtle Warm Stone Borders */
+  --border-subtle: rgba(20, 20, 19, 0.08);
+  --border-medium: rgba(20, 20, 19, 0.15);
+  --border-active: rgba(20, 20, 19, 0.28);
+}
+
+/* ─── Global Base Styles ─── */
 body {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-canvas);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-sans), "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Prevent unwanted blinking cursor (|) when clicking text or page elements */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: "Cabinet Grotesk", var(--font-display), -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.font-editorial {
+  font-family: "Newsreader", var(--font-serif), Georgia, serif;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", var(--font-mono), monospace;
+  letter-spacing: -0.02em;
+}
+
+/* Caret & Selection */
 * {
   caret-color: transparent;
 }
@@ -55,10 +128,14 @@ input,
 textarea,
 [contenteditable="true"],
 [contenteditable] {
-  caret-color: #6366f1;
+  caret-color: #FF5A36;
 }
 
-/* Interactive elements should not have accidental selection artifacts */
+::selection {
+  background-color: rgba(255, 90, 54, 0.25);
+  color: inherit;
+}
+
 button,
 a,
 nav,
@@ -67,7 +144,7 @@ svg {
   -webkit-user-select: none;
 }
 
-/* Hide native browser search cancel button to avoid duplicate clear icon */
+/* Search input cleanup */
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-results-button,
@@ -77,10 +154,10 @@ input[type="search"]::-webkit-search-results-decoration {
   display: none;
 }
 
-/* Custom modern minimal scrollbar */
+/* Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -88,19 +165,111 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(140, 140, 150, 0.25);
-  border-radius: 9999px;
+  background: rgba(160, 160, 170, 0.2);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(140, 140, 150, 0.45);
+  background: rgba(160, 160, 170, 0.4);
 }
 
-/* Hide scrollbar utility for clean carousel/filter chips */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ─── Light Mode Overrides for Hardcoded Palette Classes ─── */
+.light .bg-\[\#0A0A0A\],
+.light.bg-\[\#0A0A0A\],
+.light header.bg-\[\#0A0A0A\]\/95 {
+  background-color: #F8F6F0 !important;
+}
+
+.light .bg-\[\#121212\] {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(20, 20, 19, 0.04);
+}
+
+.light .bg-\[\#18181B\] {
+  background-color: #EFECE4 !important;
+}
+
+.light .bg-\[\#222226\] {
+  background-color: #E4E0D6 !important;
+}
+
+.light .text-\[\#FAFAF8\] {
+  color: #151514 !important;
+}
+
+.light .text-\[\#D4D4D8\] {
+  color: #383734 !important;
+}
+
+.light .text-\[\#A1A1AA\] {
+  color: #585753 !important;
+}
+
+.light .text-\[\#71717A\] {
+  color: #8A8882 !important;
+}
+
+.light .border-white\/6,
+.light .border-white\/8,
+.light .border-white\/10,
+.light .border-white\/12,
+.light .border-white\/15,
+.light .border-white\/16,
+.light .border-white\/20 {
+  border-color: rgba(20, 20, 19, 0.08) !important;
+}
+
+.light .divide-white\/6 > :not([hidden]) ~ :not([hidden]),
+.light .divide-white\/8 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(20, 20, 19, 0.08) !important;
+}
+
+.light .ring-white\/10,
+.light .ring-white\/15 {
+  --tw-ring-color: rgba(20, 20, 19, 0.12) !important;
+}
+
+.light .hover\:bg-\[\#18181B\]:hover {
+  background-color: #EFECE4 !important;
+}
+
+.light .hover\:bg-\[\#222226\]:hover {
+  background-color: #E4E0D6 !important;
+}
+
+.light .hover\:text-\[\#FAFAF8\]:hover {
+  color: #151514 !important;
+}
+
+.light .hover\:border-white\/16:hover,
+.light .hover\:border-white\/20:hover {
+  border-color: rgba(20, 20, 19, 0.18) !important;
+}
+
+.light input,
+.light textarea {
+  background-color: #EFECE4 !important;
+  color: #151514 !important;
+  border-color: rgba(20, 20, 19, 0.12) !important;
+}
+
+.light input::placeholder,
+.light textarea::placeholder {
+  color: #8A8882 !important;
+}
+
+.light table thead tr {
+  background-color: #EFECE4 !important;
+}
+
+.light tr:hover {
+  background-color: rgba(239, 236, 228, 0.5) !important;
 }
