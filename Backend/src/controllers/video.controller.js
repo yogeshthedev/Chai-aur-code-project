@@ -315,6 +315,52 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     );
 });
 
+const updateVideoChapters = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const { chapters } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  if (video.owner.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not allowed to edit chapters for this video");
+  }
+
+  let parsedChapters = chapters;
+  if (typeof chapters === "string") {
+    try {
+      parsedChapters = JSON.parse(chapters);
+    } catch {
+      throw new ApiError(400, "Invalid chapters format");
+    }
+  }
+
+  if (!Array.isArray(parsedChapters)) {
+    throw new ApiError(400, "Chapters must be an array");
+  }
+
+  video.chapters = parsedChapters
+    .filter((c) => c && c.title)
+    .map((c) => ({
+      title: String(c.title).trim(),
+      startTime: Math.max(0, Number(c.startTime) || 0),
+      description: String(c.description || "").trim(),
+    }))
+    .sort((a, b) => a.startTime - b.startTime);
+
+  await video.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video.chapters, "Chapters updated successfully"));
+});
+
 export {
   getAllVideos,
   publishAVideo,
@@ -322,4 +368,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  updateVideoChapters,
 };

@@ -8,16 +8,22 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
+  Play,
+  ListOrdered,
+  Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { MessageSquare, BookOpen } from "lucide-react";
 import { getVideoByIdApi, getVideosApi } from "../api/video.api";
 import { toggleVideoLikeApi } from "../api/like.api";
 import CommentSection from "../components/CommentSection";
 import SaveToPlaylistModal from "../components/SaveToPlaylistModal";
 import SubscribeButton from "../components/SubscribeButton";
 import { CustomVideoPlayer } from "../components/player";
+import { formatTime } from "../components/player/useVideoPlayer";
+import { VideoNotesSection } from "../components/notes";
 import { useAuthStore } from "../store/useAuthStore";
 
 const formatViews = (views = 0) => {
@@ -30,6 +36,9 @@ const VideoDetail = () => {
   const { videoId } = useParams();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const playerRef = useRef(null);
+  const [playerCurrentTime, setPlayerCurrentTime] = useState(0);
+  const [activeBottomTab, setActiveBottomTab] = useState("comments"); // 'comments' | 'notes'
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -165,6 +174,9 @@ const VideoDetail = () => {
             src={video.videoFile}
             poster={video.thumbnail}
             autoPlay
+            playerRef={playerRef}
+            onTimeUpdate={(t) => setPlayerCurrentTime(t)}
+            chapters={video.chapters || []}
             className="border border-slate-200/90 dark:border-zinc-800"
           />
 
@@ -301,13 +313,108 @@ const VideoDetail = () => {
             </button>
           </div>
 
-          {/* Comments Section */}
-          <CommentSection
-            videoId={videoId}
-            likeCount={video.likeCount || 0}
-            isLiked={Boolean(video.isLiked)}
-            videoOwnerId={video.owner?._id}
-          />
+          {/* Interactive Bottom Tabs: Comments vs Timestamped Notes */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-zinc-800 pb-1">
+              <button
+                type="button"
+                onClick={() => setActiveBottomTab("comments")}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
+                  activeBottomTab === "comments"
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <MessageSquare size={14} />
+                <span>Discussion & Comments</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveBottomTab("notes")}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
+                  activeBottomTab === "notes"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <BookOpen size={14} />
+                <span>Personal Notes</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveBottomTab("chapters")}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold rounded-2xl transition cursor-pointer ${
+                  activeBottomTab === "chapters"
+                    ? "bg-slate-900 text-white dark:bg-white dark:text-zinc-900 shadow-xs"
+                    : "text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <ListOrdered size={14} />
+                <span>Chapters ({video.chapters?.length || 0})</span>
+              </button>
+            </div>
+
+            {/* Tab 1: Comments */}
+            {activeBottomTab === "comments" && (
+              <CommentSection
+                videoId={videoId}
+                likeCount={video.likeCount || 0}
+                isLiked={Boolean(video.isLiked)}
+                videoOwnerId={video.owner?._id}
+              />
+            )}
+
+            {/* Tab 2: Timestamped Notes & Code */}
+            {activeBottomTab === "notes" && (
+              <VideoNotesSection
+                videoId={videoId}
+                currentTime={playerCurrentTime}
+                onSeek={(t) => playerRef.current?.seek(t)}
+              />
+            )}
+
+            {/* Tab 3: Chapters Timeline */}
+            {activeBottomTab === "chapters" && (
+              <div className="space-y-3">
+                {(!video.chapters || video.chapters.length === 0) ? (
+                  <div className="flex min-h-40 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 dark:border-zinc-800 bg-white/40 dark:bg-zinc-900/20 p-8 text-center text-slate-500 dark:text-zinc-400">
+                    <ListOrdered size={28} className="mb-2 text-slate-400 dark:text-zinc-500" />
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">No chapters configured</h4>
+                    <p className="mt-1 text-[11px] max-w-xs">
+                      The creator has not marked specific chapter milestones for this video.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    {video.chapters.map((ch, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => playerRef.current?.seek(ch.startTime)}
+                        className="group flex items-start gap-3 rounded-2xl border border-slate-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/60 p-3.5 text-left hover:border-indigo-500/50 hover:shadow-md transition active:scale-98 cursor-pointer"
+                      >
+                        <span className="flex h-7 px-2 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 font-mono text-[11px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition">
+                          {formatTime(ch.startTime)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                            {ch.title}
+                          </h4>
+                          {ch.description && (
+                            <p className="text-[11px] text-slate-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
+                              {ch.description}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Sidebar - Up Next (Sticky on Desktop) */}

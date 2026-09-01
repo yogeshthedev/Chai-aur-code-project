@@ -38,3 +38,10 @@ export const VIDEO_ENDPOINTS = {
   LIST: "/videos",
   DETAIL: (videoId) => `/videos/${videoId}`,
 };
+
+export const NOTE_ENDPOINTS = {
+  BASE: "/notes",
+  BY_VIDEO: (videoId) => `/notes/v/${videoId}`,
+  EXPORT: (videoId) => `/notes/v/${videoId}/export`,
+  DETAIL: (noteId) => `/notes/${noteId}`,
+};

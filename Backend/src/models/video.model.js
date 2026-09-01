@@ -34,7 +34,25 @@ const videoSchema = new Schema(
         owner: {
             type: Schema.Types.ObjectId,
             ref: "User"
-        }
+        },
+        chapters: [
+            {
+                title: {
+                    type: String,
+                    required: true,
+                    trim: true
+                },
+                startTime: {
+                    type: Number,
+                    required: true,
+                    default: 0
+                },
+                description: {
+                    type: String,
+                    default: ""
+                }
+            }
+        ]
 
     }, 
     {

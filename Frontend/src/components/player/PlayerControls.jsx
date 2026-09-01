@@ -1,4 +1,4 @@
-﻿import {
+import {
   Play,
   Pause,
   RotateCcw,
@@ -18,6 +18,7 @@ const PlayerControls = ({
   currentTime,
   duration,
   bufferedPercent,
+  chapters = [],
   volume,
   isMuted,
   playbackRate,
@@ -44,11 +45,12 @@ const PlayerControls = ({
         showControls ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
     >
-      {/* 1. Interactive Progress Bar */}
+      {/* Dynamic Scrub Progress Bar with Chapters & Hover Tooltip */}
       <ProgressBar
         currentTime={currentTime}
         duration={duration}
         bufferedPercent={bufferedPercent}
+        chapters={chapters}
         onSeek={onSeek}
       />
 

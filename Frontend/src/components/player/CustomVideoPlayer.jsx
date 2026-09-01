@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from "react";
+import { useRef, useState, useImperativeHandle } from "react";
 import { Play, Pause, RotateCcw, RotateCw, Loader2 } from "lucide-react";
 import { useVideoPlayer } from "./useVideoPlayer";
 import PlayerControls from "./PlayerControls";
@@ -9,6 +9,9 @@ const CustomVideoPlayer = ({
   poster,
   autoPlay = true,
   onVideoEnd,
+  onTimeUpdate,
+  chapters = [],
+  playerRef,
   className = "",
 }) => {
   const videoRef = useRef(null);
@@ -47,7 +50,16 @@ const CustomVideoPlayer = ({
     containerRef,
     autoPlay,
     onVideoEnd,
+    onTimeUpdate,
   });
+
+  useImperativeHandle(playerRef, () => ({
+    seek,
+    togglePlay,
+    getCurrentTime: () => currentTime,
+    getDuration: () => duration,
+    videoElement: videoRef.current,
+  }));
 
   const handleVideoClick = (e) => {
     // Single click toggles play/pause
@@ -119,6 +131,7 @@ const CustomVideoPlayer = ({
           currentTime={currentTime}
           duration={duration}
           bufferedPercent={bufferedPercent}
+          chapters={chapters}
           volume={volume}
           isMuted={isMuted}
           playbackRate={playbackRate}

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export const formatTime = (timeInSeconds = 0) => {
   if (isNaN(timeInSeconds) || timeInSeconds < 0) return "0:00";
@@ -15,7 +15,13 @@ export const formatTime = (timeInSeconds = 0) => {
   return `${minutes}:${formattedSeconds}`;
 };
 
-export const useVideoPlayer = ({ videoRef, containerRef, autoPlay = true, onVideoEnd }) => {
+export const useVideoPlayer = ({
+  videoRef,
+  containerRef,
+  autoPlay = true,
+  onVideoEnd,
+  onTimeUpdate: onExternalTimeUpdate,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -163,6 +169,9 @@ export const useVideoPlayer = ({ videoRef, containerRef, autoPlay = true, onVide
 
     const onTimeUpdate = () => {
       setCurrentTime(video.currentTime);
+      if (onExternalTimeUpdate) {
+        onExternalTimeUpdate(video.currentTime);
+      }
       if (video.buffered.length > 0) {
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
         const duration = video.duration || 1;
