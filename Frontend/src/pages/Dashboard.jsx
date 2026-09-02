@@ -8,16 +8,18 @@ import {
   Trash2,
   ExternalLink,
   Eye,
+  EyeOff,
   Clock,
   Search,
   CheckCircle2,
-  VideoOff
+  VideoOff,
+  Pencil
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getDashboardStatsApi, getDashboardVideosApi } from "../api/dashboard.api";
-import { deleteVideoApi } from "../api/video.api";
+import { deleteVideoApi, togglePublishStatusApi } from "../api/video.api";
 import { confirmToast } from "../utils/confirmToast";
 import { formatTime } from "../components/player/useVideoPlayer";
 
@@ -53,7 +55,20 @@ const Dashboard = () => {
     onError: (error) => {
       const msg = error?.response?.data?.message || "Failed to delete video";
       toast.error(msg);
-    }
+    },
+  });
+
+  const togglePublishMutation = useMutation({
+    mutationFn: togglePublishStatusApi,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ["dashboard-videos"] });
+      const isPub = response?.data?.isPublished;
+      toast.success(isPub ? "Video is now Public" : "Video set to Draft");
+    },
+    onError: (error) => {
+      const msg = error?.response?.data?.message || "Failed to toggle publish status";
+      toast.error(msg);
+    },
   });
 
   const stats = statsData || {
@@ -245,10 +260,20 @@ const Dashboard = () => {
 
                     {/* Status */}
                     <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 rounded-xs bg-[#2DD4BF]/10 px-2 py-0.5 text-[10px] font-semibold text-[#2DD4BF] border border-[#2DD4BF]/20">
-                        <CheckCircle2 size={10} />
-                        <span>Public</span>
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => togglePublishMutation.mutate(video._id)}
+                        disabled={togglePublishMutation.isPending}
+                        title={video.isPublished ? "Click to unpublish (set to Draft)" : "Click to publish"}
+                        className={`inline-flex items-center gap-1 rounded-xs px-2 py-0.5 text-[10px] font-semibold border transition cursor-pointer ${
+                          video.isPublished
+                            ? "bg-[#2DD4BF]/10 text-[#2DD4BF] border-[#2DD4BF]/20 hover:bg-[#2DD4BF]/20"
+                            : "bg-[#E5A93C]/10 text-[#E5A93C] border-[#E5A93C]/20 hover:bg-[#E5A93C]/20"
+                        }`}
+                      >
+                        {video.isPublished ? <CheckCircle2 size={10} /> : <EyeOff size={10} />}
+                        <span>{video.isPublished ? "Public" : "Draft"}</span>
+                      </button>
                     </td>
 
                     {/* Views */}
@@ -270,6 +295,14 @@ const Dashboard = () => {
                     {/* Actions */}
                     <td className="py-3 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/videos/${video._id}/edit`}
+                          className="p-1.5 rounded text-[#71717A] hover:text-[#FF5A36] hover:bg-white/6 transition"
+                          title="Edit video"
+                        >
+                          <Pencil size={13} />
+                        </Link>
+
                         <Link
                           to={`/videos/${video._id}`}
                           className="p-1.5 rounded text-[#71717A] hover:text-[#FAFAF8] hover:bg-white/6 transition"

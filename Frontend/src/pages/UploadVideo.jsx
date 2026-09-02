@@ -7,7 +7,11 @@ import {
   Film,
   Image as ImageIcon,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Globe,
+  EyeOff,
+  CheckCircle2,
+  FileText
 } from "lucide-react";
 import { uploadVideoApi } from "../api/video.api";
 import ImageCropperModal from "../components/common/ImageCropperModal";
@@ -25,6 +29,7 @@ const UploadVideo = () => {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublished, setIsPublished] = useState(true);
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState("");
@@ -109,7 +114,8 @@ const UploadVideo = () => {
         }
       }),
     onSuccess: (data) => {
-      toast.success("Video published successfully!");
+      const isPub = data?.data?.isPublished ?? isPublished;
+      toast.success(isPub ? "Video published successfully!" : "Video saved as draft!");
       setUploadProgress(100);
       navigate("/dashboard");
     },
@@ -145,6 +151,7 @@ const UploadVideo = () => {
     formData.append("description", description.trim());
     formData.append("video", videoFile);
     formData.append("thumbnail", thumbnailFile);
+    formData.append("isPublished", isPublished);
 
     uploadMutation.mutate(formData);
   };
@@ -334,6 +341,87 @@ const UploadVideo = () => {
           </div>
         </div>
 
+        {/* Step 4: Publication Visibility */}
+        <div className="rounded-lg border border-white/8 bg-[#121212] p-6 space-y-3">
+          <label className="block font-mono text-xs text-[#71717A] uppercase tracking-wider">
+            3. Publication Visibility
+          </label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Option 1: Public */}
+            <button
+              type="button"
+              onClick={() => setIsPublished(true)}
+              className={`p-4 rounded-lg border text-left transition flex items-start gap-3 cursor-pointer ${
+                isPublished
+                  ? "border-[#FF5A36] bg-[#FF5A36]/5"
+                  : "border-white/10 bg-[#18181B] hover:border-white/20"
+              }`}
+            >
+              <div
+                className={`p-2 rounded-md ${
+                  isPublished
+                    ? "bg-[#FF5A36] text-[#0A0A0A]"
+                    : "bg-white/5 text-[#71717A]"
+                }`}
+              >
+                <Globe size={16} />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-xs text-[#FAFAF8]">
+                    Public Video
+                  </span>
+                  {isPublished && (
+                    <span className="text-[10px] font-mono text-[#FF5A36] font-bold">
+                      Selected
+                    </span>
+                  )}
+                </div>
+                <p className="font-mono text-[11px] text-[#71717A] leading-relaxed">
+                  Published immediately. Visible on your channel, search results, and public feed.
+                </p>
+              </div>
+            </button>
+
+            {/* Option 2: Draft / Private */}
+            <button
+              type="button"
+              onClick={() => setIsPublished(false)}
+              className={`p-4 rounded-lg border text-left transition flex items-start gap-3 cursor-pointer ${
+                !isPublished
+                  ? "border-[#E5A93C] bg-[#E5A93C]/5"
+                  : "border-white/10 bg-[#18181B] hover:border-white/20"
+              }`}
+            >
+              <div
+                className={`p-2 rounded-md ${
+                  !isPublished
+                    ? "bg-[#E5A93C] text-[#0A0A0A]"
+                    : "bg-white/5 text-[#71717A]"
+                }`}
+              >
+                <FileText size={16} />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-xs text-[#FAFAF8]">
+                    Save as Draft
+                  </span>
+                  {!isPublished && (
+                    <span className="text-[10px] font-mono text-[#E5A93C] font-bold">
+                      Selected
+                    </span>
+                  )}
+                </div>
+                <p className="font-mono text-[11px] text-[#71717A] leading-relaxed">
+                  Unpublished. Only visible to you in Creator Studio to review or edit before publishing.
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Upload Progress Bar */}
         {uploadMutation.isPending && (
           <div className="rounded-lg border border-white/8 bg-[#121212] p-4 space-y-2 font-mono text-xs">
@@ -367,12 +455,12 @@ const UploadVideo = () => {
             {uploadMutation.isPending ? (
               <>
                 <Loader2 size={14} className="animate-spin" />
-                <span>Publishing...</span>
+                <span>{isPublished ? "Publishing..." : "Saving Draft..."}</span>
               </>
             ) : (
               <>
-                <Upload size={14} />
-                <span>Publish Video</span>
+                {isPublished ? <Upload size={14} /> : <FileText size={14} />}
+                <span>{isPublished ? "Publish Video" : "Save as Draft"}</span>
               </>
             )}
           </button>

@@ -37,6 +37,8 @@ export const DASHBOARD_ENDPOINTS = {
 export const VIDEO_ENDPOINTS = {
   LIST: "/videos",
   DETAIL: (videoId) => `/videos/${videoId}`,
+  TOGGLE_PUBLISH: (videoId) => `/videos/toggle/publish/${videoId}`,
+  CHAPTERS: (videoId) => `/videos/${videoId}/chapters`,
 };
 
 export const NOTE_ENDPOINTS = {

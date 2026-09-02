@@ -17,6 +17,7 @@ const Playlists = lazy(() => import("./pages/Playlists"));
 const PlaylistDetail = lazy(() => import("./pages/PlaylistDetail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const UploadVideo = lazy(() => import("./pages/UploadVideo"));
+const EditVideo = lazy(() => import("./pages/EditVideo"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
@@ -59,6 +60,8 @@ function AppRoutes() {
             <Route path="/liked" element={<LikedVideos />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/upload" element={<UploadVideo />} />
+            <Route path="/videos/:videoId/edit" element={<EditVideo />} />
+            <Route path="/edit-video/:videoId" element={<EditVideo />} />
           </Route>
         </Route>
 

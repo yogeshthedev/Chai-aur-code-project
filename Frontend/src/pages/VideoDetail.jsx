@@ -11,7 +11,8 @@ import {
   BookOpen,
   ListOrdered,
   Check,
-  VideoOff
+  VideoOff,
+  Pencil
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -280,6 +281,16 @@ const VideoDetail = () => {
                   {copied ? <Check size={14} className="text-[#2DD4BF]" /> : <Share2 size={14} />}
                   <span>{copied ? "Copied" : "Share"}</span>
                 </button>
+
+                {isOwnVideo && (
+                  <Link
+                    to={`/videos/${videoId}/edit`}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-[#18181B] hover:bg-[#222226] hover:border-[#FF5A36]/40 text-[#FAFAF8] hover:text-[#FF5A36] px-3.5 py-2 text-xs font-mono transition cursor-pointer"
+                  >
+                    <Pencil size={13} className="text-[#FF5A36]" />
+                    <span>Edit Video</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -423,7 +434,7 @@ const VideoDetail = () => {
                 className="flex gap-3 group p-2 rounded-md hover:bg-[#121212] transition"
               >
                 {/* 16:9 Mini Thumbnail */}
-                <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded bg-[#18181B] border border-white/8">
+                <div className="relative aspect-video w-76 shrink-0 overflow-hidden rounded bg-[#18181B] border border-white/8">
                   <img
                     src={rec.thumbnail}
                     alt={rec.title}
@@ -437,13 +448,13 @@ const VideoDetail = () => {
                 </div>
 
                 <div className="min-w-0 flex-1 space-y-1">
-                  <h4 className="font-display font-bold text-xs text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors line-clamp-2 leading-snug">
+                  <h4 className="font-display font-bold text-sm text-[#FAFAF8] group-hover:text-[#FF5A36] transition-colors line-clamp-2 leading-snug">
                     {rec.title}
                   </h4>
-                  <p className="font-mono text-[11px] text-[#71717A] truncate">
+                  <p className="font-mono text-[14px] text-[#71717A] truncate">
                     {rec.owner?.fullName || rec.owner?.username || "Creator"}
                   </p>
-                  <p className="font-mono text-[10px] text-[#71717A]">
+                  <p className="font-mono text-[12px] text-[#71717A]">
                     {formatViews(rec.views)} views
                   </p>
                 </div>

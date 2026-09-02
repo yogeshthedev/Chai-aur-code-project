@@ -109,10 +109,10 @@ const Profile = () => {
     const file = croppedFile instanceof File
       ? croppedFile
       : new File(
-          [croppedFile],
-          isAvatar ? "avatar.jpg" : "cover.jpg",
-          { type: "image/jpeg" }
-        );
+        [croppedFile],
+        isAvatar ? "avatar.jpg" : "cover.jpg",
+        { type: "image/jpeg" }
+      );
 
     const formData = new FormData();
     formData.append(isAvatar ? "avatar" : "coverImage", file);
@@ -263,33 +263,30 @@ const Profile = () => {
           <button
             type="button"
             onClick={() => setActiveTab("videos")}
-            className={`py-3 transition border-b-2 cursor-pointer ${
-              activeTab === "videos"
-                ? "border-[#FF5A36] text-[#FF5A36] font-bold"
-                : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
-            }`}
+            className={`py-3 transition border-b-2 cursor-pointer ${activeTab === "videos"
+              ? "border-[#FF5A36] text-[#FF5A36] font-bold"
+              : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
+              }`}
           >
             Your Videos ({videos.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("playlists")}
-            className={`py-3 transition border-b-2 cursor-pointer ${
-              activeTab === "playlists"
-                ? "border-[#FF5A36] text-[#FF5A36] font-bold"
-                : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
-            }`}
+            className={`py-3 transition border-b-2 cursor-pointer ${activeTab === "playlists"
+              ? "border-[#FF5A36] text-[#FF5A36] font-bold"
+              : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
+              }`}
           >
             Your Playlists ({playlists.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("settings")}
-            className={`py-3 transition border-b-2 cursor-pointer ${
-              activeTab === "settings"
-                ? "border-[#FF5A36] text-[#FF5A36] font-bold"
-                : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
-            }`}
+            className={`py-3 transition border-b-2 cursor-pointer ${activeTab === "settings"
+              ? "border-[#FF5A36] text-[#FF5A36] font-bold"
+              : "border-transparent text-[#71717A] hover:text-[#FAFAF8]"
+              }`}
           >
             Account Details
           </button>
@@ -337,7 +334,7 @@ const Profile = () => {
         <div className="space-y-4">
           {playlistsLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {Array.from({ length: 3 }, (_, i) => (
+              {Array.from({ length: 3 }, (_, i) => (    
                 <div key={i} className="aspect-video w-full rounded-md bg-[#18181B] animate-pulse" />
               ))}
             </div>

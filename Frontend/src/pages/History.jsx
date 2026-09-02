@@ -1,15 +1,28 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Play, VideoOff } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { getWatchHistoryApi } from "../api/user.api";
+import { getWatchHistoryApi, clearWatchHistoryApi } from "../api/user.api";
 import VideoCard from "../components/video/VideoCard";
 import { confirmToast } from "../utils/confirmToast";
 
 const History = () => {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["watch-history"],
     queryFn: () => getWatchHistoryApi().catch(() => null),
+  });
+
+  const clearHistoryMutation = useMutation({
+    mutationFn: clearWatchHistoryApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["watch-history"] });
+      toast.success("Watch history cleared");
+    },
+    onError: (error) => {
+      const msg = error?.response?.data?.message || "Failed to clear watch history";
+      toast.error(msg);
+    },
   });
 
   const rawVideos = data?.data ?? [];
@@ -24,7 +37,7 @@ const History = () => {
       message: "All watch logs and progress markers will be permanently cleared from this device.",
       confirmText: "Clear All Logs",
       onConfirm: () => {
-        toast.success("Watch history cleared");
+        clearHistoryMutation.mutate();
       },
     });
   };

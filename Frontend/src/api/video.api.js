@@ -36,6 +36,29 @@ export const deleteVideoApi = async (videoId) => {
 };
 
 export const updateVideoApi = async (videoId, data) => {
-  const response = await axiosInstance.patch(VIDEO_ENDPOINTS.DETAIL(videoId), data);
+  const isFormData = data instanceof FormData;
+  const response = await axiosInstance.patch(
+    VIDEO_ENDPOINTS.DETAIL(videoId),
+    data,
+    isFormData
+      ? {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      : undefined
+  );
+  return response.data;
+};
+
+export const togglePublishStatusApi = async (videoId) => {
+  const response = await axiosInstance.patch(VIDEO_ENDPOINTS.TOGGLE_PUBLISH(videoId));
+  return response.data;
+};
+
+export const updateVideoChaptersApi = async (videoId, chapters) => {
+  const response = await axiosInstance.patch(VIDEO_ENDPOINTS.CHAPTERS(videoId), {
+    chapters,
+  });
   return response.data;
 };

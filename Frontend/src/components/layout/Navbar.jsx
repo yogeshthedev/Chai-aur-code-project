@@ -1,5 +1,5 @@
 import { Menu, Search, Upload, UserCircle, X, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import ThemeToggle from "../common/ThemeToggle";
@@ -11,6 +11,29 @@ const Navbar = ({ onToggleSidebar }) => {
   const [searchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [isFocused, setIsFocused] = useState(false);
+  const [isMac, setIsMac] = useState(false);
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    setIsMac(typeof window !== "undefined" && /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent));
+
+    const handleKeyDown = (event) => {
+      // Check for Cmd+K (Mac) or Ctrl+K (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+      }
+
+      // Check for Escape to blur search
+      if (event.key === "Escape" && document.activeElement === searchInputRef.current) {
+        searchInputRef.current?.blur();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     setQuery(searchParams.get("q") || "");
@@ -72,6 +95,7 @@ const Navbar = ({ onToggleSidebar }) => {
             }`}
           />
           <input
+            ref={searchInputRef}
             id="site-search"
             type="text"
             value={query}
@@ -91,8 +115,13 @@ const Navbar = ({ onToggleSidebar }) => {
               <X size={12} />
             </button>
           ) : (
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-white/10 bg-[#18181B] px-1.5 py-0.5 text-[10px] font-mono text-[#71717A]">
-              <span>⌘</span>K
+            <kbd
+              onClick={() => searchInputRef.current?.focus()}
+              title={`Press ${isMac ? "⌘" : "Ctrl"} + K to focus search`}
+              className="hidden sm:inline-flex items-center gap-0.5 rounded border border-white/10 bg-[#18181B] px-1.5 py-0.5 text-[10px] font-mono text-[#71717A] cursor-pointer hover:border-white/20 hover:text-[#FAFAF8] transition-colors select-none"
+            >
+              <span>{isMac ? "⌘" : "Ctrl"}</span>
+              <span>K</span>
             </kbd>
           )}
         </div>

@@ -75,7 +75,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, isPublished } = req.body;
 
   // 1️⃣ Validate text fields
   if (!title || !description) {
@@ -98,6 +98,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to upload files to Cloudinary");
   }
 
+  // Parse isPublished status (defaults to true if not specified)
+  const publishStatus =
+    isPublished !== undefined
+      ? isPublished === "true" || isPublished === true
+      : true;
+
   // 4️⃣ Create video document
   const video = await Video.create({
     title: title.trim(),
@@ -106,12 +112,20 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: uploadedThumbnail.secure_url,
     duration: uploadedVideo.duration || 0,
     owner: req.user._id,
-    isPublished: true, // draft by default
+    isPublished: publishStatus,
   });
 
   return res
     .status(201)
-    .json(new ApiResponse(201, video, "Video uploaded successfully"));
+    .json(
+      new ApiResponse(
+        201,
+        video,
+        publishStatus
+          ? "Video published successfully"
+          : "Video saved as draft successfully"
+      )
+    );
 });
 
 const getVideoById = asyncHandler(async (req, res) => {

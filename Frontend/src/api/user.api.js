@@ -10,3 +10,8 @@ export const getWatchHistoryApi = async () => {
   const response = await axiosInstance.get(USER_ENDPOINTS.WATCH_HISTORY);
   return response.data;
 };
+
+export const clearWatchHistoryApi = async () => {
+  const response = await axiosInstance.delete(USER_ENDPOINTS.WATCH_HISTORY);
+  return response.data;
+};
