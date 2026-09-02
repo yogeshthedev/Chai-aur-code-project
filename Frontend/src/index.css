@@ -237,12 +237,26 @@ input[type="search"]::-webkit-search-results-decoration {
   --tw-ring-color: rgba(20, 20, 19, 0.12) !important;
 }
 
+.light .hover\:bg-\[\#121212\]:hover {
+  background-color: #EFECE4 !important;
+}
+
 .light .hover\:bg-\[\#18181B\]:hover {
   background-color: #EFECE4 !important;
 }
 
 .light .hover\:bg-\[\#222226\]:hover {
   background-color: #E4E0D6 !important;
+}
+
+.light .hover\:bg-white\/4:hover,
+.light .hover\:bg-white\/6:hover,
+.light .hover\:bg-white\/8:hover,
+.light .hover\:bg-white\/10:hover,
+.light .hover\:bg-white\/12:hover,
+.light .hover\:bg-white\/15:hover,
+.light .hover\:bg-white\/20:hover {
+  background-color: rgba(20, 20, 19, 0.06) !important;
 }
 
 .light .hover\:text-\[\#FAFAF8\]:hover {

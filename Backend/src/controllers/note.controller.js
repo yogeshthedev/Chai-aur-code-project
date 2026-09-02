@@ -49,7 +49,7 @@ const getVideoNotes = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
 
   if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "Invalid Video ID");
+    throw new ApiError(400, "Invalid Video ID");8 
   }
 
   const notes = await Note.find({

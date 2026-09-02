@@ -59,9 +59,8 @@ const RootLayout = () => {
       <div className="flex">
         {/* Desktop Sidebar */}
         <aside
-          className={`sticky top-14 hidden h-[calc(100vh-3.5rem)] shrink-0 flex-col justify-between overflow-y-auto border-r border-white/8 bg-[#0A0A0A] p-3 md:flex transition-all duration-200 ${
-            isSidebarCollapsed ? "w-16" : "w-56"
-          }`}
+          className={`sticky top-14 hidden h-[calc(100vh-3.5rem)] shrink-0 flex-col justify-between overflow-y-auto border-r border-white/8 bg-[#0A0A0A] p-3 md:flex transition-all duration-200 ${isSidebarCollapsed ? "w-16" : "w-56"
+            }`}
         >
           {/* Top Nav Sections */}
           <div className="space-y-6">
@@ -79,12 +78,10 @@ const RootLayout = () => {
                     end={to === "/"}
                     title={isSidebarCollapsed ? label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-2.5 rounded-md py-2 text-xs font-medium transition-colors duration-150 ${
-                        isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
-                      } ${
-                        isActive
-                          ? "bg-[#18181B] text-[#FAFAF8] font-semibold border-l-2 border-[#FF5A36]"
-                          : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
+                      `flex items-center gap-2.5 rounded-md py-2 text-xs font-medium transition-colors duration-150 ${isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
+                      } ${isActive
+                        ? "bg-[#18181B] text-[#FAFAF8] font-semibold border-l-2 border-[#FF5A36]"
+                        : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
                       }`
                     }
                   >
@@ -108,12 +105,10 @@ const RootLayout = () => {
                     to={to}
                     title={isSidebarCollapsed ? label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-2.5 rounded-md py-2 text-xs font-medium transition-colors duration-150 ${
-                        isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
-                      } ${
-                        isActive
-                          ? "bg-[#18181B] text-[#FAFAF8] font-semibold border-l-2 border-[#FF5A36]"
-                          : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
+                      `flex items-center gap-2.5 rounded-md py-2 text-xs font-medium transition-colors duration-150 ${isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
+                      } ${isActive
+                        ? "bg-[#18181B] text-[#FAFAF8] font-semibold border-l-2 border-[#FF5A36]"
+                        : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
                       }`
                     }
                   >
@@ -132,9 +127,8 @@ const RootLayout = () => {
                 type="button"
                 onClick={handleLogout}
                 title={isSidebarCollapsed ? "Sign out" : undefined}
-                className={`flex w-full items-center gap-2 rounded-md py-2 text-xs font-medium text-[#71717A] hover:text-[#FF5A36] hover:bg-white/4 transition-colors cursor-pointer ${
-                  isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
-                }`}
+                className={`flex w-full items-center gap-2 rounded-md py-2 text-xs font-medium text-[#71717A] hover:text-[#FF5A36] hover:bg-white/4 transition-colors cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
+                  }`}
               >
                 <LogOut size={15} className="shrink-0" />
                 {!isSidebarCollapsed && <span>Sign out</span>}
@@ -144,9 +138,8 @@ const RootLayout = () => {
                 to="/login"
                 state={{ backgroundLocation: location }}
                 title={isSidebarCollapsed ? "Sign in" : undefined}
-                className={`flex w-full items-center gap-2 rounded-md py-2 text-xs font-medium text-[#FF5A36] hover:bg-white/4 transition-colors cursor-pointer ${
-                  isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
-                }`}
+                className={`flex w-full items-center gap-2 rounded-md py-2 text-xs font-medium text-[#FF5A36] hover:bg-white/4 transition-colors cursor-pointer ${isSidebarCollapsed ? "justify-center px-0" : "px-2.5"
+                  }`}
               >
                 <User size={15} className="shrink-0 text-[#FF5A36]" />
                 {!isSidebarCollapsed && <span>Sign in</span>}
@@ -184,10 +177,9 @@ const RootLayout = () => {
                         end={to === "/"}
                         onClick={closeMobileSidebar}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-md px-2.5 py-2 text-xs font-medium transition ${
-                            isActive
-                              ? "bg-[#18181B] text-[#FAFAF8] border-l-2 border-[#FF5A36]"
-                              : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
+                          `flex items-center gap-3 rounded-md px-2.5 py-2 text-xs font-medium transition ${isActive
+                            ? "bg-[#18181B] text-[#FAFAF8] border-l-2 border-[#FF5A36]"
+                            : "text-[#A1A1AA] hover:bg-[#121212] hover:text-[#FAFAF8]"
                           }`
                         }
                       >
@@ -239,8 +231,7 @@ const RootLayout = () => {
             to={to}
             end={to === "/"}
             className={({ isActive }) =>
-              `flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-mono transition ${
-                isActive ? "text-[#FF5A36] font-semibold" : "text-[#71717A] hover:text-[#FAFAF8]"
+              `flex flex-col items-center gap-0.5 px-2 py-1 text-[10px] font-mono transition ${isActive ? "text-[#FF5A36] font-semibold" : "text-[#71717A] hover:text-[#FAFAF8]"
               }`
             }
           >
