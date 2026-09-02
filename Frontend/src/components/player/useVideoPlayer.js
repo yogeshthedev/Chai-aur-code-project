@@ -18,9 +18,12 @@ export const formatTime = (timeInSeconds = 0) => {
 export const useVideoPlayer = ({
   videoRef,
   containerRef,
-  autoPlay = true,
+  autoPlay = false,
   onVideoEnd,
   onTimeUpdate: onExternalTimeUpdate,
+  onUserPlay,
+  onUserPause,
+  onUserSeek,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -53,46 +56,74 @@ export const useVideoPlayer = ({
     if (!video) return;
 
     if (video.paused || video.ended) {
-      video.play().catch(() => {});
-      setIsPlaying(true);
-      triggerFlash("play");
+      video
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsBuffering(false);
+          triggerFlash("play");
+          onUserPlay?.(video.currentTime, video.playbackRate);
+        })
+        .catch((err) => {
+          // If browser blocked unmuted autoplay, mute and play
+          if (err.name === "NotAllowedError") {
+            video.muted = true;
+            setIsMuted(true);
+            video.play().catch(() => {});
+          }
+        });
     } else {
       video.pause();
       setIsPlaying(false);
+      setIsBuffering(false);
       triggerFlash("pause");
+      onUserPause?.(video.currentTime);
     }
-  }, [videoRef]);
+  }, [videoRef, onUserPlay, onUserPause]);
 
-  const seek = useCallback((timeInSeconds) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const clampedTime = Math.max(0, Math.min(timeInSeconds, video.duration || 0));
-    video.currentTime = clampedTime;
-    setCurrentTime(clampedTime);
-  }, [videoRef]);
+  const seek = useCallback(
+    (timeInSeconds, notifyUserAction = true) => {
+      const video = videoRef.current;
+      if (!video) return;
+      const clampedTime = Math.max(0, Math.min(timeInSeconds, video.duration || 0));
+      video.currentTime = clampedTime;
+      setCurrentTime(clampedTime);
+      setIsBuffering(false);
+      if (notifyUserAction) {
+        onUserSeek?.(clampedTime);
+      }
+    },
+    [videoRef, onUserSeek]
+  );
 
-  const seekRelative = useCallback((deltaSeconds) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const target = video.currentTime + deltaSeconds;
-    seek(target);
-    triggerFlash(deltaSeconds > 0 ? "forward" : "rewind");
-  }, [videoRef, seek]);
+  const seekRelative = useCallback(
+    (deltaSeconds) => {
+      const video = videoRef.current;
+      if (!video) return;
+      const target = video.currentTime + deltaSeconds;
+      seek(target, true);
+      triggerFlash(deltaSeconds > 0 ? "forward" : "rewind");
+    },
+    [videoRef, seek]
+  );
 
-  const setVolume = useCallback((val) => {
-    const video = videoRef.current;
-    if (!video) return;
-    const newVol = Math.max(0, Math.min(1, val));
-    video.volume = newVol;
-    setVolumeState(newVol);
-    if (newVol === 0) {
-      video.muted = true;
-      setIsMuted(true);
-    } else if (video.muted) {
-      video.muted = false;
-      setIsMuted(false);
-    }
-  }, [videoRef]);
+  const setVolume = useCallback(
+    (val) => {
+      const video = videoRef.current;
+      if (!video) return;
+      const newVol = Math.max(0, Math.min(1, val));
+      video.volume = newVol;
+      setVolumeState(newVol);
+      if (newVol === 0) {
+        video.muted = true;
+        setIsMuted(true);
+      } else if (video.muted) {
+        video.muted = false;
+        setIsMuted(false);
+      }
+    },
+    [videoRef]
+  );
 
   const toggleMute = useCallback(() => {
     const video = videoRef.current;
@@ -106,12 +137,15 @@ export const useVideoPlayer = ({
     }
   }, [videoRef]);
 
-  const setPlaybackRate = useCallback((rate) => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.playbackRate = rate;
-    setPlaybackRateState(rate);
-  }, [videoRef]);
+  const setPlaybackRate = useCallback(
+    (rate) => {
+      const video = videoRef.current;
+      if (!video) return;
+      video.playbackRate = rate;
+      setPlaybackRateState(rate);
+    },
+    [videoRef]
+  );
 
   const toggleFullscreen = useCallback(() => {
     const container = containerRef.current;
@@ -174,8 +208,8 @@ export const useVideoPlayer = ({
       }
       if (video.buffered.length > 0) {
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-        const duration = video.duration || 1;
-        setBufferedPercent((bufferedEnd / duration) * 100);
+        const dur = video.duration || 1;
+        setBufferedPercent((bufferedEnd / dur) * 100);
       }
     };
 
@@ -183,17 +217,44 @@ export const useVideoPlayer = ({
       setDuration(video.duration || 0);
       setVolumeState(video.volume);
       setIsMuted(video.muted);
+      setIsBuffering(false);
       if (autoPlay) {
-        video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+        video
+          .play()
+          .then(() => setIsPlaying(true))
+          .catch(() => setIsPlaying(false));
       }
     };
 
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onWaiting = () => setIsBuffering(true);
-    const onPlaying = () => setIsBuffering(false);
+    const onPlay = () => {
+      setIsPlaying(true);
+      setIsBuffering(false);
+    };
+
+    const onPause = () => {
+      setIsPlaying(false);
+      setIsBuffering(false);
+    };
+
+    const onWaiting = () => {
+      // Only set buffering if actively trying to play
+      if (!video.paused) {
+        setIsBuffering(true);
+      }
+    };
+
+    const onPlaying = () => {
+      setIsPlaying(true);
+      setIsBuffering(false);
+    };
+
+    const onCanPlay = () => setIsBuffering(false);
+    const onLoadedData = () => setIsBuffering(false);
+    const onSeeked = () => setIsBuffering(false);
+
     const onEnded = () => {
       setIsPlaying(false);
+      setIsBuffering(false);
       if (onVideoEnd) onVideoEnd();
     };
 
@@ -203,6 +264,9 @@ export const useVideoPlayer = ({
     video.addEventListener("pause", onPause);
     video.addEventListener("waiting", onWaiting);
     video.addEventListener("playing", onPlaying);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("loadeddata", onLoadedData);
+    video.addEventListener("seeked", onSeeked);
     video.addEventListener("ended", onEnded);
 
     return () => {
@@ -212,9 +276,12 @@ export const useVideoPlayer = ({
       video.removeEventListener("pause", onPause);
       video.removeEventListener("waiting", onWaiting);
       video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("seeked", onSeeked);
       video.removeEventListener("ended", onEnded);
     };
-  }, [videoRef, autoPlay, onVideoEnd]);
+  }, [videoRef, autoPlay, onVideoEnd, onExternalTimeUpdate]);
 
   useEffect(() => {
     const onFullscreenChange = () => {

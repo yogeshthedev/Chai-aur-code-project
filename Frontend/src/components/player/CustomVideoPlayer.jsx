@@ -1,18 +1,31 @@
 import { useRef, useState, useImperativeHandle } from "react";
-import { Play, Pause, RotateCcw, RotateCw, Loader2, FastForward } from "lucide-react";
+import { Play, Pause, RotateCcw, RotateCw, Loader2, FastForward, Lock } from "lucide-react";
 import { useVideoPlayer } from "./useVideoPlayer";
 import PlayerControls from "./PlayerControls";
 import KeyboardShortcutsModal from "./KeyboardShortcutsModal";
 
+/**
+ * 🎓 CUSTOM VIDEO PLAYER:
+ *
+ * Exposes full imperative control (playVideo, pauseVideo, seekTo)
+ * and direct callbacks for user-driven interactions (onUserPlay, onUserPause, onUserSeek).
+ */
+
 const CustomVideoPlayer = ({
   src,
   poster,
-  autoPlay = true,
+  autoPlay = false,
   onVideoEnd,
   onTimeUpdate,
   chapters = [],
   segments = [],
   playerRef,
+  ref: propRef,
+  isControlsLocked = false,
+  onLockedAttempt,
+  onUserPlay,
+  onUserPause,
+  onUserSeek,
   className = "",
 }) => {
   const videoRef = useRef(null);
@@ -52,17 +65,71 @@ const CustomVideoPlayer = ({
     autoPlay,
     onVideoEnd,
     onTimeUpdate,
+    onUserPlay: (time, rate) => {
+      if (isControlsLocked) {
+        onLockedAttempt?.();
+        return;
+      }
+      onUserPlay?.(time, rate);
+    },
+    onUserPause: (time) => {
+      if (isControlsLocked) {
+        onLockedAttempt?.();
+        return;
+      }
+      onUserPause?.(time);
+    },
+    onUserSeek: (time) => {
+      if (isControlsLocked) {
+        onLockedAttempt?.();
+        return;
+      }
+      onUserSeek?.(time);
+    },
   });
 
-  useImperativeHandle(playerRef, () => ({
-    seek,
-    togglePlay,
-    getCurrentTime: () => currentTime,
-    getDuration: () => duration,
+  // Expose imperative API for external synchronization
+  const targetRef = playerRef || propRef;
+  useImperativeHandle(targetRef, () => ({
+    playVideo: () => {
+      const v = videoRef.current;
+      if (v) {
+        v.play().catch(() => {
+          // If browser blocked unmuted autoplay, mute and play
+          v.muted = true;
+          v.play().catch(() => {});
+        });
+      }
+    },
+    pauseVideo: () => {
+      const v = videoRef.current;
+      if (v && !v.paused) {
+        v.pause();
+      }
+    },
+    seekTo: (time) => {
+      const v = videoRef.current;
+      if (v && !isNaN(time)) {
+        v.currentTime = Math.max(0, Math.min(time, v.duration || 999999));
+      }
+    },
+    getCurrentTime: () => {
+      return videoRef.current ? videoRef.current.currentTime : 0;
+    },
+    getDuration: () => {
+      return videoRef.current ? videoRef.current.duration : 0;
+    },
+    isPaused: () => {
+      return videoRef.current ? videoRef.current.paused : true;
+    },
     videoElement: videoRef.current,
   }));
 
   const handleVideoClick = () => {
+    if (isControlsLocked) {
+      onLockedAttempt?.();
+      return;
+    }
     togglePlay();
   };
 
@@ -70,12 +137,16 @@ const CustomVideoPlayer = ({
     toggleFullscreen();
   };
 
-  // Find if currently playing inside a skip segment
+  // Skip segments (SponsorBlock)
   const activeSegment = segments.find(
     (seg) => currentTime >= seg.start && currentTime < seg.end
   );
 
   const handleSkipCurrentSegment = () => {
+    if (isControlsLocked) {
+      onLockedAttempt?.();
+      return;
+    }
     if (activeSegment) {
       seek(activeSegment.end + 0.1);
     }
@@ -97,12 +168,23 @@ const CustomVideoPlayer = ({
           src={src}
           poster={poster}
           playsInline
+          preload="auto"
           onClick={handleVideoClick}
           onDoubleClick={handleDoubleClick}
           className="h-full w-full object-contain cursor-pointer"
         />
 
-        {/* Active Skip Segment Prompt (SponsorBlock Integration) */}
+        {/* Lock Overlay Badge if Host-Only Playback is Active for Viewer */}
+        {isControlsLocked && (
+          <div className="absolute top-4 left-4 z-30 pointer-events-none animate-in fade-in duration-200">
+            <div className="flex items-center gap-1.5 rounded-md bg-[#0A0A0A]/90 border border-[#E5A93C]/40 px-2.5 py-1 text-[11px] font-mono text-[#E5A93C] shadow-2xl backdrop-blur-md">
+              <Lock size={12} />
+              <span>Host-Only Playback</span>
+            </div>
+          </div>
+        )}
+
+        {/* Active Skip Segment Prompt */}
         {activeSegment && (
           <div className="absolute top-4 right-4 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
             <button
@@ -130,7 +212,7 @@ const CustomVideoPlayer = ({
         )}
 
         {/* Center Flash Action Ripple */}
-        {flashAction && (
+        {flashAction && !isControlsLocked && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/70 text-[#FAFAF8] border border-white/20 animate-out fade-out zoom-out duration-500">
               {flashAction === "play" && <Play size={24} className="fill-current ml-0.5" />}
@@ -167,12 +249,36 @@ const CustomVideoPlayer = ({
           isLooping={isLooping}
           isTheaterMode={isTheaterMode}
           showControls={showControls}
-          onTogglePlay={togglePlay}
-          onSeek={seek}
-          onSeekRelative={seekRelative}
+          onTogglePlay={() => {
+            if (isControlsLocked) {
+              onLockedAttempt?.();
+              return;
+            }
+            togglePlay();
+          }}
+          onSeek={(time) => {
+            if (isControlsLocked) {
+              onLockedAttempt?.();
+              return;
+            }
+            seek(time);
+          }}
+          onSeekRelative={(delta) => {
+            if (isControlsLocked) {
+              onLockedAttempt?.();
+              return;
+            }
+            seekRelative(delta);
+          }}
           onVolumeChange={setVolume}
           onToggleMute={toggleMute}
-          onPlaybackRateChange={setPlaybackRate}
+          onPlaybackRateChange={(rate) => {
+            if (isControlsLocked) {
+              onLockedAttempt?.();
+              return;
+            }
+            setPlaybackRate(rate);
+          }}
           onToggleFullscreen={toggleFullscreen}
           onTogglePiP={togglePiP}
           onToggleLoop={toggleLoop}
@@ -191,4 +297,3 @@ const CustomVideoPlayer = ({
 };
 
 export default CustomVideoPlayer;
-

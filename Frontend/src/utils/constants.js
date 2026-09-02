@@ -47,3 +47,4 @@ export const NOTE_ENDPOINTS = {
   EXPORT: (videoId) => `/notes/v/${videoId}/export`,
   DETAIL: (noteId) => `/notes/${noteId}`,
 };
+

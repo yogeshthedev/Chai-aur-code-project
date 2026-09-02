@@ -12,7 +12,7 @@ import {
   ListOrdered,
   Check,
   VideoOff,
-  Pencil
+  Pencil,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
