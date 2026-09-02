@@ -197,7 +197,7 @@ const ImageCropperModal = ({
             type="button"
             disabled={isProcessing}
             onClick={handleApply}
-            className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-5 py-2 font-mono text-xs font-bold text-[#0A0A0A] shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-coral-hover px-5 py-2 font-mono text-xs font-bold text-[#0A0A0A] shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isProcessing ? (
               <>

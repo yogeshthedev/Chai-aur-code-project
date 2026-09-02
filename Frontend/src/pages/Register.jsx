@@ -348,7 +348,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] py-2.5 px-4 font-mono text-xs font-bold transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-sm mt-2"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-[#FF5A36] hover:bg-coral-hover text-[#0A0A0A] py-2.5 px-4 font-mono text-xs font-bold transition active:scale-[0.99] disabled:opacity-50 cursor-pointer shadow-sm mt-2"
           >
             <span>{isSubmitting ? "Creating Account..." : "Create Curator Account"}</span>
             <ArrowRight size={14} />

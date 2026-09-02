@@ -132,7 +132,7 @@ const Navbar = ({ onToggleSidebar }) => {
         <Link
           to="/upload"
           aria-label="Upload video"
-          className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-3 py-1.5 text-xs font-mono font-bold shadow-xs transition-transform active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-coral-hover text-[#0A0A0A] px-3 py-1.5 text-xs font-mono font-bold shadow-xs transition-transform active:scale-95 cursor-pointer"
         >
           <Upload size={13} strokeWidth={2.5} />
           <span className="hidden sm:inline">Upload</span>

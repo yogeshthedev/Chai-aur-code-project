@@ -37,7 +37,7 @@ const LikedVideos = () => {
         {firstVideo && (
           <Link
             to={`/videos/${firstVideo._id}`}
-            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 text-xs font-mono font-bold transition active:scale-95 cursor-pointer self-start sm:self-auto shadow-sm"
+            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-coral-hover text-[#0A0A0A] px-4 py-2 text-xs font-mono font-bold transition active:scale-95 cursor-pointer self-start sm:self-auto shadow-sm"
           >
             <Play size={14} className="fill-current" />
             <span>Play Vault Sequence</span>
@@ -66,7 +66,7 @@ const LikedVideos = () => {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] text-[#0A0A0A] px-4 py-2 font-mono text-xs font-bold transition cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-md bg-[#FF5A36] hover:bg-coral-hover text-[#0A0A0A] px-4 py-2 font-mono text-xs font-bold transition cursor-pointer"
           >
             <span>Explore Videos</span>
           </Link>

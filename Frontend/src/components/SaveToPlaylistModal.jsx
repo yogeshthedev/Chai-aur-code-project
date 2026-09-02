@@ -117,7 +117,7 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
             <button
               type="button"
               onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-4 py-1.5 font-mono text-xs font-bold text-[#0A0A0A] active:scale-95 transition cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-coral-hover px-4 py-1.5 font-mono text-xs font-bold text-[#0A0A0A] active:scale-95 transition cursor-pointer shadow-xs"
             >
               <Plus size={13} />
               <span>Create New Playlist</span>
@@ -171,7 +171,7 @@ const SaveToPlaylistModal = ({ isOpen, onClose, videoId }) => {
                   <button
                     type="submit"
                     disabled={createPlaylistMutation.isPending || !newTitle.trim()}
-                    className="rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-3.5 py-1 font-mono text-xs font-bold text-[#0A0A0A] disabled:opacity-50"
+                    className="rounded-md bg-[#FF5A36] hover:bg-coral-hover px-3.5 py-1 font-mono text-xs font-bold text-[#0A0A0A] disabled:opacity-50"
                   >
                     {createPlaylistMutation.isPending ? "Creating..." : "Create & Add"}
                   </button>

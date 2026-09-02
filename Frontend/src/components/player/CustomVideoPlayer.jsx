@@ -159,7 +159,7 @@ const CustomVideoPlayer = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isPlaying && setShowControls(false)}
         className={`group relative overflow-hidden bg-[#0A0A0A] select-none rounded-lg border border-white/10 shadow-2xl transition-all duration-300 ${
-          isTheaterMode ? "aspect-[21/9] max-h-[75vh]" : "aspect-video"
+          isTheaterMode ? "aspect-21/9 max-h-[75vh]" : "aspect-video"
         } ${className}`}
       >
         {/* Video Element */}
@@ -177,7 +177,7 @@ const CustomVideoPlayer = ({
         {/* Lock Overlay Badge if Host-Only Playback is Active for Viewer */}
         {isControlsLocked && (
           <div className="absolute top-4 left-4 z-30 pointer-events-none animate-in fade-in duration-200">
-            <div className="flex items-center gap-1.5 rounded-md bg-[#0A0A0A]/90 border border-[#E5A93C]/40 px-2.5 py-1 text-[11px] font-mono text-[#E5A93C] shadow-2xl backdrop-blur-md">
+            <div className="flex items-center gap-1.5 rounded-md bg-[#0A0A0A]/90 border border-skip-sponsor/40 px-2.5 py-1 text-[11px] font-mono text-skip-sponsor shadow-2xl backdrop-blur-md">
               <Lock size={12} />
               <span>Host-Only Playback</span>
             </div>
@@ -190,14 +190,14 @@ const CustomVideoPlayer = ({
             <button
               type="button"
               onClick={handleSkipCurrentSegment}
-              className="flex items-center gap-2 rounded-md bg-[#0A0A0A]/90 border border-[#E5A93C]/40 px-3 py-1.5 text-xs font-mono text-[#FAFAF8] shadow-2xl backdrop-blur-md hover:bg-[#18181B] hover:border-[#E5A93C] transition cursor-pointer group/skip"
+              className="flex items-center gap-2 rounded-md bg-[#0A0A0A]/90 border border-skip-sponsor/40 px-3 py-1.5 text-xs font-mono text-[#FAFAF8] shadow-2xl backdrop-blur-md hover:bg-[#18181B] hover:border-skip-sponsor transition cursor-pointer group/skip"
             >
               <span
                 className="h-2 w-2 rounded-full animate-pulse"
                 style={{ backgroundColor: activeSegment.color || "#E5A93C" }}
               />
               <span>Skip {activeSegment.label || activeSegment.type}</span>
-              <FastForward size={13} className="text-[#E5A93C] group-hover/skip:translate-x-0.5 transition-transform" />
+              <FastForward size={13} className="text-skip-sponsor group-hover/skip:translate-x-0.5 transition-transform" />
             </button>
           </div>
         )}
