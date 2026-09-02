@@ -28,7 +28,7 @@
   --color-skip-highlight: #FF5A36;
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Dark mode is handled through the .dark theme selectors below. */
 
 /* ─── Default Dark Tokens ─── */
 :root,

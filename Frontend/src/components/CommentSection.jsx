@@ -152,7 +152,7 @@ const CommentSection = ({ videoId }) => {
           <button
             type="submit"
             disabled={addCommentMutation.isPending || !comment.trim()}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-[#FF704E] px-4 py-2 text-xs font-bold text-[#0A0A0A] shadow-xs transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#FF5A36] hover:bg-coral-hover px-4 py-2 text-xs font-bold text-[#0A0A0A] shadow-xs transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
           >
             <Send size={12} />
             <span>Post</span>
@@ -257,7 +257,7 @@ const CommentSection = ({ videoId }) => {
                         type="button"
                         onClick={() => updateCommentMutation.mutate()}
                         disabled={updateCommentMutation.isPending || !editingValue.trim()}
-                        className="rounded bg-[#FF5A36] px-3 py-1 font-mono text-[11px] font-bold text-[#0A0A0A] hover:bg-[#FF704E] cursor-pointer"
+                        className="rounded bg-[#FF5A36] px-3 py-1 font-mono text-[11px] font-bold text-[#0A0A0A] hover:bg-coral-hover cursor-pointer"
                       >
                         Save
                       </button>
