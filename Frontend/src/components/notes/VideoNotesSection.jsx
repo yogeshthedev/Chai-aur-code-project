@@ -64,7 +64,7 @@ const VideoNotesSection = ({ videoId, currentTime = 0, onSeek }) => {
     },
   });
 
-  // Delete Mutation
+  // Delete Mutationniin
   const deleteMutation = useMutation({
     mutationFn: deleteNoteApi,
     onSuccess: () => {
