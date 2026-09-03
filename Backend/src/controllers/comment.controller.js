@@ -37,8 +37,11 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
   const comments = await Comment.aggregate([
     {
-      $match: { // find this video's comments
-        video: videoObjectId,
+      $match: {
+        $or: [
+          { video: videoObjectId },
+          { video: videoId },
+        ],
       },
     },
     {
@@ -61,7 +64,10 @@ const getVideoComments = asyncHandler(async (req, res) => {
       },
     },
     {
-      $unwind: "$owner", // convert the owner array to an object
+      $unwind: {
+        path: "$owner",
+        preserveNullAndEmptyArrays: true,
+      },
     },
     { // find likes for each comment
       $lookup: {
@@ -132,7 +138,10 @@ const getVideoComments = asyncHandler(async (req, res) => {
   ]);
 
   const totalComments = await Comment.countDocuments({
-    video: videoObjectId,
+    $or: [
+      { video: videoObjectId },
+      { video: videoId },
+    ],
   });
 
 

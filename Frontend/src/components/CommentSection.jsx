@@ -16,22 +16,22 @@ const CommentSection = ({ videoId }) => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["comments", videoId],
-    queryFn: () => getVideoCommentsApi({ videoId, page: 1, limit: 20 }).catch(() => null),
+    queryFn: () => getVideoCommentsApi({ videoId, page: 1, limit: 50 }),
     enabled: Boolean(videoId),
   });
 
   const comments = data?.data?.comments ?? [];
-  const totalComments = comments.length;
+  const totalComments = data?.data?.totalComments ?? comments.length;
 
   const addCommentMutation = useMutation({
-    mutationFn: () => addCommentApi({ videoId, content: comment }),
-    onMutate: async () => {
+    mutationFn: (newContent) => addCommentApi({ videoId, content: newContent }),
+    onMutate: async (newContent) => {
       await queryClient.cancelQueries({ queryKey: ["comments", videoId] });
       const prevComments = queryClient.getQueryData(["comments", videoId]);
 
       const optimisticComment = {
         _id: "temp-" + Date.now(),
-        content: comment.trim(),
+        content: newContent,
         createdAt: new Date().toISOString(),
         owner: {
           _id: user?._id || "local-user",
@@ -39,10 +39,21 @@ const CommentSection = ({ videoId }) => {
           username: user?.username || "curator",
           avatar: user?.avatar,
         },
+        likeCount: 0,
+        isLiked: false,
       };
 
       queryClient.setQueryData(["comments", videoId], (old) => {
-        if (!old?.data) return { data: { comments: [optimisticComment, ...comments] } };
+        if (!old?.data) {
+          return {
+            statusCode: 200,
+            success: true,
+            data: {
+              comments: [optimisticComment],
+              totalComments: 1,
+            },
+          };
+        }
         const currentList = old.data.comments || [];
         return {
           ...old,
@@ -57,11 +68,14 @@ const CommentSection = ({ videoId }) => {
       setComment("");
       return { prevComments };
     },
-    onError: (err, _, context) => {
+    onSuccess: () => {
+      toast.success("Comment posted successfully");
+    },
+    onError: (err, _newContent, context) => {
       if (context?.prevComments) {
         queryClient.setQueryData(["comments", videoId], context.prevComments);
       }
-      toast.success("Note posted to discussion thread");
+      toast.error(err?.response?.data?.message || "Failed to post comment");
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
@@ -69,11 +83,15 @@ const CommentSection = ({ videoId }) => {
   });
 
   const updateCommentMutation = useMutation({
-    mutationFn: () => updateCommentApi({ commentId: editingCommentId, content: editingValue }),
+    mutationFn: ({ commentId, content }) => updateCommentApi({ commentId, content }),
     onSuccess: () => {
       setEditingCommentId(null);
       setEditingValue("");
+      toast.success("Comment updated successfully");
       queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
+    },
+    onError: (err) => {
+      toast.error(err?.response?.data?.message || "Failed to update comment");
     },
   });
 
@@ -98,22 +116,32 @@ const CommentSection = ({ videoId }) => {
 
       return { prevComments };
     },
-    onError: () => {
-      toast.success("Comment deleted locally");
+    onSuccess: () => {
+      toast.success("Comment deleted successfully");
+    },
+    onError: (err, _deletedId, context) => {
+      if (context?.prevComments) {
+        queryClient.setQueryData(["comments", videoId], context.prevComments);
+      }
+      toast.error(err?.response?.data?.message || "Failed to delete comment");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", videoId] });
     },
   });
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!comment.trim()) return;
+    const contentToPost = comment.trim();
+    if (!contentToPost) return;
     if (!user) {
       toast.error("Please sign in to post comments");
       return;
     }
-    addCommentMutation.mutate();
+    addCommentMutation.mutate(contentToPost);
   };
 
-  const currentUserId = user?._id;
+  const currentUserId = user?._id?.toString();
 
   return (
     <div className="space-y-5 rounded-lg border border-white/8 bg-[#121212] p-5">
@@ -162,7 +190,12 @@ const CommentSection = ({ videoId }) => {
 
       {/* Comment List */}
       <div className="space-y-2.5 pt-1">
-        {comments.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            <div className="h-16 animate-pulse rounded-md bg-[#18181B] border border-white/6" />
+            <div className="h-16 animate-pulse rounded-md bg-[#18181B] border border-white/6" />
+          </div>
+        ) : comments.length === 0 ? (
           <div className="rounded-md border border-dashed border-white/8 bg-[#18181B]/50 p-6 text-center">
             <p className="font-sans text-xs text-[#71717A]">
               No comments yet. Be the first to join the discussion!
@@ -170,7 +203,8 @@ const CommentSection = ({ videoId }) => {
           </div>
         ) : (
           comments.map((item) => {
-            const isOwner = item.owner?._id === currentUserId;
+            const itemOwnerId = (item.owner?._id || item.owner)?.toString();
+            const isOwner = Boolean(currentUserId && itemOwnerId && currentUserId === itemOwnerId);
             const isEditing = editingCommentId === item._id;
 
             return (
@@ -255,7 +289,7 @@ const CommentSection = ({ videoId }) => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => updateCommentMutation.mutate()}
+                        onClick={() => updateCommentMutation.mutate({ commentId: item._id, content: editingValue.trim() })}
                         disabled={updateCommentMutation.isPending || !editingValue.trim()}
                         className="rounded bg-[#FF5A36] px-3 py-1 font-mono text-[11px] font-bold text-[#0A0A0A] hover:bg-coral-hover cursor-pointer"
                       >
