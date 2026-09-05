@@ -239,7 +239,7 @@ const VideoCard = ({ video, onDelete }) => {
                     : "text-[#71717A] hover:text-[#FAFAF8] hover:bg-white/10"
                 }`}
               >
-                <MoreVertical size={16} />
+                <MoreVertical size={18} />
               </button>
 
               {/* Quick Actions Dropdown Menu */}
